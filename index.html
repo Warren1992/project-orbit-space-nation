@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="A mobile-first prototype for a digital space nation." />
+  <title>Project Orbit — Digital Space Nation</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand" role="button" tabindex="0" data-route="home">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div>
+          <strong>PROJECT ORBIT</strong>
+          <span>Digital Space Nation</span>
+        </div>
+      </div>
+      <nav class="side-nav" id="sideNav"></nav>
+      <div class="sidebar-card">
+        <span class="eyebrow">Population</span>
+        <strong id="sidebarPopulation">1,247</strong>
+        <small>Founding citizens</small>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="menuBtn" aria-label="Open navigation">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow" id="sectionKicker">PROJECT ORBIT</span>
+          <h1 id="sectionTitle">Home</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
+          <button class="icon-btn notification-dot" aria-label="Notifications">◉</button>
+          <button class="avatar avatar-sm founder-avatar" data-route="profile" aria-label="Open founder profile">W</button>
+        </div>
+      </header>
+
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation"></nav>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="All sections">
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">PROJECT ORBIT</span>
+        <h2>Nation Menu</h2>
+      </div>
+      <button class="icon-btn" id="closeDrawer" aria-label="Close menu">×</button>
+    </div>
+    <div class="drawer-links" id="drawerLinks"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <template id="homeTemplate">
+    <div class="page-grid home-grid">
+      <section class="stack">
+        <div class="hero-card">
+          <div>
+            <span class="pill gold">FOUNDING ERA</span>
+            <h2>Welcome, Citizen #001247</h2>
+            <p>This is a living digital nation: socialize, vote, build institutions, and help fund real space projects.</p>
+            <div class="hero-actions">
+              <button class="btn primary" data-route="elections">Vote now</button>
+              <button class="btn secondary" data-route="space">View space program</button>
+            </div>
+          </div>
+          <div class="planet-orb" aria-hidden="true"><span></span></div>
+        </div>
+
+        <div class="composer card">
+          <div class="composer-head">
+            <button class="avatar founder-avatar" data-route="profile">W</button>
+            <div>
+              <strong>Warren</strong>
+              <small>Founder & Head of Nation · Official Account</small>
+            </div>
+          </div>
+          <textarea id="postText" maxlength="500" placeholder="Share an update with the nation..."></textarea>
+          <div class="composer-actions">
+            <span class="muted">Public · Citizens can comment</span>
+            <button class="btn primary" id="postBtn">Post</button>
+          </div>
+        </div>
+
+        <div id="feedList" class="stack"></div>
+      </section>
+
+      <aside class="stack rail">
+        <div class="card stat-card">
+          <span class="eyebrow">Nation at a glance</span>
+          <div class="stat-line"><strong>1,247</strong><span>Citizens</span></div>
+          <div class="stat-line"><strong>31</strong><span>Countries represented</span></div>
+          <div class="stat-line"><strong>68%</strong><span>Voter participation</span></div>
+        </div>
+        <div class="card">
+          <div class="section-row"><h3>Current referendum</h3><button class="text-btn" data-route="elections">Open</button></div>
+          <p class="question">Should the nation prioritize its first lunar archive mission?</p>
+          <div class="progress"><span style="width:72%"></span></div>
+          <small>72% Yes · 4 days remaining</small>
+        </div>
+        <div class="card">
+          <div class="section-row"><h3>Space program</h3><button class="text-btn" data-route="space">Details</button></div>
+          <p>Lunar Archive Mission</p>
+          <div class="progress blue"><span style="width:43%"></span></div>
+          <small>$21,500 of $50,000 demonstration goal</small>
+        </div>
+      </aside>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
