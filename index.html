@@ -4,16 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <meta name="description" content="Project Orbit — a digital space nation with real citizen accounts." />
-  <title>Project Orbit — Digital Space Nation</title>
+  <meta name="description" content="Staralia — a digital space nation with real citizen accounts." />
+  <title>Staralia — Digital Space Nation</title>
   <link rel="stylesheet" href="styles.css" />
 
-  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="manifest" href="manifest-staralia.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Project Orbit" />
+  <meta name="apple-mobile-web-app-title" content="Staralia" />
   <script>document.documentElement.classList.add('auth-pending');</script>
   <style id="orbitGateCriticalStyles">
     html.auth-pending body,
@@ -85,7 +85,7 @@
   <div id="authGate" class="auth-gate-shell" aria-live="polite">
     <div class="auth-gate-card">
       <div class="auth-gate-mark">✦</div>
-      <div class="auth-gate-kicker">PROJECT ORBIT</div>
+      <div class="auth-gate-kicker">STARALIA</div>
       <h1>Citizens only</h1>
       <p class="auth-gate-lede">Create a citizen account or log in to enter the digital nation.</p>
       <div id="authGateContent" class="auth-gate-loading">Checking your citizenship…</div>
@@ -97,7 +97,7 @@
       <div class="brand" role="button" tabindex="0" data-route="home">
         <div class="brand-mark" aria-hidden="true">✦</div>
         <div>
-          <strong>PROJECT ORBIT</strong>
+          <strong>STARALIA</strong>
           <span>Digital Space Nation</span>
         </div>
       </div>
@@ -113,7 +113,7 @@
       <header class="topbar">
         <button class="icon-btn mobile-only" id="menuBtn" aria-label="Open navigation">☰</button>
         <div class="topbar-title">
-          <span class="eyebrow" id="sectionKicker">PROJECT ORBIT</span>
+          <span class="eyebrow" id="sectionKicker">STARALIA</span>
           <h1 id="sectionTitle">Home</h1>
         </div>
         <div class="topbar-actions">
@@ -133,7 +133,7 @@
   <aside class="drawer" id="drawer" aria-label="All sections">
     <div class="drawer-head">
       <div>
-        <span class="eyebrow">PROJECT ORBIT</span>
+        <span class="eyebrow">STARALIA</span>
         <h2>Nation Menu</h2>
       </div>
       <button class="icon-btn" id="closeDrawer" aria-label="Close menu">×</button>
@@ -149,7 +149,7 @@
         <div class="hero-card">
           <div>
             <span class="pill gold">FOUNDING ERA</span>
-            <h2 id="citizenWelcome">Welcome to Project Orbit</h2>
+            <h2 id="citizenWelcome">Welcome to Staralia</h2>
             <p>This is a living digital nation: socialize, vote, build institutions, and help fund real space projects.</p>
             <div class="hero-actions">
               <button class="btn primary" data-route="elections">Vote now</button>
@@ -200,12 +200,12 @@
     </div>
   </template>
 
-  <script src="app.js"></script>
-  <script src="pwa-v16.js" defer></script>
-  <script type="module" src="supabase-auth.js"></script>
-  <script type="module" src="auth-gate-v16.js"></script>
-  <script type="module" src="live-app-v164.js"></script>
-  <script src="national-flag-v161.js" defer></script>
-  <script src="national-emblem-v165.js" defer></script>
+  <script src="app-v170.js"></script>
+  <script src="pwa-v170.js" defer></script>
+  <script type="module" src="supabase-auth-v170.js"></script>
+  <script type="module" src="auth-gate-v170.js"></script>
+  <script type="module" src="live-app-v170.js"></script>
+  <script src="national-flag-v170.js" defer></script>
+  <script src="national-emblem-v170.js" defer></script>
 </body>
 </html>

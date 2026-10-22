@@ -1,37 +1,47 @@
-PROJECT ORBIT v1.6.5 — NATIONAL EMBLEM
+STARALIA v1.7.0 — COMPLETE PROJECT ORBIT → STARALIA REBRAND
 
-UPLOAD THESE THREE FILES TO THE ROOT OF:
+UPLOAD ALL FILES IN THIS ZIP TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
-1. Replace index.html with the included index.html
-2. Add national-emblem-v165.js as a NEW file
-3. Add national-emblem.png as a NEW file
+Replace index.html.
+Add the other files as new files:
+- app-v170.js
+- supabase-auth-v170.js
+- auth-gate-v170.js
+- live-app-v170.js
+- national-flag-v170.js
+- national-emblem-v170.js
+- pwa-v170.js
+- manifest-staralia.webmanifest
+- sw-v170.js
 
-Leave all other existing files alone.
+You do NOT need to remove the older versioned JavaScript files for the website to work.
+index.html now loads only the new Staralia v1.7.0 files.
 
-WHAT CHANGED
-- The official national emblem now appears immediately to the left of "PROJECT ORBIT" in the main top header.
-- The desktop Project Orbit brand mark also uses the national emblem.
-- A new "National Emblem" destination is added to:
-  * More
-  * the Nation Menu / drawer
-  * desktop navigation
-- The National Emblem page includes:
-  * the full official emblem
-  * a description of what it represents
-  * symbolism for the cosmic manta ray
-  * the circular celestial frame
-  * the four-point star
-  * purple
-  * silver/white
-  * the black field
-  * the planetary horizon
-  * the lower violet orb
-  * the motto represented by the inner symbolic glyph ring
-  * a Download emblem button
-  * a View full size button
+REBRANDED
+- Website title and metadata
+- Main header and navigation branding
+- Login / citizenship gateway
+- Account and notification copy
+- Sharing titles
+- Founder/admin referendum placeholder copy
+- National Flag page and downloadable flag filename
+- National Emblem page and downloadable emblem filename
+- PWA / install-app wording
+- PWA manifest name and short name
+- Service worker identity
+- Core app name used by the Constitution and other prototype sections
 
-NATIONAL MOTTO SHOWN ON THE PAGE
-"Consciousness in Outer Space"
+LIVE DATABASE
+The existing public Supabase civic content has already been updated:
+- Founding Institutions Act summary
+- Citizen Rights Charter body
+- Lunar Archive Authorization summary/body
+- Lunar Mission Q&A location
+A verification scan found 0 remaining public database rows containing "Project Orbit".
 
-No Supabase/database changes are required for this version.
+NOTE ABOUT THE EXISTING INSTALLED PHONE APP
+The website and new installs will use Staralia immediately after GitHub Pages updates.
+Android/Samsung may keep the old launcher label for an already-installed PWA. If the
+home-screen icon still says Project Orbit after reopening/refeshing, remove the old
+installed shortcut/app and install Staralia again from the updated site.
