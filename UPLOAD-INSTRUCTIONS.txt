@@ -1,24 +1,35 @@
-PROJECT ORBIT v1.6.3 — FOLLOWING-ONLY HOME FEED
+PROJECT ORBIT v1.6.4 — COMMENT LIKES + REAL ACCOUNT SEARCH
 
 UPLOAD THESE TWO FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html with the included index.html
-2. Add live-app-v163.js as a NEW file
+2. Add live-app-v164.js as a NEW file
 
 Leave all other existing files alone.
 
 WHAT CHANGED
-- Home is now a true following feed.
-- You see:
-  * your own posts
-  * posts from citizens you follow
-- You do NOT see posts from citizens you do not follow.
-- The previous Nation / Following feed switch was removed from Home.
-- If your feed is empty, Project Orbit points you to Citizens to find people to follow.
-- Automatic Founder-follow behavior remains unchanged, so ordinary citizens still receive Founder posts.
 
-CURRENT FOLLOW DATA CHECK
-- BedBugStories (#000004) automatically follows Warren (#000001).
-- Warren (#000001) does NOT currently follow BedBugStories.
-Therefore BedBugStories posts should not appear in Warren's Home feed after this update.
+COMMENT LIKES
+- Every signed-in citizen can Like / Unlike comments.
+- Inline replies under a post now show a Like button and like count.
+- The full Comments view also shows comment likes.
+- Comment authors receive a normal like notification when another citizen likes their comment.
+- Likes update in realtime.
+- Supabase RLS prevents anonymous access and prevents citizens from deleting another citizen's like.
+
+CITIZENS SEARCH FIELD
+- "Search citizens by name, role, or number..." now searches the REAL Supabase citizen directory.
+- Search works immediately while typing.
+- Searches display name/account name, role, country, and citizen number.
+- Clicking a search result opens that citizen's profile.
+
+GLOBAL ACCOUNT SEARCH
+- The magnifying-glass icon at the top of Project Orbit now opens a "Find an account" search window.
+- Type an account/display name such as BedBugStories to find the account.
+- Results include profile picture, display name, role/country, and citizen number.
+- Tapping a result opens the citizen's profile.
+
+BACKEND
+- public.comment_likes has already been created.
+- RLS, triggers, realtime publication, and comment-like notifications are already active.
