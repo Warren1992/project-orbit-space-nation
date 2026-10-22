@@ -1,23 +1,24 @@
-PROJECT ORBIT v1.6.1 — NATIONAL FLAG
+PROJECT ORBIT v1.6.3 — FOLLOWING-ONLY HOME FEED
 
-UPLOAD/REPLACE THESE FILES IN THE ROOT OF:
+UPLOAD THESE TWO FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
-REPLACE:
-- index.html
+1. Replace index.html with the included index.html
+2. Add live-app-v163.js as a NEW file
 
-ADD:
-- national-flag-v161.js
-- national-flag.png
-
-LEAVE ALL OTHER EXISTING FILES ALONE.
+Leave all other existing files alone.
 
 WHAT CHANGED
-- Adds More → National Flag.
-- Displays the supplied official Project Orbit flag at full width.
-- Adds an official description and symbolism for the flag.
-- Adds a Download flag button for the high-resolution PNG.
-- Adds a View full resolution option.
-- Works inside the existing members-only website and installed PWA.
+- Home is now a true following feed.
+- You see:
+  * your own posts
+  * posts from citizens you follow
+- You do NOT see posts from citizens you do not follow.
+- The previous Nation / Following feed switch was removed from Home.
+- If your feed is empty, Project Orbit points you to Citizens to find people to follow.
+- Automatic Founder-follow behavior remains unchanged, so ordinary citizens still receive Founder posts.
 
-After uploading, close and reopen the installed Project Orbit app if it is already running.
+CURRENT FOLLOW DATA CHECK
+- BedBugStories (#000004) automatically follows Warren (#000001).
+- Warren (#000001) does NOT currently follow BedBugStories.
+Therefore BedBugStories posts should not appear in Warren's Home feed after this update.
