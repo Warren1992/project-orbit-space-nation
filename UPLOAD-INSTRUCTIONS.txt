@@ -1,0 +1,41 @@
+PROJECT ORBIT v1.6 — MEMBERS-ONLY + INSTALLABLE APP
+
+UPLOAD/REPLACE THESE FILES IN THE ROOT OF:
+Warren1992/project-orbit-space-nation
+
+REPLACE:
+- index.html
+
+ADD:
+- auth-gate-v16.js
+- pwa-v16.js
+- manifest.webmanifest
+- sw-v16.js
+- icon-192.png
+- icon-512.png
+
+LEAVE THESE EXISTING FILES ALONE:
+- app.js
+- styles.css
+- supabase-auth.js
+- live-app-v152.js
+- all older live-app files
+
+WHAT VERSION 1.6 DOES
+1. MEMBERS-ONLY WEBSITE
+   - Visitors see only Create account / Log in until authenticated.
+   - There is no close/skip button.
+   - Existing citizens who already have a Supabase session enter automatically.
+   - Sign-out immediately returns the person to the locked gateway.
+   - Anonymous database SELECT access has already been removed from Project Orbit tables.
+
+2. INSTALLABLE PHONE APP (PWA)
+   - Adds a web-app manifest and service worker.
+   - Installs with a Project Orbit icon.
+   - Opens in a standalone app window instead of looking like a normal browser tab.
+   - An Install Project Orbit button appears on the login gateway and Settings/More.
+   - Samsung Internet fallback instructions are included when the browser does not expose the automatic install prompt.
+
+NOTE
+The installed app is the same Project Orbit website and uses the same Supabase citizenship/login.
+It is not a Google Play Store APK yet.

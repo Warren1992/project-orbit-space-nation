@@ -7,8 +7,91 @@
   <meta name="description" content="Project Orbit — a digital space nation with real citizen accounts." />
   <title>Project Orbit — Digital Space Nation</title>
   <link rel="stylesheet" href="styles.css" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Project Orbit" />
+  <script>document.documentElement.classList.add('auth-pending');</script>
+  <style id="orbitGateCriticalStyles">
+    html.auth-pending body,
+    html.auth-locked body{overflow:hidden;background:#050b14}
+    html.auth-pending .app-shell,
+    html.auth-pending .bottom-nav,
+    html.auth-pending .drawer,
+    html.auth-pending .drawer-backdrop,
+    html.auth-locked .app-shell,
+    html.auth-locked .bottom-nav,
+    html.auth-locked .drawer,
+    html.auth-locked .drawer-backdrop{
+      visibility:hidden!important;
+      pointer-events:none!important;
+      user-select:none!important;
+    }
+    .auth-gate-shell{
+      position:fixed;inset:0;z-index:10000;display:grid;place-items:center;
+      overflow:auto;padding:max(24px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom));
+      background:
+        radial-gradient(circle at 20% 15%,rgba(41,96,165,.26),transparent 31%),
+        radial-gradient(circle at 86% 24%,rgba(244,185,66,.16),transparent 26%),
+        linear-gradient(160deg,#030813,#07111f 56%,#0d1727);
+      color:#fff;
+    }
+    .auth-gate-shell[hidden]{display:none!important}
+    .auth-gate-card{
+      width:min(470px,100%);border:1px solid rgba(244,185,66,.24);border-radius:28px;
+      background:rgba(9,20,35,.94);box-shadow:0 30px 100px rgba(0,0,0,.6);
+      padding:28px;backdrop-filter:blur(18px)
+    }
+    .auth-gate-mark{
+      width:78px;height:78px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;
+      border:3px solid rgba(244,185,66,.72);background:linear-gradient(145deg,#213d86,#251477);
+      font-size:34px;font-weight:950;color:#fff;box-shadow:0 0 50px rgba(244,185,66,.12)
+    }
+    .auth-gate-kicker{text-align:center;color:#ffd978;letter-spacing:.16em;font-size:12px;font-weight:900}
+    .auth-gate-card h1{text-align:center;font-size:34px;line-height:1.08;margin:8px 0 10px}
+    .auth-gate-lede{text-align:center;color:#a8b7ca;line-height:1.55;margin:0 auto 22px;max-width:390px}
+    .auth-gate-tabs{
+      display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#050d18;
+      border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:4px;margin:18px 0
+    }
+    .auth-gate-tab{
+      border:0;border-radius:11px;background:transparent;color:#93a5bb;padding:12px;font-weight:900;font-size:15px
+    }
+    .auth-gate-tab.active{background:rgba(244,185,66,.14);color:#ffd978}
+    .auth-gate-form{display:grid;gap:13px}
+    .auth-gate-form label{display:grid;gap:7px;color:#d9e2ee;font-size:13px;font-weight:850}
+    .auth-gate-input{
+      width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);border-radius:13px;
+      padding:14px;background:#06101d;color:white;font:inherit;outline:none
+    }
+    .auth-gate-input:focus{border-color:rgba(244,185,66,.7);box-shadow:0 0 0 3px rgba(244,185,66,.08)}
+    .auth-gate-submit,.auth-gate-install{
+      width:100%;border:0;border-radius:14px;padding:14px 16px;font-size:17px;font-weight:950
+    }
+    .auth-gate-submit{background:linear-gradient(135deg,#ffc447,#f2a51f);color:#111827}
+    .auth-gate-install{margin-top:12px;border:1px solid rgba(255,255,255,.12);background:#142235;color:#fff}
+    .auth-gate-message{min-height:21px;font-size:13px;line-height:1.45;color:#a8b7ca;margin:0}
+    .auth-gate-message.error{color:#ff9d9d}.auth-gate-message.success{color:#7be0b8}
+    .auth-gate-note{font-size:12px;color:#718399;line-height:1.5;text-align:center;margin:14px 0 0}
+    .auth-gate-loading{text-align:center;color:#a8b7ca;font-weight:800}
+  </style>
+
 </head>
 <body>
+
+  <div id="authGate" class="auth-gate-shell" aria-live="polite">
+    <div class="auth-gate-card">
+      <div class="auth-gate-mark">✦</div>
+      <div class="auth-gate-kicker">PROJECT ORBIT</div>
+      <h1>Citizens only</h1>
+      <p class="auth-gate-lede">Create a citizen account or log in to enter the digital nation.</p>
+      <div id="authGateContent" class="auth-gate-loading">Checking your citizenship…</div>
+    </div>
+  </div>
+
   <div class="app-shell">
     <aside class="sidebar" aria-label="Primary navigation">
       <div class="brand" role="button" tabindex="0" data-route="home">
@@ -118,7 +201,9 @@
   </template>
 
   <script src="app.js"></script>
+  <script src="pwa-v16.js" defer></script>
   <script type="module" src="supabase-auth.js"></script>
+  <script type="module" src="auth-gate-v16.js"></script>
   <script type="module" src="live-app-v152.js"></script>
 </body>
 </html>
