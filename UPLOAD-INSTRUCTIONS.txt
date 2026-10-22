@@ -1,35 +1,37 @@
-PROJECT ORBIT v1.6.4 — COMMENT LIKES + REAL ACCOUNT SEARCH
+PROJECT ORBIT v1.6.5 — NATIONAL EMBLEM
 
-UPLOAD THESE TWO FILES TO THE ROOT OF:
+UPLOAD THESE THREE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html with the included index.html
-2. Add live-app-v164.js as a NEW file
+2. Add national-emblem-v165.js as a NEW file
+3. Add national-emblem.png as a NEW file
 
 Leave all other existing files alone.
 
 WHAT CHANGED
+- The official national emblem now appears immediately to the left of "PROJECT ORBIT" in the main top header.
+- The desktop Project Orbit brand mark also uses the national emblem.
+- A new "National Emblem" destination is added to:
+  * More
+  * the Nation Menu / drawer
+  * desktop navigation
+- The National Emblem page includes:
+  * the full official emblem
+  * a description of what it represents
+  * symbolism for the cosmic manta ray
+  * the circular celestial frame
+  * the four-point star
+  * purple
+  * silver/white
+  * the black field
+  * the planetary horizon
+  * the lower violet orb
+  * the motto represented by the inner symbolic glyph ring
+  * a Download emblem button
+  * a View full size button
 
-COMMENT LIKES
-- Every signed-in citizen can Like / Unlike comments.
-- Inline replies under a post now show a Like button and like count.
-- The full Comments view also shows comment likes.
-- Comment authors receive a normal like notification when another citizen likes their comment.
-- Likes update in realtime.
-- Supabase RLS prevents anonymous access and prevents citizens from deleting another citizen's like.
+NATIONAL MOTTO SHOWN ON THE PAGE
+"Consciousness in Outer Space"
 
-CITIZENS SEARCH FIELD
-- "Search citizens by name, role, or number..." now searches the REAL Supabase citizen directory.
-- Search works immediately while typing.
-- Searches display name/account name, role, country, and citizen number.
-- Clicking a search result opens that citizen's profile.
-
-GLOBAL ACCOUNT SEARCH
-- The magnifying-glass icon at the top of Project Orbit now opens a "Find an account" search window.
-- Type an account/display name such as BedBugStories to find the account.
-- Results include profile picture, display name, role/country, and citizen number.
-- Tapping a result opens the citizen's profile.
-
-BACKEND
-- public.comment_likes has already been created.
-- RLS, triggers, realtime publication, and comment-like notifications are already active.
+No Supabase/database changes are required for this version.
