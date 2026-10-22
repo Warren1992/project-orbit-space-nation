@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <meta name="description" content="A mobile-first prototype for a digital space nation." />
+  <meta name="description" content="Project Orbit — a digital space nation with real citizen accounts." />
   <title>Project Orbit — Digital Space Nation</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -21,8 +21,8 @@
       <nav class="side-nav" id="sideNav"></nav>
       <div class="sidebar-card">
         <span class="eyebrow">Population</span>
-        <strong id="sidebarPopulation">1,247</strong>
-        <small>Founding citizens</small>
+        <strong id="sidebarPopulation">—</strong>
+        <small>Registered citizens</small>
       </div>
     </aside>
 
@@ -36,7 +36,7 @@
         <div class="topbar-actions">
           <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
           <button class="icon-btn notification-dot" aria-label="Notifications">◉</button>
-          <button class="avatar avatar-sm founder-avatar" data-route="profile" aria-label="Open founder profile">W</button>
+          <button class="avatar avatar-sm" id="accountBtn" aria-label="Open account">?</button>
         </div>
       </header>
 
@@ -66,7 +66,7 @@
         <div class="hero-card">
           <div>
             <span class="pill gold">FOUNDING ERA</span>
-            <h2>Welcome, Citizen #001247</h2>
+            <h2 id="citizenWelcome">Welcome to Project Orbit</h2>
             <p>This is a living digital nation: socialize, vote, build institutions, and help fund real space projects.</p>
             <div class="hero-actions">
               <button class="btn primary" data-route="elections">Vote now</button>
@@ -86,7 +86,7 @@
           </div>
           <textarea id="postText" maxlength="500" placeholder="Share an update with the nation..."></textarea>
           <div class="composer-actions">
-            <span class="muted">Public · Citizens can comment</span>
+            <span class="muted">Prototype local post composer</span>
             <button class="btn primary" id="postBtn">Post</button>
           </div>
         </div>
@@ -97,26 +97,27 @@
       <aside class="stack rail">
         <div class="card stat-card">
           <span class="eyebrow">Nation at a glance</span>
-          <div class="stat-line"><strong>1,247</strong><span>Citizens</span></div>
-          <div class="stat-line"><strong>31</strong><span>Countries represented</span></div>
-          <div class="stat-line"><strong>68%</strong><span>Voter participation</span></div>
+          <div class="stat-line"><strong id="homePopulation">—</strong><span>Citizens</span></div>
+          <div class="stat-line"><strong>Founding</strong><span>Era</span></div>
+          <div class="stat-line"><strong>Live</strong><span>Registration</span></div>
         </div>
         <div class="card">
           <div class="section-row"><h3>Current referendum</h3><button class="text-btn" data-route="elections">Open</button></div>
           <p class="question">Should the nation prioritize its first lunar archive mission?</p>
           <div class="progress"><span style="width:72%"></span></div>
-          <small>72% Yes · 4 days remaining</small>
+          <small>Prototype vote · database voting comes next</small>
         </div>
         <div class="card">
           <div class="section-row"><h3>Space program</h3><button class="text-btn" data-route="space">Details</button></div>
           <p>Lunar Archive Mission</p>
           <div class="progress blue"><span style="width:43%"></span></div>
-          <small>$21,500 of $50,000 demonstration goal</small>
+          <small>Planning-stage demonstration goal</small>
         </div>
       </aside>
     </div>
   </template>
 
   <script src="app.js"></script>
+  <script type="module" src="supabase-auth.js"></script>
 </body>
 </html>
