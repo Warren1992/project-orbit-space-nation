@@ -1,47 +1,63 @@
-STARALIA v1.7.0 — COMPLETE PROJECT ORBIT → STARALIA REBRAND
+STARALIA v1.7.1 — DIRECT MESSAGING + RESIDENCY
 
-UPLOAD ALL FILES IN THIS ZIP TO THE ROOT OF:
+UPLOAD THESE THREE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
-Replace index.html.
-Add the other files as new files:
-- app-v170.js
-- supabase-auth-v170.js
-- auth-gate-v170.js
-- live-app-v170.js
-- national-flag-v170.js
-- national-emblem-v170.js
-- pwa-v170.js
-- manifest-staralia.webmanifest
-- sw-v170.js
+1. Replace index.html with the included index.html
+2. Add app-v171.js as a NEW file
+3. Add messaging-residency-v171.js as a NEW file
 
-You do NOT need to remove the older versioned JavaScript files for the website to work.
-index.html now loads only the new Staralia v1.7.0 files.
+Leave all other existing files alone, including live-app-v170.js.
 
-REBRANDED
-- Website title and metadata
-- Main header and navigation branding
-- Login / citizenship gateway
-- Account and notification copy
-- Sharing titles
-- Founder/admin referendum placeholder copy
-- National Flag page and downloadable flag filename
-- National Emblem page and downloadable emblem filename
-- PWA / install-app wording
-- PWA manifest name and short name
-- Service worker identity
-- Core app name used by the Constitution and other prototype sections
+DIRECT MESSAGING
+- Private one-to-one citizen messaging.
+- "Message" button on other citizen profiles.
+- Messages page available from navigation and More.
+- Search citizens by account name to start a conversation.
+- Inbox with latest-message previews and unread counts.
+- Realtime message updates.
+- Recipient-only read receipts.
+- 2,000-character message limit.
+- Database RLS prevents citizens from reading conversations they are not part of.
+- Anonymous users have no direct-message table access.
 
-LIVE DATABASE
-The existing public Supabase civic content has already been updated:
-- Founding Institutions Act summary
-- Citizen Rights Charter body
-- Lunar Archive Authorization summary/body
-- Lunar Mission Q&A location
-A verification scan found 0 remaining public database rows containing "Project Orbit".
+RESIDENCY
+- New Staralia Residency page.
+- Optional Resident status priced at $100 USD one-time.
+- Residents receive:
+  * Resident badge
+  * Digital Resident ID card
+  * Eligibility for future Resident-only spaces/events
+  * Supporter status
+- Residency does NOT add voting power.
+- Clear notice that Staralia Resident is digital membership/status, not legal residency,
+  immigration status, sovereign citizenship, or a government-issued identity document.
+- A citizen can begin a residency request now.
+- The request is stored securely in Supabase as payment_required.
+- Actual charging is NOT simulated and is NOT active yet.
+- Secure payment checkout should be activated only after Stripe is connected.
+- Resident status should only be changed to confirmed "resident" after verified payment.
 
-NOTE ABOUT THE EXISTING INSTALLED PHONE APP
-The website and new installs will use Staralia immediately after GitHub Pages updates.
-Android/Samsung may keep the old launcher label for an already-installed PWA. If the
-home-screen icon still says Project Orbit after reopening/refeshing, remove the old
-installed shortcut/app and install Staralia again from the updated site.
+BACKEND
+The required Supabase database changes are ALREADY LIVE:
+- public.direct_messages
+- public.residencies
+- RLS policies
+- sender-enforcement trigger
+- residency-request enforcement trigger
+- realtime publication
+- supporting indexes
+
+SECURITY VERIFICATION
+- Founder -> BedBugStories private messaging test passed.
+- Recipient read-receipt test passed.
+- Other citizens cannot see unpaid residency requests.
+- anon has zero grants on direct_messages and residencies.
+- Test rows were cleaned up.
+- Supabase security advisor reported only the pre-existing warning that leaked-password
+  protection is disabled; no new security warning was introduced by these features.
+
+PAYMENTS
+A Stripe connection is still required to accept the $100 payment.
+Once Stripe is connected, the next step is to create the $100 Staralia Residency product/
+payment link and connect verified payment confirmation to the residencies table.
