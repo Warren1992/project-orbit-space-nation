@@ -1,112 +1,61 @@
-STARALIA v1.10.0 — BICAMERAL CONGRESS + PROPOSITIONS + PRESIDENT
+STARALIA v1.11.0 — ICON NAVIGATION + PRESIDENTIAL NEWS
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Add app-v1100.js
-3. Add live-app-v1100.js
-4. Add staralia-civic-v1100.js
+2. Add staralia-news-nav-v1110.js
 
-Leave the other existing v1.8.1/v1.9.0 support files in place.
+Leave all other existing Staralia files in place.
 
-WHAT CHANGED
+BOTTOM NAVIGATION
+The five mobile buttons are now:
+- Home
+- Citizens
+- Direct Messaging
+- News
+- More
 
-PRESIDENT OF STARALIA
-- Citizen #000001 is now displayed as President of Staralia.
-- All "Head of Nation" wording has been removed from the new app files.
-- The President belongs to the Executive Branch and does not hold a House or Senate seat.
-- Internal is_founder authorization remains only as a secure backend identity flag.
+The visible words underneath the five icons are removed. Accessibility labels remain for screen readers and long-press/title behavior.
 
-BICAMERAL CONGRESS
-Congress now has two chambers:
-- House of Representatives: 100 elected Representatives
-- Senate: 100 elected Senators
+ELECTIONS + CONGRESS
+- Elections is removed from the bottom navigation.
+- Congress is removed from the bottom navigation.
+- Both are moved to the More page as prominent civic tiles.
+- Their routes and all underlying functionality remain intact.
 
-Citizens elect members of both chambers.
-Ordinary citizens do not vote directly on congressional legislation.
+HEADER
+- The header now displays STARALIA first and the transparent National Emblem immediately to its right.
+- The search, notifications, and account/avatar buttons remain on the right side of the top bar.
 
-BILL PROCESS
-1. A Representative or Senator introduces a bill in their chamber.
-2. That chamber votes.
-3. If it passes, the same bill goes to the other chamber.
-4. If both chambers pass it, the bill goes to the President.
-5. The President may sign it into Staralia law or veto it.
-6. A presidential veto can be overridden only by a two-thirds vote in BOTH chambers.
-7. The Supreme Court remains available for constitutional review.
+NEWS
+- New database-backed Staralia News page.
+- Every signed-in citizen can read national news stories.
+- Only Citizen #000001 / the authenticated President of Staralia account can publish official news.
+- President-only publishing is enforced in Supabase RLS and a server-side trigger; it is not merely hidden in the browser.
+- News stories support:
+  * Headline
+  * Short summary
+  * Full story
+  * Optional image uploaded from the phone
+- Story images reuse Staralia's existing public post-media storage bucket.
+- President can delete official news stories.
+- News updates use Supabase Realtime.
 
-HOUSE OF REPRESENTATIVES
-- 100 numbered seats.
-- House elections, candidates, private citizen ballots, and public aggregate tallies.
-- Representatives can introduce House bills and vote on House legislation.
-- A person cannot simultaneously serve as President, Senator, Representative, and/or Supreme Court Justice where branch separation prohibits it.
-
-SENATE
-- 100 numbered seats.
-- Senate elections remain in place.
-- Senators introduce Senate bills, vote on Senate legislation, confirm Supreme Court nominees, and participate in veto overrides.
-
-PROPOSITIONS
-- The referendum system has been completely removed.
-- Citizens may vote directly only on numbered Propositions, such as Proposition 6.
-- Proposition ballots are private; aggregate Yes/No totals are public to signed-in citizens.
-- The two former referendum ballots were preserved and migrated:
-  * Proposition 1 — Lunar archive question — existing votes preserved.
-  * Proposition 2 — Mars Settlement — existing vote preserved.
-- Legacy referendum tables/functions were removed after migration.
-
-ELECTIONS PAGE
-The Elections page now contains:
-- House elections
-- Senate elections
-- Propositions
-There are no referendum controls.
-
-CURRENT BILL MIGRATION
-- Founding Institutions Act: remains in Senate consideration.
-- Citizen Rights Charter: remains in Senate consideration.
-- Lunar Archive Authorization: remains in Senate consideration.
-- Droid Army Creation Act: previously passed the old unicameral Senate, so it now moves to the new House of Representatives. It must pass the House before it can reach the President.
-
-GOVERNMENT / JUDICIAL
-- Government page now describes:
-  * Legislative Branch — House + Senate
-  * Executive Branch — President of Staralia
-  * Judicial Branch — 9-seat Supreme Court
-- Supreme Court nomination flow remains President nomination + Senate confirmation.
-- Executive Orders and Proclamations remain President-only.
+NATIONAL MOTTO
+The v1.10.1 National Motto functionality is retained in this release through the new navigation layer:
+WE CARRY DAWN BEYOND THE SKY
+The Motto page remains accessible from More / the Nation menu.
 
 BACKEND
-All required Supabase changes are ALREADY LIVE:
-- President role update
-- 100-seat House
-- 100-seat Senate
-- House elections/candidates/private ballots/tallies
-- Bicameral bill stages
-- House and Senate roll-call votes
-- Presidential sign/veto authority
-- Two-thirds veto override in both chambers
-- Propositions/private ballots/public tallies
-- Legacy referendum subsystem removed
-- Realtime subscriptions and scheduled finalization jobs
-- RLS and permission enforcement
+The required Supabase news table, RLS policies, President-only publishing trigger, indexes,
+and Realtime publication are ALREADY LIVE.
 
 VERIFIED
-- President role: PASS
-- Proposition migration/vote preservation: PASS
-- Proposition ballot privacy: PASS
-- Regular citizen can vote on a Proposition: PASS
-- Regular citizen cannot create a Proposition: PASS
-- Non-member cannot introduce legislation: PASS
-- President can open a House election: PASS
-- Non-President cannot open a House election: PASS
-- Non-President cannot sign a congressional bill: PASS
-- President can sign a bill after both chambers pass: PASS
-- Temporary test records: CLEANED UP
-- Old referendum tables/functions: REMOVED
-- Supabase security advisor: no new v1.10.0 warnings
+- President can publish official news: PASS
+- Regular citizen publishing attempt: REJECTED
+- Regular citizen can read published news: PASS
+- Anonymous database access to news table: NONE
+- Temporary test news story: CLEANED UP
+- Supabase security advisor: no new v1.11.0 warning
 - Existing unrelated warning remains: leaked-password protection is disabled
-
-NOTE
-Staralia is a private digital civic community. Its offices, laws, courts, Congress, President,
-and Propositions are internal Staralia institutions and do not create real-world governmental authority.
