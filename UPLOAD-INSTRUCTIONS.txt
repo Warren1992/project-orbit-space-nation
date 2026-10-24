@@ -1,33 +1,70 @@
-STARALIA v1.7.2 — CLEAN NATIONAL HEADER + TRANSPARENT EMBLEM
+STARALIA v1.8.0 — PROFILE PHOTO + 18+ TERMS + EXECUTIVE ACTIONS
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Replace national-emblem.png
-3. Add national-emblem-transparent-v172.png as a NEW file
-4. Add staralia-header-v172.js as a NEW file
+2. Add auth-gate-v180.js
+3. Add staralia-civic-v180.js
 
-Leave all other files alone.
+Leave the other existing v1.7.2 files in place.
 
 WHAT CHANGED
-- Removed the visible page-name text from the top header on every page.
-  Examples that are now hidden in the header: Home, Citizens, Elections, Senate,
-  More, World, Messages, Residency, National Emblem, etc.
-- The page name is still kept internally in the DOM so existing navigation and route
-  logic continue to work.
-- The header now consistently shows only:
-    [National Emblem]  STARALIA
-- The National Emblem now has a transparent outside background rather than a black/
-  square image background.
-- The original intentional dark/black interior field inside the emblem is preserved.
-- National Emblem uses elsewhere in the interface are automatically switched to the
-  transparent v1.7.2 asset.
-- The National Emblem page's download/view links are switched to the transparent file.
-- New versioned filenames reduce Samsung Internet / PWA caching problems.
 
-NO SUPABASE CHANGES ARE REQUIRED.
+TOP-RIGHT ACCOUNT PHOTO
+- When a citizen has a profile photo, that photo now fills the top-right account circle.
+- Citizens without a profile photo still see their account initial.
+- The existing click behavior for opening the citizen's own profile remains intact.
 
-If Samsung Internet still displays the old header after GitHub Pages updates, refresh
-once. If an installed PWA remains cached, close/reopen it; reinstalling the PWA is only
-necessary if Android continues to retain an old cached shell.
+18+ ACCOUNT REQUIREMENT
+- New account creation now requires date of birth.
+- The browser checks for age 18+ before signup.
+- Supabase independently enforces the 18+ requirement server-side, so changing browser code cannot bypass it.
+- Date of birth is stored privately and is not added to the public citizen profile.
+
+USER AGREEMENT / TERMS
+- New users must open the User Agreement & Terms of Use.
+- The acceptance checkbox remains disabled until the user reaches the agreement confirmation and clicks "I have read this agreement."
+- They must then check the agreement box before creating an account.
+- Supabase independently requires the accepted Terms version during signup.
+- Current Terms version: 2026-10-23-v1.
+- A User Agreement tile is also available from More after login.
+
+IMPORTANT LEGAL NOTE
+These Terms provide useful account rules, disclosures, consent records, and an 18+ requirement.
+They do NOT guarantee protection from all legal claims or satisfy every law that may apply.
+Have a qualified attorney review the Terms, Privacy Policy, payment/refund rules, and business
+structure before treating them as production legal documents.
+
+FOUNDER EXECUTIVE ACTIONS
+- Government now contains an official Executive Actions archive.
+- Only the real Founder & Head of Nation account can sign:
+  * Executive Orders
+  * Proclamations
+- This restriction is enforced in Supabase using the existing private Founder identity mapping.
+- Ordinary citizens cannot bypass the restriction by editing browser code.
+- Executive Orders receive EO-001, EO-002, etc.
+- Proclamations receive P-001, P-002, etc.
+- Signed text is immutable.
+- The Founder can revoke an action, but its signed record remains in the archive.
+- Executive actions are clearly described as internal Staralia governance records, not real-world governmental authority.
+
+BACKEND
+The required Supabase changes are ALREADY LIVE:
+- private user compliance records for birthday / Terms acceptance
+- server-side age and Terms validation on new auth users
+- public.executive_actions
+- Founder-only RLS and signing triggers
+- realtime updates for executive actions
+
+VERIFIED
+- Adult + accepted Terms: PASS
+- Under-18 signup metadata: REJECTED
+- Missing Terms acceptance: REJECTED
+- Founder signing: PASS
+- BedBugStories/non-Founder signing: REJECTED
+- Anonymous executive-action access: NONE
+- Compliance table access for regular users: NONE
+- Temporary test records: CLEANED UP
+
+Existing users are not forced to re-enter a birthday; these requirements apply to new accounts.
