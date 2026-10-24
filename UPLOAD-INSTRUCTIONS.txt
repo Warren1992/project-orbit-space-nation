@@ -1,70 +1,73 @@
-STARALIA v1.8.0 — PROFILE PHOTO + 18+ TERMS + EXECUTIVE ACTIONS
+STARALIA v1.8.1 — STABILITY + BLOCKING + DIRECT MESSAGE SAFETY
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Add auth-gate-v180.js
-3. Add staralia-civic-v180.js
+2. Add app-v181.js
+3. Add supabase-auth-v181.js
+4. Add messaging-residency-v181.js
+5. Add staralia-civic-v181.js
+6. Add staralia-safety-v181.js
 
-Leave the other existing v1.7.2 files in place.
+Leave all other existing files in place.
 
-WHAT CHANGED
+FIXES
 
-TOP-RIGHT ACCOUNT PHOTO
-- When a citizen has a profile photo, that photo now fills the top-right account circle.
-- Citizens without a profile photo still see their account initial.
-- The existing click behavior for opening the citizen's own profile remains intact.
+MORE PAGE
+- Fixes the bottom-right More page briefly appearing and then disappearing.
+- Route changes are now idempotent, so clicking a tab does not cause a second duplicate render from the hash-change event.
+- The messaging and civic observers now watch the app view instead of the entire document, reducing UI races.
+- A short More-page stability guard restores the More page if another script unexpectedly overwrites it immediately after the tap.
 
-18+ ACCOUNT REQUIREMENT
-- New account creation now requires date of birth.
-- The browser checks for age 18+ before signup.
-- Supabase independently enforces the 18+ requirement server-side, so changing browser code cannot bypass it.
-- Date of birth is stored privately and is not added to the public citizen profile.
+TOP-RIGHT PROFILE PHOTO
+- Citizens with an uploaded profile photo now keep that photo in the top-right account circle.
+- The photo is rendered as a persistent CSS background image, so older account code writing an initial such as W or B cannot erase it.
+- Citizens without a photo still see their account initial.
 
-USER AGREEMENT / TERMS
-- New users must open the User Agreement & Terms of Use.
-- The acceptance checkbox remains disabled until the user reaches the agreement confirmation and clicks "I have read this agreement."
-- They must then check the agreement box before creating an account.
-- Supabase independently requires the accepted Terms version during signup.
-- Current Terms version: 2026-10-23-v1.
-- A User Agreement tile is also available from More after login.
+BLOCKING
+- A Block / Unblock button appears on other citizen profiles.
+- A Block / Unblock control also appears inside a direct-message conversation.
+- More now includes a Blocked Citizens manager where a citizen can unblock accounts.
+- When Citizen A blocks Citizen B:
+  * B cannot retrieve A's citizen profile.
+  * B cannot retrieve A's posts in the authenticated feed.
+  * A and B cannot exchange new direct messages in either direction.
+  * New follows between them are prevented.
+- The blocker can still view the blocked citizen's profile so the block can be managed/reversed.
+- Blocking is enforced in Supabase RLS/triggers, not only in JavaScript.
+- Anonymous users have no access to the block table.
 
-IMPORTANT LEGAL NOTE
-These Terms provide useful account rules, disclosures, consent records, and an 18+ requirement.
-They do NOT guarantee protection from all legal claims or satisfy every law that may apply.
-Have a qualified attorney review the Terms, Privacy Policy, payment/refund rules, and business
-structure before treating them as production legal documents.
-
-FOUNDER EXECUTIVE ACTIONS
-- Government now contains an official Executive Actions archive.
-- Only the real Founder & Head of Nation account can sign:
-  * Executive Orders
-  * Proclamations
-- This restriction is enforced in Supabase using the existing private Founder identity mapping.
-- Ordinary citizens cannot bypass the restriction by editing browser code.
-- Executive Orders receive EO-001, EO-002, etc.
-- Proclamations receive P-001, P-002, etc.
-- Signed text is immutable.
-- The Founder can revoke an action, but its signed record remains in the archive.
-- Executive actions are clearly described as internal Staralia governance records, not real-world governmental authority.
+DIRECT MESSAGE SAFETY FILTER
+- Direct messages are checked in the browser for common prohibited language before submission.
+- Supabase independently checks every inserted DM server-side.
+- The server blocks configured racial/identity slurs, common profanity/vulgar terms, and explicit threatening phrases/patterns.
+- Users receive a generic message asking them to remove profanity, slurs, vulgar, hateful, sexual, offensive, or threatening language.
+- The server-side rule cannot be bypassed by editing the browser JavaScript.
+- This is a rules-based safety filter. No static filter can identify every offensive expression or every evasive spelling, so it should be treated as one moderation layer rather than a guarantee that all harmful content will be caught.
 
 BACKEND
 The required Supabase changes are ALREADY LIVE:
-- private user compliance records for birthday / Terms acceptance
-- server-side age and Terms validation on new auth users
-- public.executive_actions
-- Founder-only RLS and signing triggers
-- realtime updates for executive actions
+- public.user_blocks
+- block-aware profile RLS
+- block-aware post RLS
+- block-aware direct-message RLS
+- follow restrictions when a block exists
+- server-side DM moderation trigger
+- private moderation term/rule storage
+- user_blocks Realtime publication
+- supporting indexes
 
 VERIFIED
-- Adult + accepted Terms: PASS
-- Under-18 signup metadata: REJECTED
-- Missing Terms acceptance: REJECTED
-- Founder signing: PASS
-- BedBugStories/non-Founder signing: REJECTED
-- Anonymous executive-action access: NONE
-- Compliance table access for regular users: NONE
-- Temporary test records: CLEANED UP
+- Safe DM: accepted
+- Profanity test DM: rejected
+- Threat test DM: rejected
+- Blocked citizen viewing blocker's profile: denied
+- Blocked citizen viewing blocker's posts: denied
+- Blocked citizen sending new DM: denied
+- Blocker can still view blocked citizen's profile: allowed
+- Test block/message rows: cleaned up
+- New security advisor warnings: none
 
-Existing users are not forced to re-enter a birthday; these requirements apply to new accounts.
+NOTE
+Supabase still reports the pre-existing account-security warning that leaked-password protection is disabled. That warning is unrelated to this v1.8.1 update.
