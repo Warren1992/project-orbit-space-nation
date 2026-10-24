@@ -1,61 +1,83 @@
-STARALIA v1.11.0 — ICON NAVIGATION + PRESIDENTIAL NEWS
+STARALIA v1.11.1 — NATIONAL CALENDAR + DUAL-DATE NEWS
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Add staralia-news-nav-v1110.js
+2. Add staralia-news-nav-v1111.js
 
 Leave all other existing Staralia files in place.
 
-BOTTOM NAVIGATION
-The five mobile buttons are now:
-- Home
-- Citizens
-- Direct Messaging
-- News
-- More
+STARALIAN CALENDAR
+Official epoch:
+0001 Aurelis 01 = January 1, 2026
 
-The visible words underneath the five icons are removed. Accessibility labels remain for screen readers and long-press/title behavior.
+Official date order:
+YEAR · MONTH · DAY
+Example:
+0001 Nythera 27
 
-ELECTIONS + CONGRESS
-- Elections is removed from the bottom navigation.
-- Congress is removed from the bottom navigation.
-- Both are moved to the More page as prominent civic tiles.
-- Their routes and all underlying functionality remain intact.
+12 MONTHS
+01 Aurelis
+02 Velaris
+03 Caelora
+04 Novaris
+05 Elurion
+06 Veylora
+07 Solaryn
+08 Astralis
+09 Meridion
+10 Nythera
+11 Orivane
+12 Zenithar
 
-HEADER
-- The header now displays STARALIA first and the transparent National Emblem immediately to its right.
-- The search, notifications, and account/avatar buttons remain on the right side of the top bar.
+Each month contains exactly 30 days.
+
+THE PASSAGE
+After Zenithar 30:
+Passage 01 — Founding Day
+Passage 02 — Citizenship Day
+Passage 03 — Day of Consciousness
+Passage 04 — Exploration Day
+Passage 05 — Dawn Day
+
+Earth leap years add:
+Passage 06 — Continuance Day
+
+This keeps January 1 aligned with Aurelis 01 every year.
+
+CALENDAR PAGE
+- Added a Calendar tile to More / Nation navigation.
+- Automatically displays today's current Staralian date.
+- Shows the Earth date beneath it.
+- Shows all 12 months and their meanings.
+- Shows all Passage holidays.
+- Includes a two-way converter:
+  * Earth → Staralia
+  * Staralia → Earth
+- Dates before January 1, 2026 are intentionally outside the Staralian era.
 
 NEWS
-- New database-backed Staralia News page.
-- Every signed-in citizen can read national news stories.
-- Only Citizen #000001 / the authenticated President of Staralia account can publish official news.
-- President-only publishing is enforced in Supabase RLS and a server-side trigger; it is not merely hidden in the browser.
-- News stories support:
-  * Headline
-  * Short summary
-  * Full story
-  * Optional image uploaded from the phone
-- Story images reuse Staralia's existing public post-media storage bucket.
-- President can delete official news stories.
-- News updates use Supabase Realtime.
+Every official news story now displays two dates on the same story card:
+LEFT:
+Staralia · 0001 Nythera 27
 
-NATIONAL MOTTO
-The v1.10.1 National Motto functionality is retained in this release through the new navigation layer:
-WE CARRY DAWN BEYOND THE SKY
-The Motto page remains accessible from More / the Nation menu.
+RIGHT:
+Earth (U.S.) · October 24, 2026
+
+Both dates are derived automatically from the story's existing published_at timestamp.
+No extra date entry is required when the President publishes a story.
+
+VALIDATED EXAMPLES
+January 1, 2026 = 0001 Aurelis 01
+October 24, 2026 = 0001 Nythera 27
+December 26, 2026 = 0001 Zenithar 30
+December 27, 2026 = 0001 Passage 01
+December 31, 2026 = 0001 Passage 05
+December 31, 2028 = 0003 Passage 06
+
+Round-trip Earth ↔ Staralia conversion was tested across every day of 2026, 2027, and 2028.
 
 BACKEND
-The required Supabase news table, RLS policies, President-only publishing trigger, indexes,
-and Realtime publication are ALREADY LIVE.
-
-VERIFIED
-- President can publish official news: PASS
-- Regular citizen publishing attempt: REJECTED
-- Regular citizen can read published news: PASS
-- Anonymous database access to news table: NONE
-- Temporary test news story: CLEANED UP
-- Supabase security advisor: no new v1.11.0 warning
-- Existing unrelated warning remains: leaked-password protection is disabled
+No Supabase schema change is required for v1.11.1.
+The existing news_articles.published_at timestamp is used for automatic dual-date display.
