@@ -1,83 +1,59 @@
-STARALIA v1.11.1 — NATIONAL CALENDAR + DUAL-DATE NEWS
+STARALIA v1.12.0 — STARALIAN LANGUAGE + AUREKHA SCRIPT
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Add staralia-news-nav-v1111.js
+2. Add staralia-news-nav-v1120.js
+3. Add aurekha-script-1-1.png
+4. Add aurekha-handwriting-sheet.png
 
 Leave all other existing Staralia files in place.
 
-STARALIAN CALENDAR
-Official epoch:
-0001 Aurelis 01 = January 1, 2026
+NEW LANGUAGE & SCRIPT PAGE
+A new "Language & Script" section has been added to More and the nation navigation.
 
-Official date order:
-YEAR · MONTH · DAY
-Example:
-0001 Nythera 27
+It includes:
+- Staralian as the English language name
+- Stelari as the native language name
+- Aurekha as the official writing system
+- Staralian Language Standard 1.0
+- Aurekha Script 1.1
+- All 26 native letter names
+- Romanization / pronunciation guides
+- Full Aurekha alphabet infographic
+- Black-and-white handwriting practice sheet
+- Grammar quickstart
+- Pronoun system
+- Foundational word roots
+- First canonical phrases
+- Official Staralian translation of the national motto
 
-12 MONTHS
-01 Aurelis
-02 Velaris
-03 Caelora
-04 Novaris
-05 Elurion
-06 Veylora
-07 Solaryn
-08 Astralis
-09 Meridion
-10 Nythera
-11 Orivane
-12 Zenithar
+OFFICIAL MOTTO
+VI THAL AUR SAI KAEL
+We Carry Dawn Beyond the Sky
 
-Each month contains exactly 30 days.
+CORE GRAMMAR DISPLAYED
+- Subject → Verb → Object
+- da = past
+- sha = future
+- ne = negation
+- ke = question marker
+- -en / -in = regular plural
+- adjectives and possessives follow nouns
+- no grammatical articles equivalent to a/an/the
+- gender-neutral pronoun system
 
-THE PASSAGE
-After Zenithar 30:
-Passage 01 — Founding Day
-Passage 02 — Citizenship Day
-Passage 03 — Day of Consciousness
-Passage 04 — Exploration Day
-Passage 05 — Dawn Day
+AUREKHA
+The page explicitly treats Latin letters as romanization only.
+Aurekha glyphs are presented as the native letters with their own names:
+Aura, Elya, Itha, Oru, Ulya, Yeli, Aeri, Aini,
+Baren, Dari, Falen, Hesu, Karu, Lani, Meru, Netha,
+Pora, Reli, Seri, Talu, Vena, Zari, Shael, Zhael, Khal, Thari.
 
-Earth leap years add:
-Passage 06 — Continuance Day
-
-This keeps January 1 aligned with Aurelis 01 every year.
-
-CALENDAR PAGE
-- Added a Calendar tile to More / Nation navigation.
-- Automatically displays today's current Staralian date.
-- Shows the Earth date beneath it.
-- Shows all 12 months and their meanings.
-- Shows all Passage holidays.
-- Includes a two-way converter:
-  * Earth → Staralia
-  * Staralia → Earth
-- Dates before January 1, 2026 are intentionally outside the Staralian era.
-
-NEWS
-Every official news story now displays two dates on the same story card:
-LEFT:
-Staralia · 0001 Nythera 27
-
-RIGHT:
-Earth (U.S.) · October 24, 2026
-
-Both dates are derived automatically from the story's existing published_at timestamp.
-No extra date entry is required when the President publishes a story.
-
-VALIDATED EXAMPLES
-January 1, 2026 = 0001 Aurelis 01
-October 24, 2026 = 0001 Nythera 27
-December 26, 2026 = 0001 Zenithar 30
-December 27, 2026 = 0001 Passage 01
-December 31, 2026 = 0001 Passage 05
-December 31, 2028 = 0003 Passage 06
-
-Round-trip Earth ↔ Staralia conversion was tested across every day of 2026, 2027, and 2028.
+EXISTING FEATURES
+News, dual Earth/Staralia news dates, Calendar, date converter, National Motto,
+Direct Messaging, Elections, Congress, Government, and all existing v1.11.x features remain intact.
 
 BACKEND
-No Supabase schema change is required for v1.11.1.
-The existing news_articles.published_at timestamp is used for automatic dual-date display.
+No Supabase schema changes are required for this update.
