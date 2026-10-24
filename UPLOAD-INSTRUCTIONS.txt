@@ -1,73 +1,95 @@
-STARALIA v1.8.1 — STABILITY + BLOCKING + DIRECT MESSAGE SAFETY
+STARALIA v1.9.0 — THREE-BRANCH FEDERAL GOVERNMENT
 
 UPLOAD THESE FILES TO THE ROOT OF:
 Warren1992/project-orbit-space-nation
 
 1. Replace index.html
-2. Add app-v181.js
-3. Add supabase-auth-v181.js
-4. Add messaging-residency-v181.js
-5. Add staralia-civic-v181.js
-6. Add staralia-safety-v181.js
+2. Add app-v190.js
+3. Add live-app-v190.js
+4. Add staralia-civic-v190.js
 
-Leave all other existing files in place.
+Leave the other existing v1.8.1 files in place.
 
-FIXES
+GOVERNMENT STRUCTURE
 
-MORE PAGE
-- Fixes the bottom-right More page briefly appearing and then disappearing.
-- Route changes are now idempotent, so clicking a tab does not cause a second duplicate render from the hash-change event.
-- The messaging and civic observers now watch the app view instead of the entire document, reducing UI races.
-- A short More-page stability guard restores the More page if another script unexpectedly overwrites it immediately after the tap.
+LEGISLATIVE BRANCH
+- Congress consists of ONE chamber only: the Senate.
+- The Senate has exactly 100 seats.
+- The Founder & Head of Nation is part of the Executive Branch and is no longer a voting Senator.
+- Senators are seated through Senate elections.
+- Active Senators introduce bills, debate, comment, and cast roll-call votes.
+- The Executive can no longer directly close Senate bill voting.
+- Senate voting is finalized automatically after the voting deadline.
 
-TOP-RIGHT PROFILE PHOTO
-- Citizens with an uploaded profile photo now keep that photo in the top-right account circle.
-- The photo is rendered as a persistent CSS background image, so older account code writing an initial such as W or B cannot erase it.
-- Citizens without a photo still see their account initial.
+EXECUTIVE BRANCH
+- Citizen #000001, Founder & Head of Nation, serves as Staralia's chief executive.
+- A Senate-passed bill is presented to the Executive.
+- The Founder can:
+  * Sign the bill into Staralia law
+  * Veto the bill
+  * Issue Executive Orders
+  * Issue Proclamations
+  * Nominate Supreme Court justices
+- Signed laws receive sequential Staralia Law numbers (S.L. 001, S.L. 002, etc.).
+- A veto opens a 7-day Senate override vote.
+- A two-thirds Senate override turns the vetoed bill into law.
+- The Founder cannot directly appoint or remove Senators under this model.
 
-BLOCKING
-- A Block / Unblock button appears on other citizen profiles.
-- A Block / Unblock control also appears inside a direct-message conversation.
-- More now includes a Blocked Citizens manager where a citizen can unblock accounts.
-- When Citizen A blocks Citizen B:
-  * B cannot retrieve A's citizen profile.
-  * B cannot retrieve A's posts in the authenticated feed.
-  * A and B cannot exchange new direct messages in either direction.
-  * New follows between them are prevented.
-- The blocker can still view the blocked citizen's profile so the block can be managed/reversed.
-- Blocking is enforced in Supabase RLS/triggers, not only in JavaScript.
-- Anonymous users have no access to the block table.
+JUDICIAL BRANCH
+- Staralia now has a 9-seat Supreme Court:
+  * Seat 1: Chief Justice
+  * Seats 2–9: Associate Justices
+- The Founder nominates justices.
+- The Senate votes to confirm or reject nominations.
+- Citizens may file constitutional-review cases.
+- Active justices can vote to uphold, strike, or dismiss a challenged Staralia government action.
+- A majority/quorum of active justices is required before a final Court decision can be issued.
 
-DIRECT MESSAGE SAFETY FILTER
-- Direct messages are checked in the browser for common prohibited language before submission.
-- Supabase independently checks every inserted DM server-side.
-- The server blocks configured racial/identity slurs, common profanity/vulgar terms, and explicit threatening phrases/patterns.
-- Users receive a generic message asking them to remove profanity, slurs, vulgar, hateful, sexual, offensive, or threatening language.
-- The server-side rule cannot be bypassed by editing the browser JavaScript.
-- This is a rules-based safety filter. No static filter can identify every offensive expression or every evasive spelling, so it should be treated as one moderation layer rather than a guarantee that all harmful content will be caught.
+CHECKS AND BALANCES
+1. Senator introduces legislation.
+2. Senate votes.
+3. Passed bill goes to the Executive.
+4. Executive signs or vetoes.
+5. Senate may override a veto with two-thirds support.
+6. Supreme Court can review constitutional challenges within Staralia.
+
+CURRENT LIVE STATE
+- Senate capacity: 100
+- Active Senators right now: 0
+- Founder has been removed from Senate membership to preserve branch separation.
+- Supreme Court capacity: 9
+- Active Justices right now: 0
+- The Droid Army Creation Act, which had previously passed the Senate, is now correctly
+  in "Awaiting Executive" status and can be signed or vetoed by the Founder from Government.
+- Supreme Court seats can be filled after the Founder nominates citizens and the Senate confirms them.
 
 BACKEND
-The required Supabase changes are ALREADY LIVE:
-- public.user_blocks
-- block-aware profile RLS
-- block-aware post RLS
-- block-aware direct-message RLS
-- follow restrictions when a block exists
-- server-side DM moderation trigger
-- private moderation term/rule storage
-- user_blocks Realtime publication
-- supporting indexes
+All required Supabase changes are ALREADY LIVE:
+- 100-seat Senate limit
+- Founder/Senate separation
+- Senate election-only seating safeguards
+- automatic Senate bill finalization
+- Executive sign/veto process
+- veto override voting and 2/3 rule
+- 9-seat Supreme Court
+- judicial nominations and Senate confirmation
+- constitutional case filings
+- justice voting / Court decisions
+- realtime publications
+- scheduled federal-process jobs
+- RLS and permission hardening
 
-VERIFIED
-- Safe DM: accepted
-- Profanity test DM: rejected
-- Threat test DM: rejected
-- Blocked citizen viewing blocker's profile: denied
-- Blocked citizen viewing blocker's posts: denied
-- Blocked citizen sending new DM: denied
-- Blocker can still view blocked citizen's profile: allowed
-- Test block/message rows: cleaned up
-- New security advisor warnings: none
+SECURITY / TESTING
+- Founder Executive bill authority: PASS
+- Non-Founder Executive authority: REJECTED
+- Founder judicial nomination: PASS
+- Non-Founder judicial nomination: REJECTED
+- Ordinary citizen constitutional case filing: PASS
+- Temporary test records: CLEANED UP
+- Supabase security advisor after hardening: no new v1.9.0 warnings.
+  The only remaining warning is the pre-existing leaked-password-protection setting.
 
-NOTE
-Supabase still reports the pre-existing account-security warning that leaked-password protection is disabled. That warning is unrelated to this v1.8.1 update.
+IMPORTANT
+This is Staralia's internal digital-government system. It is modeled on concepts from the
+U.S. federal separation of powers but is not a U.S. government body and does not create
+real-world governmental authority.
