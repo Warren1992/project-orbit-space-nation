@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="description" content="Staralia — a digital space nation with real citizen accounts." />
+  <title>Staralia — Digital Space Nation</title>
+  <link rel="stylesheet" href="styles.css" />
+
+  <link rel="manifest" href="manifest-staralia.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Staralia" />
+  <script>document.documentElement.classList.add('auth-pending');</script>
+  <style id="orbitGateCriticalStyles">
+    html.auth-pending body,
+    html.auth-locked body{overflow:hidden;background:#050b14}
+    html.auth-pending .app-shell,
+    html.auth-pending .bottom-nav,
+    html.auth-pending .drawer,
+    html.auth-pending .drawer-backdrop,
+    html.auth-locked .app-shell,
+    html.auth-locked .bottom-nav,
+    html.auth-locked .drawer,
+    html.auth-locked .drawer-backdrop{
+      visibility:hidden!important;
+      pointer-events:none!important;
+      user-select:none!important;
+    }
+    .auth-gate-shell{
+      position:fixed;inset:0;z-index:10000;display:grid;place-items:center;
+      overflow:auto;padding:max(24px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom));
+      background:
+        radial-gradient(circle at 20% 15%,rgba(41,96,165,.26),transparent 31%),
+        radial-gradient(circle at 86% 24%,rgba(244,185,66,.16),transparent 26%),
+        linear-gradient(160deg,#030813,#07111f 56%,#0d1727);
+      color:#fff;
+    }
+    .auth-gate-shell[hidden]{display:none!important}
+    .auth-gate-card{
+      width:min(470px,100%);border:1px solid rgba(244,185,66,.24);border-radius:28px;
+      background:rgba(9,20,35,.94);box-shadow:0 30px 100px rgba(0,0,0,.6);
+      padding:28px;backdrop-filter:blur(18px)
+    }
+    .auth-gate-mark{
+      width:78px;height:78px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;
+      border:3px solid rgba(244,185,66,.72);background:linear-gradient(145deg,#213d86,#251477);
+      font-size:34px;font-weight:950;color:#fff;box-shadow:0 0 50px rgba(244,185,66,.12)
+    }
+    .auth-gate-kicker{text-align:center;color:#ffd978;letter-spacing:.16em;font-size:12px;font-weight:900}
+    .auth-gate-card h1{text-align:center;font-size:34px;line-height:1.08;margin:8px 0 10px}
+    .auth-gate-lede{text-align:center;color:#a8b7ca;line-height:1.55;margin:0 auto 22px;max-width:390px}
+    .auth-gate-tabs{
+      display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#050d18;
+      border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:4px;margin:18px 0
+    }
+    .auth-gate-tab{
+      border:0;border-radius:11px;background:transparent;color:#93a5bb;padding:12px;font-weight:900;font-size:15px
+    }
+    .auth-gate-tab.active{background:rgba(244,185,66,.14);color:#ffd978}
+    .auth-gate-form{display:grid;gap:13px}
+    .auth-gate-form label{display:grid;gap:7px;color:#d9e2ee;font-size:13px;font-weight:850}
+    .auth-gate-input{
+      width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.12);border-radius:13px;
+      padding:14px;background:#06101d;color:white;font:inherit;outline:none
+    }
+    .auth-gate-input:focus{border-color:rgba(244,185,66,.7);box-shadow:0 0 0 3px rgba(244,185,66,.08)}
+    .auth-gate-submit,.auth-gate-install{
+      width:100%;border:0;border-radius:14px;padding:14px 16px;font-size:17px;font-weight:950
+    }
+    .auth-gate-submit{background:linear-gradient(135deg,#ffc447,#f2a51f);color:#111827}
+    .auth-gate-install{margin-top:12px;border:1px solid rgba(255,255,255,.12);background:#142235;color:#fff}
+    .auth-gate-message{min-height:21px;font-size:13px;line-height:1.45;color:#a8b7ca;margin:0}
+    .auth-gate-message.error{color:#ff9d9d}.auth-gate-message.success{color:#7be0b8}
+    .auth-gate-note{font-size:12px;color:#718399;line-height:1.5;text-align:center;margin:14px 0 0}
+    .auth-gate-loading{text-align:center;color:#a8b7ca;font-weight:800}
+  </style>
+
+</head>
+<body>
+
+  <div id="authGate" class="auth-gate-shell" aria-live="polite">
+    <div class="auth-gate-card">
+      <div class="auth-gate-mark">✦</div>
+      <div class="auth-gate-kicker">STARALIA</div>
+      <h1>Citizens only</h1>
+      <p class="auth-gate-lede">Create a citizen account or log in to enter the digital nation.</p>
+      <div id="authGateContent" class="auth-gate-loading">Checking your citizenship…</div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand" role="button" tabindex="0" data-route="home">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div>
+          <strong>STARALIA</strong>
+          <span>Digital Space Nation</span>
+        </div>
+      </div>
+      <nav class="side-nav" id="sideNav"></nav>
+      <div class="sidebar-card">
+        <span class="eyebrow">Population</span>
+        <strong id="sidebarPopulation">—</strong>
+        <small>Registered citizens</small>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="menuBtn" aria-label="Open navigation">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow" id="sectionKicker">STARALIA</span>
+          <h1 id="sectionTitle">Home</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
+          <button class="icon-btn notification-dot" aria-label="Notifications">◉</button>
+          <button class="avatar avatar-sm" id="accountBtn" aria-label="Open account">?</button>
+        </div>
+      </header>
+
+      <section id="view" class="view" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Mobile navigation"></nav>
+
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="drawer" aria-label="All sections">
+    <div class="drawer-head">
+      <div>
+        <span class="eyebrow">STARALIA</span>
+        <h2>Nation Menu</h2>
+      </div>
+      <button class="icon-btn" id="closeDrawer" aria-label="Close menu">×</button>
+    </div>
+    <div class="drawer-links" id="drawerLinks"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <template id="homeTemplate">
+    <div class="page-grid home-grid">
+      <section class="stack">
+        <div class="hero-card">
+          <div>
+            <span class="pill gold">FOUNDING ERA</span>
+            <h2 id="citizenWelcome">Welcome to Staralia</h2>
+            <p>This is a living digital nation: socialize, vote, build institutions, and help fund real space projects.</p>
+            <div class="hero-actions">
+              <button class="btn primary" data-route="elections">Vote now</button>
+              <button class="btn secondary" data-route="space">View space program</button>
+            </div>
+          </div>
+          <div class="planet-orb" aria-hidden="true"><span></span></div>
+        </div>
+
+        <div class="composer card">
+          <div class="composer-head">
+            <button class="avatar founder-avatar" data-route="profile">W</button>
+            <div>
+              <strong>Warren</strong>
+              <small>President of Staralia · Official Account</small>
+            </div>
+          </div>
+          <textarea id="postText" maxlength="500" placeholder="Share an update with the nation..."></textarea>
+          <div class="composer-actions">
+            <span class="muted">Prototype local post composer</span>
+            <button class="btn primary" id="postBtn">Post</button>
+          </div>
+        </div>
+
+        <div id="feedList" class="stack"></div>
+      </section>
+
+      <aside class="stack rail">
+        <div class="card stat-card">
+          <span class="eyebrow">Nation at a glance</span>
+          <div class="stat-line"><strong id="homePopulation">—</strong><span>Citizens</span></div>
+          <div class="stat-line"><strong>Founding</strong><span>Era</span></div>
+          <div class="stat-line"><strong>Live</strong><span>Registration</span></div>
+        </div>
+        <div class="card">
+          <div class="section-row"><h3>Current proposition</h3><button class="text-btn" data-route="elections">Open</button></div>
+          <p class="question">Loading active Proposition…</p>
+          <div class="progress"><span style="width:72%"></span></div>
+          <small>Citizen Proposition ballot</small>
+        </div>
+        <div class="card">
+          <div class="section-row"><h3>Space program</h3><button class="text-btn" data-route="space">Details</button></div>
+          <p>Lunar Archive Mission</p>
+          <div class="progress blue"><span style="width:43%"></span></div>
+          <small>Planning-stage demonstration goal</small>
+        </div>
+      </aside>
+    </div>
+  </template>
+
+  <script src="app-v1100.js"></script>
+  <script src="pwa-v170.js" defer></script>
+  <script type="module" src="supabase-auth-v181.js"></script>
+  <script type="module" src="auth-gate-v180.js"></script>
+  <script type="module" src="live-app-v1100.js"></script>
+  <script type="module" src="messaging-residency-v181.js"></script>
+  <script type="module" src="staralia-civic-v1100.js"></script>
+  <script src="national-flag-v170.js" defer></script>
+  <script src="national-emblem-v170.js" defer></script>
+  <script src="staralia-header-v172.js" defer></script>
+  <script type="module" src="staralia-safety-v181.js"></script>
+  <script src="staralia-news-nav-v1120.js"></script>
+  <!-- Staralia AI Officeholders v1.13.0 -->
+  <script type="module">
+const waitForStaraliaDb1130 = async () => {
+  for (let i = 0; i < 120; i++) {
+    if (window.projectOrbitDb) return window.projectOrbitDb;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error('Staralia database client did not initialize');
+};
+
+const officeDb1130 = await waitForStaraliaDb1130();
+
+const officeState1130 = {
+  citizens: [],
+  terms: [],
+  me: null,
+  residency: null
+};
+
+const esc1130 = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[char]));
+
+const pad1130 = value => String(value ?? '').padStart(6, '0');
+
+const officePriority1130 = {
+  president: 1,
+  judge: 2,
+  senator: 3,
+  representative: 4
+};
+
+function citizen1130(citizenNo) {
+  return officeState1130.citizens.find(c => Number(c.citizen_no) === Number(citizenNo)) || null;
+}
+
+function officeTerms1130(citizenNo) {
+  return officeState1130.terms
+    .filter(term => Number(term.citizen_no) === Number(citizenNo))
+    .sort((a, b) => {
+      const activeDelta = Number(Boolean(a.ended_at)) - Number(Boolean(b.ended_at));
+      if (activeDelta) return activeDelta;
+      const priorityDelta = (officePriority1130[a.office_type] || 99) - (officePriority1130[b.office_type] || 99);
+      if (priorityDelta) return priorityDelta;
+      return new Date(b.started_at).getTime() - new Date(a.started_at).getTime();
+    });
+}
+
+function activeOffices1130(citizenNo) {
+  return officeTerms1130(citizenNo).filter(term => !term.ended_at);
+}
+
+function currentTitle1130(citizen) {
+  return activeOffices1130(citizen?.citizen_no)?.[0]?.title || citizen?.role || 'Citizen';
+}
+
+function date1130(value) {
+  if (!value) return 'Present';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? ''
+    : parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function citizenNoFromText1130(text) {
+  const match = String(text || '').match(/#(\d{1,6})/);
+  return match ? Number(match[1]) : 0;
+}
+
+function injectOfficeStyles1130() {
+  if (document.querySelector('#staraliaOfficeholderStyles1130')) return;
+  const style = document.createElement('style');
+  style.id = 'staraliaOfficeholderStyles1130';
+  style.textContent = `
+    .staralia-ai-badge,.staralia-office-badge,.staralia-mini-ai,.staralia-mini-office{
+      display:inline-flex;align-items:center;gap:5px;border-radius:999px;font-weight:900;letter-spacing:.04em
+    }
+    .staralia-ai-badge{padding:6px 10px;font-size:11px;color:#ddceff;background:rgba(145,92,255,.14);border:1px solid rgba(175,133,255,.32)}
+    .staralia-office-badge{padding:6px 10px;font-size:11px;color:#ffe29a;background:rgba(244,185,66,.12);border:1px solid rgba(244,185,66,.30)}
+    .staralia-mini-ai{padding:2px 6px;font-size:9px;color:#ddceff;background:rgba(145,92,255,.14);border:1px solid rgba(175,133,255,.25);margin-left:5px;vertical-align:middle}
+    .staralia-mini-office{padding:2px 6px;font-size:9px;color:#b9dcff;background:rgba(75,163,255,.10);border:1px solid rgba(75,163,255,.24);margin-left:5px;vertical-align:middle}
+    .staralia-ai-note{margin:14px 0 0;padding:11px 13px;border-radius:13px;background:rgba(145,92,255,.08);border:1px solid rgba(175,133,255,.20);color:#c9b8ef;font-size:12px;line-height:1.5}
+    .staralia-service-card h3{margin-bottom:6px}
+    .staralia-service-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+    .staralia-service-row:last-child{border-bottom:0}
+    .staralia-service-row small{display:block;color:#8395aa;margin-top:4px;line-height:1.45}
+    .staralia-service-status{align-self:start}
+    .staralia-office-note{margin:12px 0 0;padding:11px 13px;border-radius:13px;background:rgba(75,163,255,.07);border:1px solid rgba(75,163,255,.18);color:#b9cbe0;font-size:12px;line-height:1.5}
+    .senate-member-row.staralia-office-row{cursor:pointer;border-radius:10px;padding-left:6px;padding-right:6px}
+    .senate-member-row.staralia-office-row:hover{background:rgba(255,255,255,.035)}
+    @media(max-width:760px){
+      .staralia-service-row{grid-template-columns:1fr}
+      .staralia-service-status{justify-self:start}
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+async function loadOfficeState1130() {
+  const [citizensResult, termsResult, sessionResult] = await Promise.all([
+    officeDb1130
+      .from('profiles')
+      .select('citizen_no,display_name,country,role,is_founder,account_type,joined_at')
+      .order('citizen_no', { ascending: true }),
+    officeDb1130
+      .from('office_terms')
+      .select('id,citizen_no,office_type,title,branch,chamber,seat_no,source,started_at,ended_at,end_reason')
+      .order('started_at', { ascending: false }),
+    officeDb1130.auth.getSession()
+  ]);
+
+  if (!citizensResult.error) officeState1130.citizens = citizensResult.data || [];
+  if (!termsResult.error) officeState1130.terms = termsResult.data || [];
+
+  officeState1130.me = null;
+  officeState1130.residency = null;
+
+  if (sessionResult?.data?.session?.user) {
+    const mine = await officeDb1130.rpc('my_profile');
+    officeState1130.me = mine.data?.[0] || null;
+    if (officeState1130.me?.citizen_no) {
+      const residency = await officeDb1130
+        .from('residencies')
+        .select('citizen_no,status,price_cents,currency,paid_at,resident_since')
+        .eq('citizen_no', officeState1130.me.citizen_no)
+        .maybeSingle();
+      officeState1130.residency = residency.data || null;
+    }
+  }
+}
+
+function decoratePopulation1130() {
+  const humans = officeState1130.citizens.filter(c => c.account_type !== 'ai');
+  const population = humans.length;
+
+  const sidebar = document.querySelector('#sidebarPopulation');
+  const home = document.querySelector('#homePopulation');
+  if (sidebar && sidebar.textContent !== population.toLocaleString()) sidebar.textContent = population.toLocaleString();
+  if (home && home.textContent !== population.toLocaleString()) home.textContent = population.toLocaleString();
+
+  if (document.querySelector('#sectionTitle')?.textContent === 'Citizens') {
+    const metrics = document.querySelectorAll('#view .metric');
+    const today = new Date().toISOString().slice(0, 10);
+    const month = today.slice(0, 7);
+    const countries = new Set(humans.map(c => c.country?.trim()).filter(Boolean)).size;
+    const todayCount = humans.filter(c => String(c.joined_at).slice(0, 10) === today).length;
+    const monthCount = humans.filter(c => String(c.joined_at).slice(0, 7) === month).length;
+
+    if (metrics[0]) {
+      const strong = metrics[0].querySelector('strong');
+      const small = metrics[0].querySelector('small');
+      if (strong) strong.textContent = population.toLocaleString();
+      if (small) small.textContent = `+${monthCount} this month`;
+    }
+    if (metrics[1]) {
+      const strong = metrics[1].querySelector('strong');
+      const small = metrics[1].querySelector('small');
+      if (strong) strong.textContent = countries.toLocaleString();
+      if (small) small.textContent = countries ? 'Countries represented by human citizens' : 'Add your country in your profile';
+    }
+    if (metrics[2]) {
+      const strong = metrics[2].querySelector('strong');
+      const small = metrics[2].querySelector('small');
+      if (strong) strong.textContent = todayCount.toLocaleString();
+      if (small) small.textContent = todayCount === 1 ? 'New human citizen today' : 'New human citizens today';
+    }
+  }
+}
+
+function decorateCitizenDirectory1130() {
+  document.querySelectorAll('#citizenList .citizen-row').forEach(row => {
+    const citizenNo = citizenNoFromText1130(row.querySelector('.citizen-number')?.textContent);
+    const citizen = citizen1130(citizenNo);
+    if (!citizen) return;
+
+    const strong = row.querySelector('.identity-meta strong');
+    const small = row.querySelector('.identity-meta small');
+    const flag = row.querySelector('.flag,.country-text');
+
+    if (flag && citizen.account_type === 'ai' && flag.textContent !== '🤖') flag.textContent = '🤖';
+
+    if (strong) {
+      strong.querySelectorAll('.staralia-mini-ai,.staralia-mini-office').forEach(el => el.remove());
+      if (citizen.account_type === 'ai') {
+        const badge = document.createElement('span');
+        badge.className = 'staralia-mini-ai';
+        badge.textContent = 'AI';
+        strong.appendChild(badge);
+      }
+      const office = activeOffices1130(citizenNo)[0];
+      if (office) {
+        const badge = document.createElement('span');
+        badge.className = 'staralia-mini-office';
+        badge.textContent = String(office.title || '').toUpperCase();
+        strong.appendChild(badge);
+      }
+    }
+
+    if (small) {
+      const desired = `${currentTitle1130(citizen)}${citizen.country ? ` · ${citizen.country}` : ''}`;
+      if (small.textContent !== desired) small.textContent = desired;
+    }
+  });
+}
+
+function serviceMarkup1130(citizenNo) {
+  const terms = officeTerms1130(citizenNo);
+  if (!terms.length) return '';
+
+  return `<div class="card staralia-service-card" data-office-service-card="1">
+    <div class="section-row">
+      <div><span class="eyebrow">PUBLIC RECORD</span><h3>Government service</h3></div>
+      <span class="pill blue">${terms.length} TERM${terms.length === 1 ? '' : 'S'}</span>
+    </div>
+    ${terms.map(term => {
+      const active = !term.ended_at;
+      const seat = term.seat_no ? ` · Seat ${term.seat_no}` : '';
+      const chamber = term.chamber ? String(term.chamber).replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) : String(term.branch || '').replace(/\b\w/g, c => c.toUpperCase());
+      const reason = !active && term.end_reason ? ` · ${esc1130(term.end_reason)}` : '';
+      return `<div class="staralia-service-row">
+        <div>
+          <strong>${esc1130(term.title)}</strong>
+          <small>${esc1130(chamber)}${seat} · ${date1130(term.started_at)} – ${date1130(term.ended_at)}${reason}</small>
+        </div>
+        <span class="pill ${active ? 'green' : 'blue'} staralia-service-status">${active ? 'CURRENT' : 'FORMER'}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function decorateProfile1130() {
+  const page = document.querySelector('#view .profile-page');
+  if (!page) return;
+
+  let citizenNo = Number(String(new URL(location.href).searchParams.get('citizen') || '').replace(/\D/g, ''));
+  if (!citizenNo) citizenNo = citizenNoFromText1130(page.querySelector('.profile-meta')?.textContent);
+  if (!citizenNo && document.querySelector('#sectionTitle')?.textContent === 'President Profile') citizenNo = 1;
+
+  const citizen = citizen1130(citizenNo);
+  if (!citizen) return;
+
+  const nameRow = page.querySelector('.profile-page-name');
+  if (nameRow) {
+    nameRow.querySelectorAll('.staralia-ai-badge,.staralia-office-badge').forEach(el => el.remove());
+
+    if (citizen.account_type === 'ai') {
+      const ai = document.createElement('span');
+      ai.className = 'staralia-ai-badge';
+      ai.textContent = 'AI CITIZEN';
+      nameRow.appendChild(ai);
+    }
+
+    activeOffices1130(citizenNo).forEach(term => {
+      const duplicatePresident = citizen.is_founder &&
+        String(term.title).toUpperCase() === 'PRESIDENT' &&
+        [...nameRow.querySelectorAll('.pill')].some(el => el.textContent.trim().toUpperCase() === 'PRESIDENT');
+      if (duplicatePresident) return;
+      const badge = document.createElement('span');
+      badge.className = 'staralia-office-badge';
+      badge.textContent = String(term.title).toUpperCase();
+      nameRow.appendChild(badge);
+    });
+  }
+
+  const meta = page.querySelector('.profile-meta');
+  if (meta) {
+    const desired = `${currentTitle1130(citizen)} · Citizen #${pad1130(citizenNo)}${citizen.country ? ` · ${citizen.country}` : ''}`;
+    if (meta.textContent !== desired) meta.textContent = desired;
+  }
+
+  const main = page.querySelector('.profile-page-main');
+  if (main) {
+    let note = main.querySelector('[data-ai-citizen-note]');
+    if (citizen.account_type === 'ai') {
+      if (!note) {
+        note = document.createElement('div');
+        note.dataset.aiCitizenNote = '1';
+        note.className = 'staralia-ai-note';
+        const bio = main.querySelector('.profile-page-bio');
+        bio?.insertAdjacentElement('afterend', note);
+      }
+      note.textContent = 'This is a clearly identified artificial Staralia citizen account. AI status is permanent; government-office badges appear only while this citizen actively holds that office.';
+    } else {
+      note?.remove();
+    }
+  }
+
+  const stack = page.closest('.stack');
+  if (stack) {
+    stack.querySelector('[data-office-service-card]')?.remove();
+    const markup = serviceMarkup1130(citizenNo);
+    if (markup) page.insertAdjacentHTML('afterend', markup);
+  }
+}
+
+function decorateCongress1130() {
+  if (!document.querySelector('#view .senate-live-root')) return;
+
+  const intro = document.querySelector('#view .senate-live-root > .card');
+  if (intro && !intro.querySelector('[data-ai-founding-congress-note]')) {
+    const note = document.createElement('div');
+    note.dataset.aiFoundingCongressNote = '1';
+    note.className = 'staralia-office-note';
+    note.textContent = 'Founding-era AI citizens temporarily occupy unfilled congressional seats. When an eligible paid human citizen wins an election for an AI-held seat, the AI term ends and the elected citizen takes the same seat.';
+    intro.appendChild(note);
+  }
+
+  document.querySelectorAll('#view .senate-member-row').forEach(row => {
+    const citizenNo = citizenNoFromText1130(row.textContent);
+    const citizen = citizen1130(citizenNo);
+    if (!citizen) return;
+
+    row.classList.add('staralia-office-row');
+    row.querySelectorAll('.staralia-mini-ai').forEach(el => el.remove());
+
+    if (citizen.account_type === 'ai') {
+      const strong = row.querySelector('strong');
+      if (strong) {
+        const ai = document.createElement('span');
+        ai.className = 'staralia-mini-ai';
+        ai.textContent = 'AI CITIZEN';
+        strong.prepend(ai);
+      }
+    }
+
+    if (!row.dataset.officeProfileBound) {
+      row.dataset.officeProfileBound = '1';
+      row.addEventListener('click', event => {
+        if (event.target.closest('button,a,input,select,textarea')) return;
+        const url = new URL(location.href);
+        url.searchParams.set('citizen', pad1130(citizenNo));
+        url.hash = 'citizens';
+        location.href = url.toString();
+      });
+    }
+  });
+}
+
+function decorateElections1130() {
+  const electionRoot = document.querySelector('#view .live-election-stack');
+  if (!electionRoot) return;
+
+  const intro = electionRoot.querySelector('.card');
+  if (intro && !intro.querySelector('[data-paid-candidacy-note]')) {
+    const note = document.createElement('div');
+    note.dataset.paidCandidacyNote = '1';
+    note.className = 'staralia-office-note';
+    note.textContent = 'Human citizens become eligible to run for House or Senate after completing Staralia’s $100 residency membership. AI-held founding seats remain available for human elections.';
+    intro.appendChild(note);
+  }
+
+  const paid = officeState1130.residency?.status === 'resident' && Boolean(officeState1130.residency?.paid_at);
+  document.querySelectorAll('[data-register-chamber-candidate]').forEach(button => {
+    if (officeState1130.me?.account_type === 'ai') {
+      button.disabled = true;
+      button.textContent = 'AI founding accounts cannot register here';
+      return;
+    }
+    if (officeState1130.me && !paid) {
+      button.disabled = true;
+      button.textContent = '$100 residency required to run';
+      button.title = 'Complete paid residency before registering as a candidate.';
+    }
+  });
+}
+
+function decorateAccountSurfaces1130() {
+  const me = officeState1130.me ? citizen1130(officeState1130.me.citizen_no) : null;
+  if (!me) return;
+
+  const quick = document.querySelector('#authJoinCard .muted');
+  if (quick && quick.textContent.includes('Citizen #')) {
+    const desired = `Citizen #${pad1130(me.citizen_no)} · ${currentTitle1130(me)}`;
+    if (quick.textContent !== desired) quick.textContent = desired;
+  }
+
+  const myCard = document.querySelector('.my-profile-quick-card .muted');
+  if (myCard && myCard.textContent.includes('Citizen #')) {
+    const desired = `Citizen #${pad1130(me.citizen_no)} · ${currentTitle1130(me)}`;
+    if (myCard.textContent !== desired) myCard.textContent = desired;
+  }
+}
+
+function decorateAll1130() {
+  decoratePopulation1130();
+  decorateCitizenDirectory1130();
+  decorateProfile1130();
+  decorateCongress1130();
+  decorateElections1130();
+  decorateAccountSurfaces1130();
+}
+
+let decorateTimer1130 = null;
+function scheduleDecorate1130() {
+  clearTimeout(decorateTimer1130);
+  decorateTimer1130 = setTimeout(decorateAll1130, 45);
+}
+
+async function refreshOfficeState1130() {
+  await loadOfficeState1130();
+  decorateAll1130();
+}
+
+injectOfficeStyles1130();
+await refreshOfficeState1130();
+
+const officeObserver1130 = new MutationObserver(scheduleDecorate1130);
+officeObserver1130.observe(document.body, { childList: true, subtree: true });
+
+let officeRealtimeTimer1130 = null;
+const scheduleOfficeRefresh1130 = () => {
+  clearTimeout(officeRealtimeTimer1130);
+  officeRealtimeTimer1130 = setTimeout(refreshOfficeState1130, 180);
+};
+
+officeDb1130
+  .channel('staralia-officeholders-v1130')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'office_terms' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'residencies' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'house_members' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'senate_members' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'supreme_court_justices' }, scheduleOfficeRefresh1130)
+  .subscribe();
+
+officeDb1130.auth.onAuthStateChange(() => setTimeout(refreshOfficeState1130, 0));
+
+  </script>
+</body>
+</html>
