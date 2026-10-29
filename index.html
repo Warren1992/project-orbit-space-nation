@@ -4,8 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
-  <meta name="description" content="Staralia — a digital space nation with real citizen accounts." />
-  <title>Staralia — Digital Space Nation</title>
+  <meta name="description" content="Starvalla — a digital space nation with real citizen accounts." />
+  <title>Starvalla — Digital Space Nation</title>
   <link rel="stylesheet" href="styles.css" />
 
   <link rel="manifest" href="manifest-staralia.webmanifest" />
@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Staralia" />
+  <meta name="apple-mobile-web-app-title" content="Starvalla" />
   <script>document.documentElement.classList.add('auth-pending');</script>
   <style id="orbitGateCriticalStyles">
     html.auth-pending body,
@@ -85,7 +85,7 @@
   <div id="authGate" class="auth-gate-shell" aria-live="polite">
     <div class="auth-gate-card">
       <div class="auth-gate-mark">✦</div>
-      <div class="auth-gate-kicker">STARALIA</div>
+      <div class="auth-gate-kicker">STARVALLA</div>
       <h1>Citizens only</h1>
       <p class="auth-gate-lede">Create a citizen account or log in to enter the digital nation.</p>
       <div id="authGateContent" class="auth-gate-loading">Checking your citizenship…</div>
@@ -97,7 +97,7 @@
       <div class="brand" role="button" tabindex="0" data-route="home">
         <div class="brand-mark" aria-hidden="true">✦</div>
         <div>
-          <strong>STARALIA</strong>
+          <strong>STARVALLA</strong>
           <span>Digital Space Nation</span>
         </div>
       </div>
@@ -113,7 +113,7 @@
       <header class="topbar">
         <button class="icon-btn mobile-only" id="menuBtn" aria-label="Open navigation">☰</button>
         <div class="topbar-title">
-          <span class="eyebrow" id="sectionKicker">STARALIA</span>
+          <span class="eyebrow" id="sectionKicker">STARVALLA</span>
           <h1 id="sectionTitle">Home</h1>
         </div>
         <div class="topbar-actions">
@@ -133,7 +133,7 @@
   <aside class="drawer" id="drawer" aria-label="All sections">
     <div class="drawer-head">
       <div>
-        <span class="eyebrow">STARALIA</span>
+        <span class="eyebrow">STARVALLA</span>
         <h2>Nation Menu</h2>
       </div>
       <button class="icon-btn" id="closeDrawer" aria-label="Close menu">×</button>
@@ -149,7 +149,7 @@
         <div class="hero-card">
           <div>
             <span class="pill gold">FOUNDING ERA</span>
-            <h2 id="citizenWelcome">Welcome to Staralia</h2>
+            <h2 id="citizenWelcome">Welcome to Starvalla</h2>
             <p>This is a living digital nation: socialize, vote, build institutions, and help fund real space projects.</p>
             <div class="hero-actions">
               <button class="btn primary" data-route="elections">Vote now</button>
@@ -164,7 +164,7 @@
             <button class="avatar founder-avatar" data-route="profile">W</button>
             <div>
               <strong>Warren</strong>
-              <small>President of Staralia · Official Account</small>
+              <small>President of Starvalla · Official Account</small>
             </div>
           </div>
           <textarea id="postText" maxlength="500" placeholder="Share an update with the nation..."></textarea>
@@ -212,5 +212,882 @@
   <script src="staralia-header-v172.js" defer></script>
   <script type="module" src="staralia-safety-v181.js"></script>
   <script src="staralia-news-nav-v1120.js"></script>
+  <!-- Starvalla AI Officeholders v1.13.0 -->
+  <script type="module">
+const waitForStarvallaDb1130 = async () => {
+  for (let i = 0; i < 120; i++) {
+    if (window.projectOrbitDb) return window.projectOrbitDb;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error('Starvalla database client did not initialize');
+};
+
+const officeDb1130 = await waitForStarvallaDb1130();
+
+const officeState1130 = {
+  citizens: [],
+  terms: [],
+  me: null,
+  residency: null
+};
+
+const esc1130 = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[char]));
+
+const pad1130 = value => String(value ?? '').padStart(6, '0');
+
+const officePriority1130 = {
+  president: 1,
+  judge: 2,
+  senator: 3,
+  representative: 4
+};
+
+function citizen1130(citizenNo) {
+  return officeState1130.citizens.find(c => Number(c.citizen_no) === Number(citizenNo)) || null;
+}
+
+function officeTerms1130(citizenNo) {
+  return officeState1130.terms
+    .filter(term => Number(term.citizen_no) === Number(citizenNo))
+    .sort((a, b) => {
+      const activeDelta = Number(Boolean(a.ended_at)) - Number(Boolean(b.ended_at));
+      if (activeDelta) return activeDelta;
+      const priorityDelta = (officePriority1130[a.office_type] || 99) - (officePriority1130[b.office_type] || 99);
+      if (priorityDelta) return priorityDelta;
+      return new Date(b.started_at).getTime() - new Date(a.started_at).getTime();
+    });
+}
+
+function activeOffices1130(citizenNo) {
+  return officeTerms1130(citizenNo).filter(term => !term.ended_at);
+}
+
+function currentTitle1130(citizen) {
+  return activeOffices1130(citizen?.citizen_no)?.[0]?.title || citizen?.role || 'Citizen';
+}
+
+function date1130(value) {
+  if (!value) return 'Present';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? ''
+    : parsed.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function citizenNoFromText1130(text) {
+  const match = String(text || '').match(/#(\d{1,6})/);
+  return match ? Number(match[1]) : 0;
+}
+
+function injectOfficeStyles1130() {
+  if (document.querySelector('#staraliaOfficeholderStyles1130')) return;
+  const style = document.createElement('style');
+  style.id = 'staraliaOfficeholderStyles1130';
+  style.textContent = `
+    .staralia-ai-badge,.staralia-office-badge,.staralia-mini-ai,.staralia-mini-office{
+      display:inline-flex;align-items:center;gap:5px;border-radius:999px;font-weight:900;letter-spacing:.04em
+    }
+    .staralia-ai-badge{padding:6px 10px;font-size:11px;color:#ddceff;background:rgba(145,92,255,.14);border:1px solid rgba(175,133,255,.32)}
+    .staralia-office-badge{padding:6px 10px;font-size:11px;color:#ffe29a;background:rgba(244,185,66,.12);border:1px solid rgba(244,185,66,.30)}
+    .staralia-mini-ai{padding:2px 6px;font-size:9px;color:#ddceff;background:rgba(145,92,255,.14);border:1px solid rgba(175,133,255,.25);margin-left:5px;vertical-align:middle}
+    .staralia-mini-office{padding:2px 6px;font-size:9px;color:#b9dcff;background:rgba(75,163,255,.10);border:1px solid rgba(75,163,255,.24);margin-left:5px;vertical-align:middle}
+    .staralia-ai-note{margin:14px 0 0;padding:11px 13px;border-radius:13px;background:rgba(145,92,255,.08);border:1px solid rgba(175,133,255,.20);color:#c9b8ef;font-size:12px;line-height:1.5}
+    .staralia-service-card h3{margin-bottom:6px}
+    .staralia-service-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+    .staralia-service-row:last-child{border-bottom:0}
+    .staralia-service-row small{display:block;color:#8395aa;margin-top:4px;line-height:1.45}
+    .staralia-service-status{align-self:start}
+    .staralia-office-note{margin:12px 0 0;padding:11px 13px;border-radius:13px;background:rgba(75,163,255,.07);border:1px solid rgba(75,163,255,.18);color:#b9cbe0;font-size:12px;line-height:1.5}
+    .senate-member-row.staralia-office-row{cursor:pointer;border-radius:10px;padding-left:6px;padding-right:6px}
+    .senate-member-row.staralia-office-row:hover{background:rgba(255,255,255,.035)}
+    @media(max-width:760px){
+      .staralia-service-row{grid-template-columns:1fr}
+      .staralia-service-status{justify-self:start}
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+async function loadOfficeState1130() {
+  const [citizensResult, termsResult, sessionResult] = await Promise.all([
+    officeDb1130
+      .from('profiles')
+      .select('citizen_no,display_name,country,role,is_founder,account_type,joined_at')
+      .order('citizen_no', { ascending: true }),
+    officeDb1130
+      .from('office_terms')
+      .select('id,citizen_no,office_type,title,branch,chamber,seat_no,source,started_at,ended_at,end_reason')
+      .order('started_at', { ascending: false }),
+    officeDb1130.auth.getSession()
+  ]);
+
+  if (!citizensResult.error) officeState1130.citizens = citizensResult.data || [];
+  if (!termsResult.error) officeState1130.terms = termsResult.data || [];
+
+  officeState1130.me = null;
+  officeState1130.residency = null;
+
+  if (sessionResult?.data?.session?.user) {
+    const mine = await officeDb1130.rpc('my_profile');
+    officeState1130.me = mine.data?.[0] || null;
+    if (officeState1130.me?.citizen_no) {
+      const residency = await officeDb1130
+        .from('residencies')
+        .select('citizen_no,status,price_cents,currency,paid_at,resident_since')
+        .eq('citizen_no', officeState1130.me.citizen_no)
+        .maybeSingle();
+      officeState1130.residency = residency.data || null;
+    }
+  }
+}
+
+function decoratePopulation1130() {
+  const humans = officeState1130.citizens.filter(c => c.account_type !== 'ai');
+  const population = humans.length;
+
+  const sidebar = document.querySelector('#sidebarPopulation');
+  const home = document.querySelector('#homePopulation');
+  if (sidebar && sidebar.textContent !== population.toLocaleString()) sidebar.textContent = population.toLocaleString();
+  if (home && home.textContent !== population.toLocaleString()) home.textContent = population.toLocaleString();
+
+  if (document.querySelector('#sectionTitle')?.textContent === 'Citizens') {
+    const metrics = document.querySelectorAll('#view .metric');
+    const today = new Date().toISOString().slice(0, 10);
+    const month = today.slice(0, 7);
+    const countries = new Set(humans.map(c => c.country?.trim()).filter(Boolean)).size;
+    const todayCount = humans.filter(c => String(c.joined_at).slice(0, 10) === today).length;
+    const monthCount = humans.filter(c => String(c.joined_at).slice(0, 7) === month).length;
+
+    if (metrics[0]) {
+      const strong = metrics[0].querySelector('strong');
+      const small = metrics[0].querySelector('small');
+      if (strong) strong.textContent = population.toLocaleString();
+      if (small) small.textContent = `+${monthCount} this month`;
+    }
+    if (metrics[1]) {
+      const strong = metrics[1].querySelector('strong');
+      const small = metrics[1].querySelector('small');
+      if (strong) strong.textContent = countries.toLocaleString();
+      if (small) small.textContent = countries ? 'Countries represented by human citizens' : 'Add your country in your profile';
+    }
+    if (metrics[2]) {
+      const strong = metrics[2].querySelector('strong');
+      const small = metrics[2].querySelector('small');
+      if (strong) strong.textContent = todayCount.toLocaleString();
+      if (small) small.textContent = todayCount === 1 ? 'New human citizen today' : 'New human citizens today';
+    }
+  }
+}
+
+function decorateCitizenDirectory1130() {
+  document.querySelectorAll('#citizenList .citizen-row').forEach(row => {
+    const citizenNo = citizenNoFromText1130(row.querySelector('.citizen-number')?.textContent);
+    const citizen = citizen1130(citizenNo);
+    if (!citizen) return;
+
+    const strong = row.querySelector('.identity-meta strong');
+    const small = row.querySelector('.identity-meta small');
+    const flag = row.querySelector('.flag,.country-text');
+
+    if (flag && citizen.account_type === 'ai' && flag.textContent !== '🤖') flag.textContent = '🤖';
+
+    if (strong) {
+      strong.querySelectorAll('.staralia-mini-ai,.staralia-mini-office').forEach(el => el.remove());
+      if (citizen.account_type === 'ai') {
+        const badge = document.createElement('span');
+        badge.className = 'staralia-mini-ai';
+        badge.textContent = 'AI';
+        strong.appendChild(badge);
+      }
+      const office = activeOffices1130(citizenNo)[0];
+      if (office) {
+        const badge = document.createElement('span');
+        badge.className = 'staralia-mini-office';
+        badge.textContent = String(office.title || '').toUpperCase();
+        strong.appendChild(badge);
+      }
+    }
+
+    if (small) {
+      const desired = `${currentTitle1130(citizen)}${citizen.country ? ` · ${citizen.country}` : ''}`;
+      if (small.textContent !== desired) small.textContent = desired;
+    }
+  });
+}
+
+function serviceMarkup1130(citizenNo) {
+  const terms = officeTerms1130(citizenNo);
+  if (!terms.length) return '';
+
+  return `<div class="card staralia-service-card" data-office-service-card="1">
+    <div class="section-row">
+      <div><span class="eyebrow">PUBLIC RECORD</span><h3>Government service</h3></div>
+      <span class="pill blue">${terms.length} TERM${terms.length === 1 ? '' : 'S'}</span>
+    </div>
+    ${terms.map(term => {
+      const active = !term.ended_at;
+      const seat = term.seat_no ? ` · Seat ${term.seat_no}` : '';
+      const chamber = term.chamber ? String(term.chamber).replaceAll('_', ' ').replace(/\b\w/g, c => c.toUpperCase()) : String(term.branch || '').replace(/\b\w/g, c => c.toUpperCase());
+      const reason = !active && term.end_reason ? ` · ${esc1130(term.end_reason)}` : '';
+      return `<div class="staralia-service-row">
+        <div>
+          <strong>${esc1130(term.title)}</strong>
+          <small>${esc1130(chamber)}${seat} · ${date1130(term.started_at)} – ${date1130(term.ended_at)}${reason}</small>
+        </div>
+        <span class="pill ${active ? 'green' : 'blue'} staralia-service-status">${active ? 'CURRENT' : 'FORMER'}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function decorateProfile1130() {
+  const page = document.querySelector('#view .profile-page');
+  if (!page) return;
+
+  let citizenNo = Number(String(new URL(location.href).searchParams.get('citizen') || '').replace(/\D/g, ''));
+  if (!citizenNo) citizenNo = citizenNoFromText1130(page.querySelector('.profile-meta')?.textContent);
+  if (!citizenNo && document.querySelector('#sectionTitle')?.textContent === 'President Profile') citizenNo = 1;
+
+  const citizen = citizen1130(citizenNo);
+  if (!citizen) return;
+
+  const nameRow = page.querySelector('.profile-page-name');
+  if (nameRow) {
+    nameRow.querySelectorAll('.staralia-ai-badge,.staralia-office-badge').forEach(el => el.remove());
+
+    if (citizen.account_type === 'ai') {
+      const ai = document.createElement('span');
+      ai.className = 'staralia-ai-badge';
+      ai.textContent = 'AI CITIZEN';
+      nameRow.appendChild(ai);
+    }
+
+    activeOffices1130(citizenNo).forEach(term => {
+      const duplicatePresident = citizen.is_founder &&
+        String(term.title).toUpperCase() === 'PRESIDENT' &&
+        [...nameRow.querySelectorAll('.pill')].some(el => el.textContent.trim().toUpperCase() === 'PRESIDENT');
+      if (duplicatePresident) return;
+      const badge = document.createElement('span');
+      badge.className = 'staralia-office-badge';
+      badge.textContent = String(term.title).toUpperCase();
+      nameRow.appendChild(badge);
+    });
+  }
+
+  const meta = page.querySelector('.profile-meta');
+  if (meta) {
+    const desired = `${currentTitle1130(citizen)} · Citizen #${pad1130(citizenNo)}${citizen.country ? ` · ${citizen.country}` : ''}`;
+    if (meta.textContent !== desired) meta.textContent = desired;
+  }
+
+  const main = page.querySelector('.profile-page-main');
+  if (main) {
+    let note = main.querySelector('[data-ai-citizen-note]');
+    if (citizen.account_type === 'ai') {
+      if (!note) {
+        note = document.createElement('div');
+        note.dataset.aiCitizenNote = '1';
+        note.className = 'staralia-ai-note';
+        const bio = main.querySelector('.profile-page-bio');
+        bio?.insertAdjacentElement('afterend', note);
+      }
+      note.textContent = 'This is a clearly identified artificial Starvalla citizen account. AI status is permanent; government-office badges appear only while this citizen actively holds that office.';
+    } else {
+      note?.remove();
+    }
+  }
+
+  const stack = page.closest('.stack');
+  if (stack) {
+    stack.querySelector('[data-office-service-card]')?.remove();
+    const markup = serviceMarkup1130(citizenNo);
+    if (markup) page.insertAdjacentHTML('afterend', markup);
+  }
+}
+
+function decorateCongress1130() {
+  if (!document.querySelector('#view .senate-live-root')) return;
+
+  const intro = document.querySelector('#view .senate-live-root > .card');
+  if (intro && !intro.querySelector('[data-ai-founding-congress-note]')) {
+    const note = document.createElement('div');
+    note.dataset.aiFoundingCongressNote = '1';
+    note.className = 'staralia-office-note';
+    note.textContent = 'Founding-era AI citizens temporarily occupy unfilled congressional seats. When an eligible paid human citizen wins an election for an AI-held seat, the AI term ends and the elected citizen takes the same seat.';
+    intro.appendChild(note);
+  }
+
+  document.querySelectorAll('#view .senate-member-row').forEach(row => {
+    const citizenNo = citizenNoFromText1130(row.textContent);
+    const citizen = citizen1130(citizenNo);
+    if (!citizen) return;
+
+    row.classList.add('staralia-office-row');
+    row.querySelectorAll('.staralia-mini-ai').forEach(el => el.remove());
+
+    if (citizen.account_type === 'ai') {
+      const strong = row.querySelector('strong');
+      if (strong) {
+        const ai = document.createElement('span');
+        ai.className = 'staralia-mini-ai';
+        ai.textContent = 'AI CITIZEN';
+        strong.prepend(ai);
+      }
+    }
+
+    if (!row.dataset.officeProfileBound) {
+      row.dataset.officeProfileBound = '1';
+      row.addEventListener('click', event => {
+        if (event.target.closest('button,a,input,select,textarea')) return;
+        const url = new URL(location.href);
+        url.searchParams.set('citizen', pad1130(citizenNo));
+        url.hash = 'citizens';
+        location.href = url.toString();
+      });
+    }
+  });
+}
+
+function decorateElections1130() {
+  const electionRoot = document.querySelector('#view .live-election-stack');
+  if (!electionRoot) return;
+
+  const intro = electionRoot.querySelector('.card');
+  if (intro && !intro.querySelector('[data-paid-candidacy-note]')) {
+    const note = document.createElement('div');
+    note.dataset.paidCandidacyNote = '1';
+    note.className = 'staralia-office-note';
+    note.textContent = 'Human citizens become eligible to run for House or Senate after completing Starvalla’s $100 residency membership. AI-held founding seats remain available for human elections.';
+    intro.appendChild(note);
+  }
+
+  const paid = officeState1130.residency?.status === 'resident' && Boolean(officeState1130.residency?.paid_at);
+  document.querySelectorAll('[data-register-chamber-candidate]').forEach(button => {
+    if (officeState1130.me?.account_type === 'ai') {
+      button.disabled = true;
+      button.textContent = 'AI founding accounts cannot register here';
+      return;
+    }
+    if (officeState1130.me && !paid) {
+      button.disabled = true;
+      button.textContent = '$100 residency required to run';
+      button.title = 'Complete paid residency before registering as a candidate.';
+    }
+  });
+}
+
+function decorateAccountSurfaces1130() {
+  const me = officeState1130.me ? citizen1130(officeState1130.me.citizen_no) : null;
+  if (!me) return;
+
+  const quick = document.querySelector('#authJoinCard .muted');
+  if (quick && quick.textContent.includes('Citizen #')) {
+    const desired = `Citizen #${pad1130(me.citizen_no)} · ${currentTitle1130(me)}`;
+    if (quick.textContent !== desired) quick.textContent = desired;
+  }
+
+  const myCard = document.querySelector('.my-profile-quick-card .muted');
+  if (myCard && myCard.textContent.includes('Citizen #')) {
+    const desired = `Citizen #${pad1130(me.citizen_no)} · ${currentTitle1130(me)}`;
+    if (myCard.textContent !== desired) myCard.textContent = desired;
+  }
+}
+
+function decorateAll1130() {
+  decoratePopulation1130();
+  decorateCitizenDirectory1130();
+  decorateProfile1130();
+  decorateCongress1130();
+  decorateElections1130();
+  decorateAccountSurfaces1130();
+}
+
+let decorateTimer1130 = null;
+function scheduleDecorate1130() {
+  clearTimeout(decorateTimer1130);
+  decorateTimer1130 = setTimeout(decorateAll1130, 45);
+}
+
+async function refreshOfficeState1130() {
+  await loadOfficeState1130();
+  decorateAll1130();
+}
+
+injectOfficeStyles1130();
+await refreshOfficeState1130();
+
+const officeObserver1130 = new MutationObserver(scheduleDecorate1130);
+officeObserver1130.observe(document.body, { childList: true, subtree: true });
+
+let officeRealtimeTimer1130 = null;
+const scheduleOfficeRefresh1130 = () => {
+  clearTimeout(officeRealtimeTimer1130);
+  officeRealtimeTimer1130 = setTimeout(refreshOfficeState1130, 180);
+};
+
+officeDb1130
+  .channel('staralia-officeholders-v1130')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'office_terms' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'residencies' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'house_members' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'senate_members' }, scheduleOfficeRefresh1130)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'supreme_court_justices' }, scheduleOfficeRefresh1130)
+  .subscribe();
+
+officeDb1130.auth.onAuthStateChange(() => setTimeout(refreshOfficeState1130, 0));
+
+  </script>
+
+  <!-- Starvalla AI Legislature Engine v1.14.0 -->
+  <script type="module">
+const waitForStarvallaDb1140 = async () => {
+  for (let i = 0; i < 120; i++) {
+    if (window.projectOrbitDb) return window.projectOrbitDb;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  throw new Error('Starvalla database client did not initialize');
+};
+
+const aiDb1140 = await waitForStarvallaDb1140();
+
+const aiState1140 = {
+  citizens: [],
+  profiles: [],
+  positions: [],
+  bills: []
+};
+
+const esc1140 = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+}[char]));
+
+const pad1140 = value => String(value ?? '').padStart(6, '0');
+
+function brandText1140(value) {
+  return String(value ?? '')
+    .replaceAll('STARALIAN', 'STARVALLAN')
+    .replaceAll('Staralian', 'Starvallan')
+    .replaceAll('STARALIA', 'STARVALLA')
+    .replaceAll('Staralia', 'Starvalla');
+}
+
+function citizen1140(citizenNo) {
+  return aiState1140.citizens.find(c => Number(c.citizen_no) === Number(citizenNo)) || null;
+}
+
+function aiProfile1140(citizenNo) {
+  return aiState1140.profiles.find(p => Number(p.citizen_no) === Number(citizenNo)) || null;
+}
+
+function bill1140(billId) {
+  return aiState1140.bills.find(b => Number(b.id) === Number(billId)) || null;
+}
+
+function positionsForBill1140(billId) {
+  return aiState1140.positions.filter(p => Number(p.bill_id) === Number(billId));
+}
+
+function positionsForCitizen1140(citizenNo) {
+  return aiState1140.positions
+    .filter(p => Number(p.citizen_no) === Number(citizenNo))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+function citizenNoFromText1140(text) {
+  const match = String(text || '').match(/#(\d{1,6})/);
+  return match ? Number(match[1]) : 0;
+}
+
+function billIdFromCard1140(card) {
+  const text = card.querySelector('.senate-badge')?.textContent || '';
+  const match = text.match(/B-(\d+)/i);
+  return match ? Number(match[1]) : 0;
+}
+
+function injectAiStyles1140() {
+  if (document.querySelector('#starvallaAiLegislatureStyles1140')) return;
+  const style = document.createElement('style');
+  style.id = 'starvallaAiLegislatureStyles1140';
+  style.textContent = `
+    .starvalla-ai-engine-card{
+      border-color:rgba(145,92,255,.28);
+      background:linear-gradient(135deg,rgba(145,92,255,.09),rgba(13,24,40,.96));
+    }
+    .starvalla-ai-engine-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px
+    }
+    .starvalla-ai-engine-stat{
+      padding:12px;border-radius:13px;background:rgba(255,255,255,.035);text-align:center
+    }
+    .starvalla-ai-engine-stat strong{display:block;font-size:22px}
+    .starvalla-ai-engine-stat span{font-size:11px;color:#8798ad}
+    .starvalla-ai-rule-note{
+      margin-top:12px;padding:11px 13px;border:1px solid rgba(145,92,255,.20);
+      border-radius:13px;background:rgba(145,92,255,.06);color:#c9b8ef;font-size:12px;line-height:1.5
+    }
+    .starvalla-ai-bill-panel{
+      margin-top:14px;padding:13px;border-radius:14px;border:1px solid rgba(145,92,255,.20);
+      background:rgba(145,92,255,.055)
+    }
+    .starvalla-ai-bill-header{
+      display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap
+    }
+    .starvalla-ai-bill-header h4{margin:4px 0 0}
+    .starvalla-ai-counts{display:flex;gap:7px;flex-wrap:wrap}
+    .starvalla-ai-count{
+      padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.06);
+      color:#cfd8e5;font-size:10px;font-weight:900
+    }
+    .starvalla-ai-reason-list{display:grid;gap:8px;margin-top:10px}
+    .starvalla-ai-reason{
+      display:grid;grid-template-columns:minmax(130px,auto) 72px 1fr;gap:9px;align-items:start;
+      padding:9px 0;border-top:1px solid rgba(255,255,255,.07)
+    }
+    .starvalla-ai-reason:first-child{border-top:0}
+    .starvalla-ai-reason small{color:#8798ad;line-height:1.45}
+    .starvalla-ai-vote{
+      justify-self:start;padding:4px 7px;border-radius:999px;font-size:10px;font-weight:900
+    }
+    .starvalla-ai-vote.yes{background:rgba(49,196,141,.13);color:#7be0b8}
+    .starvalla-ai-vote.no{background:rgba(255,93,115,.12);color:#ff9d9d}
+    .starvalla-ai-vote.abstain{background:rgba(244,185,66,.12);color:#ffd978}
+    .starvalla-ai-profile-card{border-color:rgba(145,92,255,.25)}
+    .starvalla-ai-profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .starvalla-ai-profile-grid div{padding:12px;border-radius:12px;background:rgba(255,255,255,.035)}
+    .starvalla-ai-profile-grid strong{display:block;margin-bottom:3px}
+    .starvalla-ai-traits{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+    .starvalla-ai-trait{padding:5px 8px;border-radius:999px;background:rgba(75,163,255,.08);color:#b9dcff;font-size:10px;font-weight:900}
+    .starvalla-ai-history-row{padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}
+    .starvalla-ai-history-row:first-child{border-top:0}
+    .starvalla-ai-history-row small{display:block;color:#8798ad;margin-top:4px;line-height:1.45}
+    @media(max-width:760px){
+      .starvalla-ai-engine-grid{grid-template-columns:1fr 1fr 1fr}
+      .starvalla-ai-reason{grid-template-columns:1fr auto}
+      .starvalla-ai-reason small{grid-column:1 / -1}
+      .starvalla-ai-profile-grid{grid-template-columns:1fr}
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+async function loadAiState1140() {
+  const [citizens, profiles, positions, bills] = await Promise.all([
+    aiDb1140.from('profiles')
+      .select('citizen_no,display_name,country,role,is_founder,account_type,joined_at')
+      .order('citizen_no', { ascending: true }),
+    aiDb1140.from('ai_politician_profiles')
+      .select('citizen_no,governing_style,primary_priority,science,liberty,security,fiscal_restraint,infrastructure,environment,diplomacy,innovation,institutionalism,compromise')
+      .order('citizen_no', { ascending: true }),
+    aiDb1140.from('ai_legislative_positions')
+      .select('bill_id,citizen_no,chamber,vote,score,topic,reasoning,created_at')
+      .order('created_at', { ascending: false })
+      .limit(1000),
+    aiDb1140.from('bills')
+      .select('id,title,summary,status,origin_chamber,senate_result,house_result,created_at')
+      .order('id', { ascending: false })
+      .limit(100)
+  ]);
+
+  if (!citizens.error) aiState1140.citizens = citizens.data || [];
+  if (!profiles.error) aiState1140.profiles = profiles.data || [];
+  if (!positions.error) aiState1140.positions = positions.data || [];
+  if (!bills.error) aiState1140.bills = bills.data || [];
+}
+
+function renderAiCongressHeader1140() {
+  const root = document.querySelector('#view .senate-live-root');
+  if (!root || root.querySelector('[data-ai-engine-card="1140"]')) return;
+
+  const activePositions = aiState1140.positions.length;
+  const billsWithAi = new Set(aiState1140.positions.map(p => Number(p.bill_id))).size;
+  const card = document.createElement('section');
+  card.className = 'card starvalla-ai-engine-card';
+  card.dataset.aiEngineCard = '1140';
+  card.innerHTML = `
+    <span class="eyebrow">AI LEGISLATURE ENGINE</span>
+    <h3 style="margin:6px 0">Founding Congress is active</h3>
+    <p class="muted">AI Representatives and Senators evaluate bills using persistent political traits and cast recorded roll-call votes in the same congressional system used by future human officeholders.</p>
+    <div class="starvalla-ai-engine-grid">
+      <div class="starvalla-ai-engine-stat"><strong>${aiState1140.profiles.length}</strong><span>AI political profiles</span></div>
+      <div class="starvalla-ai-engine-stat"><strong>${activePositions}</strong><span>Recorded AI positions</span></div>
+      <div class="starvalla-ai-engine-stat"><strong>${billsWithAi}</strong><span>Bills evaluated</span></div>
+    </div>
+    <div class="starvalla-ai-rule-note">This is a transparent rule-based political simulation, not a hidden external AI service. Each AI citizen has persistent policy weights, a governing style, and a primary priority. Human citizens can replace AI officeholders through Starvalla elections.</div>
+  `;
+
+  const hero = root.querySelector('.card');
+  if (hero) hero.insertAdjacentElement('afterend', card);
+  else root.prepend(card);
+}
+
+function decorateBillCards1140() {
+  document.querySelectorAll('#view .bill-card').forEach(card => {
+    const billId = billIdFromCard1140(card);
+    if (!billId) return;
+
+    const old = card.querySelector('[data-ai-bill-panel]');
+    old?.remove();
+
+    const positions = positionsForBill1140(billId);
+    if (!positions.length) return;
+
+    const yes = positions.filter(p => p.vote === 'yes').length;
+    const no = positions.filter(p => p.vote === 'no').length;
+    const abstain = positions.filter(p => p.vote === 'abstain').length;
+    const chamberNames = [...new Set(positions.map(p => p.chamber))].map(x => x === 'senate' ? 'Senate' : 'House').join(' + ');
+    const sample = positions
+      .slice()
+      .sort((a, b) => Math.abs(Number(b.score)) - Math.abs(Number(a.score)))
+      .slice(0, 10);
+
+    const panel = document.createElement('div');
+    panel.className = 'starvalla-ai-bill-panel';
+    panel.dataset.aiBillPanel = String(billId);
+    panel.innerHTML = `
+      <div class="starvalla-ai-bill-header">
+        <div>
+          <span class="eyebrow">AI ROLL CALL · ${esc1140(chamberNames)}</span>
+          <h4>${positions.length} AI officeholder${positions.length === 1 ? '' : 's'} evaluated this bill</h4>
+        </div>
+        <div class="starvalla-ai-counts">
+          <span class="starvalla-ai-count">YES ${yes}</span>
+          <span class="starvalla-ai-count">NO ${no}</span>
+          <span class="starvalla-ai-count">ABSTAIN ${abstain}</span>
+        </div>
+      </div>
+      <details style="margin-top:10px">
+        <summary>Read AI voting reasons</summary>
+        <div class="starvalla-ai-reason-list">
+          ${sample.map(position => {
+            const person = citizen1140(position.citizen_no) || { display_name: 'AI Citizen' };
+            return `<div class="starvalla-ai-reason">
+              <strong>${esc1140(person.display_name)}<br><small>Citizen #${pad1140(position.citizen_no)} · ${esc1140(position.chamber === 'senate' ? 'Senator' : 'Representative')}</small></strong>
+              <span class="starvalla-ai-vote ${esc1140(position.vote)}">${esc1140(position.vote.toUpperCase())}</span>
+              <small><strong>${esc1140(position.topic)}</strong><br>${esc1140(position.reasoning)}</small>
+            </div>`;
+          }).join('')}
+        </div>
+        ${positions.length > sample.length ? `<p class="muted" style="margin:9px 0 0">Showing 10 representative explanations. The full ${positions.length}-member roll call is recorded in Starvalla.</p>` : ''}
+      </details>
+    `;
+
+    const discussion = card.querySelector('.bill-discussion');
+    if (discussion) discussion.insertAdjacentElement('beforebegin', panel);
+    else card.appendChild(panel);
+  });
+}
+
+function issueTraits1140(profile) {
+  if (!profile) return [];
+  return [
+    ['Science', profile.science],
+    ['Liberty', profile.liberty],
+    ['Security', profile.security],
+    ['Fiscal restraint', profile.fiscal_restraint],
+    ['Infrastructure', profile.infrastructure],
+    ['Environment', profile.environment],
+    ['Diplomacy', profile.diplomacy],
+    ['Innovation', profile.innovation],
+    ['Institutions', profile.institutionalism],
+    ['Compromise', profile.compromise]
+  ].sort((a, b) => Number(b[1]) - Number(a[1]));
+}
+
+function decorateAiCitizenProfile1140() {
+  const page = document.querySelector('#view .profile-page');
+  if (!page) return;
+
+  let citizenNo = Number(String(new URL(location.href).searchParams.get('citizen') || '').replace(/\D/g, ''));
+  if (!citizenNo) citizenNo = citizenNoFromText1140(page.querySelector('.profile-meta')?.textContent);
+  if (!citizenNo) return;
+
+  const citizen = citizen1140(citizenNo);
+  const profile = aiProfile1140(citizenNo);
+  if (!citizen || citizen.account_type !== 'ai' || !profile) {
+    document.querySelector('#view [data-ai-political-profile="1140"]')?.remove();
+    return;
+  }
+
+  const stack = page.closest('.stack');
+  if (!stack) return;
+  stack.querySelector('[data-ai-political-profile="1140"]')?.remove();
+
+  const traits = issueTraits1140(profile);
+  const recent = positionsForCitizen1140(citizenNo).slice(0, 6);
+
+  const card = document.createElement('section');
+  card.className = 'card starvalla-ai-profile-card';
+  card.dataset.aiPoliticalProfile = '1140';
+  card.innerHTML = `
+    <div class="section-row">
+      <div><span class="eyebrow">AI POLITICAL PROFILE</span><h3 style="margin:6px 0">${esc1140(profile.governing_style)}</h3></div>
+      <span class="pill blue">SIMULATED OFFICIAL</span>
+    </div>
+    <p class="muted">Persistent governing traits used by the Starvalla AI Legislature Engine. These values remain attached to this AI citizen across bills and office terms.</p>
+    <div class="starvalla-ai-profile-grid">
+      <div><strong>Primary priority</strong><span>${esc1140(profile.primary_priority)}</span></div>
+      <div><strong>Compromise tendency</strong><span>${Number(profile.compromise)} / 100</span></div>
+    </div>
+    <div class="starvalla-ai-traits">
+      ${traits.slice(0, 5).map(([name, value]) => `<span class="starvalla-ai-trait">${esc1140(name)} ${Number(value)}</span>`).join('')}
+    </div>
+    <div style="margin-top:16px">
+      <h4 style="margin:0 0 6px">Recent legislative activity</h4>
+      ${recent.length ? recent.map(position => {
+        const bill = bill1140(position.bill_id) || { title: `Bill B-${String(position.bill_id).padStart(3, '0')}` };
+        return `<div class="starvalla-ai-history-row">
+          <strong>${esc1140(bill.title)} · <span class="starvalla-ai-vote ${esc1140(position.vote)}">${esc1140(position.vote.toUpperCase())}</span></strong>
+          <small>${esc1140(position.chamber === 'senate' ? 'Senate' : 'House')} · ${esc1140(position.topic)}<br>${esc1140(position.reasoning)}</small>
+        </div>`;
+      }).join('') : '<p class="muted">No legislative vote has been recorded for this AI citizen yet.</p>'}
+    </div>
+  `;
+
+  const service = stack.querySelector('[data-office-service-card]');
+  if (service) service.insertAdjacentElement('afterend', card);
+  else page.insertAdjacentElement('afterend', card);
+}
+
+function rebrandNode1140(root) {
+  if (!root) return;
+
+  if (root.nodeType === Node.TEXT_NODE) {
+    const parent = root.parentElement;
+    if (parent && ['SCRIPT','STYLE','NOSCRIPT'].includes(parent.tagName)) return;
+    const next = brandText1140(root.nodeValue);
+    if (next !== root.nodeValue) root.nodeValue = next;
+    return;
+  }
+
+  if (root.nodeType !== Node.ELEMENT_NODE && root.nodeType !== Node.DOCUMENT_FRAGMENT_NODE) return;
+
+  if (root.nodeType === Node.ELEMENT_NODE) {
+    const el = root;
+    if (['SCRIPT','STYLE','NOSCRIPT'].includes(el.tagName)) return;
+    for (const attr of ['title','aria-label','placeholder','value']) {
+      if (el.hasAttribute?.(attr)) {
+        const old = el.getAttribute(attr);
+        const next = brandText1140(old);
+        if (old !== next) el.setAttribute(attr, next);
+      }
+    }
+  }
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => rebrandNode1140(node));
+}
+
+function applyBrand1140() {
+  document.title = 'Starvalla — Digital Space Nation';
+
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) metaDescription.content = brandText1140(metaDescription.content);
+
+  const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+  if (appleTitle) appleTitle.content = 'Starvalla';
+
+  rebrandNode1140(document.body);
+}
+
+function installStarvallaManifest1140() {
+  if (window.__starvallaManifest1140) return;
+  window.__starvallaManifest1140 = true;
+
+  const manifest = {
+    name: 'Starvalla — Digital Space Nation',
+    short_name: 'Starvalla',
+    description: 'A members-only digital space nation with citizen accounts, social features, elections, Congress, events, and space projects.',
+    start_url: './',
+    scope: './',
+    display: 'standalone',
+    background_color: '#07111f',
+    theme_color: '#07111f',
+    orientation: 'portrait-primary',
+    icons: [
+      { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const url = URL.createObjectURL(blob);
+  let link = document.querySelector('link[rel="manifest"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'manifest';
+    document.head.appendChild(link);
+  }
+  link.href = url;
+}
+
+if (!window.__starvallaDialogsPatched1140) {
+  window.__starvallaDialogsPatched1140 = true;
+  const nativeConfirm = window.confirm.bind(window);
+  const nativeAlert = window.alert.bind(window);
+  const nativePrompt = window.prompt.bind(window);
+  window.confirm = message => nativeConfirm(brandText1140(message));
+  window.alert = message => nativeAlert(brandText1140(message));
+  window.prompt = (message, value) => nativePrompt(brandText1140(message), value);
+}
+
+function decorateAiUi1140() {
+  applyBrand1140();
+  renderAiCongressHeader1140();
+  decorateBillCards1140();
+  decorateAiCitizenProfile1140();
+}
+
+let uiTimer1140 = null;
+function scheduleAiUi1140() {
+  clearTimeout(uiTimer1140);
+  uiTimer1140 = setTimeout(decorateAiUi1140, 50);
+}
+
+async function refreshAiState1140() {
+  await loadAiState1140();
+  decorateAiUi1140();
+}
+
+injectAiStyles1140();
+installStarvallaManifest1140();
+applyBrand1140();
+await refreshAiState1140();
+
+const brandObserver1140 = new MutationObserver(mutations => {
+  for (const mutation of mutations) {
+    if (mutation.type === 'characterData') rebrandNode1140(mutation.target);
+    mutation.addedNodes?.forEach(node => rebrandNode1140(node));
+  }
+  scheduleAiUi1140();
+});
+
+brandObserver1140.observe(document.body, {
+  childList: true,
+  subtree: true,
+  characterData: true
+});
+
+let realtimeTimer1140 = null;
+const scheduleRealtime1140 = () => {
+  clearTimeout(realtimeTimer1140);
+  realtimeTimer1140 = setTimeout(refreshAiState1140, 180);
+};
+
+aiDb1140.channel('starvalla-ai-legislature-v1140')
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_legislative_positions' }, scheduleRealtime1140)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_politician_profiles' }, scheduleRealtime1140)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'bills' }, scheduleRealtime1140)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'bill_votes' }, scheduleRealtime1140)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'house_bill_votes' }, scheduleRealtime1140)
+  .subscribe();
+
+aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
+  </script>
+
 </body>
 </html>
