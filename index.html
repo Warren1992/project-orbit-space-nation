@@ -78,7 +78,6 @@
     .auth-gate-note{font-size:12px;color:#718399;line-height:1.5;text-align:center;margin:14px 0 0}
     .auth-gate-loading{text-align:center;color:#a8b7ca;font-weight:800}
   </style>
-
 </head>
 <body>
 
@@ -1088,6 +1087,184 @@ aiDb1140.channel('starvalla-ai-legislature-v1140')
 
 aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
+
+
+  <!-- Starvalla Launch Readiness v1.16.0 -->
+  <style id="starvallaLaunchReadinessStyles1160">
+    .starvalla-legal-footer{
+      margin:28px 0 10px;padding:17px 18px;border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;background:rgba(255,255,255,.025);color:#8293a8;
+      font-size:12px;line-height:1.6;text-align:center
+    }
+    .starvalla-legal-footer strong{color:#d5deea}
+    .starvalla-legal-footer-actions{
+      margin-top:9px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap
+    }
+    .starvalla-legal-footer button{
+      border:0;background:transparent;color:#ffd978;font:inherit;font-weight:850;
+      text-decoration:underline;padding:2px 4px
+    }
+    .starvalla-prototype-label{
+      display:inline-flex;padding:5px 9px;border-radius:999px;border:1px solid rgba(244,185,66,.28);
+      background:rgba(244,185,66,.07);color:#ffd978;font-size:10px;font-weight:900;letter-spacing:.08em
+    }
+    .starvalla-prototype-card{border-color:rgba(244,185,66,.22)!important}
+  </style>
+  <script>
+  (() => {
+    'use strict';
+
+    const DISCLAIMER = 'Starvalla is a private digital civic community and social simulation. It is not a sovereign state or government and does not confer legal citizenship, nationality, immigration status, government identification, diplomatic status, or territorial rights.';
+
+    function removeResidencyUI() {
+      document.querySelectorAll('[data-route="residency"],[data-my-residency],.residency-root,.resident-card').forEach(el => el.remove());
+      if (location.hash.replace(/^#/, '').toLowerCase() === 'residency') location.hash = 'more';
+    }
+
+    function removeStaticDemoPosts() {
+      document.querySelectorAll('#feedList .post-card').forEach(card => {
+        const text = card.textContent || '';
+        if (
+          text.includes('Ava Chen') ||
+          text.includes('Citizen #000842') ||
+          text.includes('Construction has officially begun on our first national digital institutions.')
+        ) card.remove();
+      });
+    }
+
+    function neutralizePrototypeNumbers() {
+      const title = document.querySelector('#sectionTitle')?.textContent?.trim() || '';
+      const view = document.querySelector('#view');
+      if (!view) return;
+
+      if (title === 'Treasury' && !view.querySelector('[data-starvalla-safe-treasury]')) {
+        view.innerHTML = `
+          <div class="stack" data-starvalla-safe-treasury="1">
+            <div class="card starvalla-prototype-card">
+              <span class="starvalla-prototype-label">PROTOTYPE ECONOMY</span>
+              <h2 style="margin:10px 0 7px">ORB is an in-app concept</h2>
+              <p class="muted">The Treasury and ORB credit system are prototype simulation features. No live financial balance, bank account, investment, security, or cash-value asset is represented on this page.</p>
+            </div>
+            <div class="card">
+              <h3>Live financial features are not enabled</h3>
+              <p class="muted">If Starvalla later enables real payments or fundraising, real prices, transaction terms, and verified totals should be displayed separately and clearly at that time.</p>
+            </div>
+          </div>`;
+      }
+
+      const walker = document.createTreeWalker(view, NodeFilter.SHOW_TEXT);
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(node => {
+        const raw = node.nodeValue || '';
+        if (raw.includes('$21,500 / $50,000 demonstration goal')) {
+          node.nodeValue = raw.replace(
+            '$21,500 / $50,000 demonstration goal',
+            'Concept-stage project · no active fundraising total is represented here'
+          );
+        }
+      });
+
+      if (title === 'Space Program') {
+        view.querySelectorAll('.progress').forEach(progress => {
+          const label = progress.closest('.card')?.textContent || '';
+          if (label.includes('Lunar Archive Mission')) {
+            const bar = progress.querySelector('span');
+            if (bar) bar.style.width = '0%';
+          }
+        });
+      }
+
+      view.querySelectorAll('.metric').forEach(metric => {
+        const label = metric.querySelector('span')?.textContent?.trim();
+        const strong = metric.querySelector('strong');
+        const small = metric.querySelector('small');
+        if (!strong) return;
+
+        if (label === 'Citizens' && strong.textContent.trim() === '1,247') {
+          strong.textContent = '—';
+          if (small) small.textContent = 'Loading live registered accounts';
+        }
+        if (label === 'Countries' && strong.textContent.trim() === '31') {
+          strong.textContent = '—';
+          if (small) small.textContent = 'Calculated from live profiles';
+        }
+        if (label === 'New today' && strong.textContent.trim() === '19') {
+          strong.textContent = '—';
+          if (small) small.textContent = 'Calculated from live registrations';
+        }
+      });
+    }
+
+    function addLegalTiles() {
+      const grid = document.querySelector('#view .more-grid');
+      if (!grid) return;
+
+      if (!grid.querySelector('[data-starvalla-privacy-tile]')) {
+        const b = document.createElement('button');
+        b.className = 'more-tile';
+        b.dataset.starvallaPrivacyTile = '1';
+        b.innerHTML = '<span>◉</span><strong>Privacy Policy</strong><small>How Starvalla handles account and community data</small>';
+        b.addEventListener('click', () => window.starvallaOpenPrivacy?.());
+        grid.appendChild(b);
+      }
+
+      if (!grid.querySelector('[data-starvalla-terms-tile]')) {
+        const b = document.createElement('button');
+        b.className = 'more-tile';
+        b.dataset.starvallaTermsTile = '1';
+        b.innerHTML = '<span>▤</span><strong>Terms of Use</strong><small>18+ eligibility, AI disclosure, and community rules</small>';
+        b.addEventListener('click', () => window.starvallaOpenTerms?.());
+        grid.appendChild(b);
+      }
+    }
+
+    function addPermanentDisclaimer() {
+      const view = document.querySelector('#view');
+      if (!view || view.querySelector('[data-starvalla-legal-footer]')) return;
+
+      const footer = document.createElement('section');
+      footer.className = 'starvalla-legal-footer';
+      footer.dataset.starvallaLegalFooter = '1';
+      footer.innerHTML = `
+        <strong>Digital community notice</strong><br>
+        ${DISCLAIMER}
+        <div class="starvalla-legal-footer-actions">
+          <button type="button" data-open-starvalla-privacy>Privacy Policy</button>
+          <button type="button" data-open-starvalla-terms>Terms of Use</button>
+        </div>`;
+
+      footer.querySelector('[data-open-starvalla-privacy]')?.addEventListener('click', () => window.starvallaOpenPrivacy?.());
+      footer.querySelector('[data-open-starvalla-terms]')?.addEventListener('click', () => window.starvallaOpenTerms?.());
+      view.appendChild(footer);
+    }
+
+    function applyLaunchReadiness() {
+      removeResidencyUI();
+      removeStaticDemoPosts();
+      neutralizePrototypeNumbers();
+      addLegalTiles();
+      addPermanentDisclaimer();
+    }
+
+    let timer = null;
+    const schedule = () => {
+      clearTimeout(timer);
+      timer = setTimeout(applyLaunchReadiness, 60);
+    };
+
+    applyLaunchReadiness();
+
+    const root = document.querySelector('#view');
+    if (root) {
+      const observer = new MutationObserver(schedule);
+      observer.observe(root, {childList:true, subtree:true, characterData:true});
+    }
+
+    window.addEventListener('hashchange', schedule);
+  })();
+  </script>
+  <!-- /Starvalla Launch Readiness v1.16.0 -->
 
 </body>
 </html>
