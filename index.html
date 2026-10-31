@@ -1823,5 +1823,60 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Emblem/Home Cleanup v1.17.2 -->
 
+
+  <!-- Starvalla Emblem Route/Home Card Fix v1.17.3 -->
+  <style id="starvallaFix1173">
+    /* The legacy auth module can still create this card; keep it out of the Home UI. */
+    #authJoinCard{
+      display:none!important;
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    function leaveMoreRouteForEmblem1173() {
+      try {
+        if (typeof state !== 'undefined') {
+          state.route = 'national-emblem';
+        }
+      } catch {}
+
+      /* replaceState avoids firing the legacy hashchange router, which does not
+         know about the custom National Emblem route. */
+      try {
+        history.replaceState(
+          history.state,
+          '',
+          location.pathname + location.search + '#national-emblem'
+        );
+      } catch {}
+
+      const title = document.querySelector('#sectionTitle');
+      const kicker = document.querySelector('#sectionKicker');
+      if (title) title.textContent = 'National Emblem';
+      if (kicker) {
+        kicker.textContent = 'STARVALLA';
+        kicker.style.setProperty('color', '#fff', 'important');
+      }
+    }
+
+    /* national-emblem-v170.js already renders the page. Its listener was
+       registered earlier. This listener runs on the same document click after
+       it and changes the route before the More-page observer can redraw. */
+    document.addEventListener('click', event => {
+      if (!event.target.closest?.('[data-national-emblem]')) return;
+      leaveMoreRouteForEmblem1173();
+    }, true);
+
+    /* Belt-and-suspenders: if the old Live Citizen Account card is already
+       present when this update loads, keep it hidden immediately. */
+    const existing = document.querySelector('#authJoinCard');
+    if (existing) existing.style.setProperty('display', 'none', 'important');
+  })();
+  </script>
+  <!-- /Starvalla Emblem Route/Home Card Fix v1.17.3 -->
+
 </body>
 </html>
