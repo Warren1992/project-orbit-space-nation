@@ -1555,5 +1555,187 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Navigation Cleanup v1.17.0 -->
 
+
+  <!-- Starvalla More Menu Stability v1.17.1 -->
+  <style id="starvallaMoreMenuStability1171">
+    /* Center the Starvalla wordmark/emblem within the free header space. */
+    .topbar{
+      position:relative!important;
+    }
+    .topbar-title.orbit-brand-title{
+      justify-self:center!important;
+      width:max-content!important;
+      margin-left:clamp(14px,4vw,44px)!important;
+      margin-right:auto!important;
+    }
+
+    @media(max-width:760px){
+      .topbar-title.orbit-brand-title{
+        justify-self:center!important;
+        margin-left:clamp(18px,5vw,38px)!important;
+      }
+    }
+
+    @media(max-width:390px){
+      .topbar-title.orbit-brand-title{
+        margin-left:18px!important;
+      }
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const MORE_ROUTES = [
+      'elections',
+      'senate',
+      'calendar',
+      'language',
+      'constitution',
+      'treasury',
+      'government',
+      'judiciary',
+      'events',
+      'world',
+      'motto',
+      'profile'
+    ];
+
+    const MORE_DESCRIPTIONS = {
+      elections: 'House elections, Senate elections, and Propositions',
+      senate: '100 Representatives + 100 Senators',
+      calendar: 'Starvalla dates, months, holidays, and converter',
+      language: 'Starvalla language, Aurekha alphabet, grammar, and learning resources',
+      constitution: 'National charter and citizen rights',
+      treasury: 'Prototype credits and civic economy',
+      government: 'Three branches and Presidential office',
+      judiciary: 'Supreme Court and constitutional cases',
+      events: 'Speeches, sessions, and meetups',
+      world: 'Future explorable virtual capital',
+      motto: 'Official national motto and meaning',
+      profile: 'President of Starvalla'
+    };
+
+    function escapeMore1171(value) {
+      return String(value ?? '').replace(/[&<>'"]/g, c => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        "'":'&#39;',
+        '"':'&quot;'
+      }[c]));
+    }
+
+    function renderStableMore1171() {
+      const view = document.querySelector('#view');
+      if (!view) return;
+
+      try {
+        if (typeof state !== 'undefined') state.route = 'more';
+      } catch {}
+
+      // Update the address bar without firing the legacy hashchange renderer.
+      try {
+        if (location.hash !== '#more') {
+          history.replaceState(history.state, '', location.pathname + location.search + '#more');
+        }
+      } catch {}
+
+      const title = document.querySelector('#sectionTitle');
+      const kicker = document.querySelector('#sectionKicker');
+      if (title) title.textContent = 'More';
+      if (kicker) {
+        kicker.textContent = 'STARVALLA';
+        kicker.style.setProperty('color', '#fff', 'important');
+      }
+
+      // Repaint the bottom nav so More gets the active state, but don't use setRoute().
+      try {
+        if (typeof renderNav === 'function') renderNav();
+      } catch {}
+
+      const tiles = MORE_ROUTES
+        .filter(id => {
+          try {
+            return typeof routeMeta !== 'undefined' && routeMeta[id];
+          } catch {
+            return false;
+          }
+        })
+        .map(id => {
+          const meta = routeMeta[id];
+          return `
+            <button class="more-tile" data-route="${escapeMore1171(id)}">
+              <span>${meta.icon}</span>
+              <strong>${escapeMore1171(meta.label)}</strong>
+              <small>${escapeMore1171(MORE_DESCRIPTIONS[id] || '')}</small>
+            </button>`;
+        })
+        .join('');
+
+      view.innerHTML = `
+        <div class="more-grid" data-stable-more-v1171="1">
+          <span data-route="messages" hidden aria-hidden="true"></span>
+          ${tiles}
+        </div>`;
+
+      // The existing legal/safety modules will append Privacy, Terms,
+      // and Blocked Citizens to this stable grid without rebuilding it.
+    }
+
+    function isMoreControl1171(target) {
+      return !!target?.closest?.('.bottom-nav [data-route="more"]');
+    }
+
+    // Capture the bottom-right hamburger before the legacy route handler can rebuild it.
+    document.addEventListener('click', event => {
+      if (!isMoreControl1171(event.target)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      renderStableMore1171();
+    }, true);
+
+    // If #more is opened from a bookmark/back navigation, override the legacy render once.
+    window.addEventListener('hashchange', () => {
+      if (location.hash === '#more') {
+        setTimeout(renderStableMore1171, 0);
+      }
+    });
+
+    // If an older module replaces the More view during one of its delayed
+    // "stabilization" passes, restore the stable version immediately.
+    const view = document.querySelector('#view');
+    if (view) {
+      let restoring = false;
+      const observer = new MutationObserver(() => {
+        if (restoring) return;
+
+        let onMore = false;
+        try {
+          onMore = (typeof state !== 'undefined' && state.route === 'more') || location.hash === '#more';
+        } catch {
+          onMore = location.hash === '#more';
+        }
+
+        if (!onMore) return;
+        if (view.querySelector('[data-stable-more-v1171]')) return;
+
+        restoring = true;
+        setTimeout(() => {
+          renderStableMore1171();
+          restoring = false;
+        }, 0);
+      });
+
+      observer.observe(view, { childList:true, subtree:false });
+    }
+  })();
+  </script>
+  <!-- /Starvalla More Menu Stability v1.17.1 -->
+
 </body>
 </html>
