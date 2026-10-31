@@ -2037,5 +2037,773 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Star Reactions v1.17.4 -->
 
+
+  <!-- Starvalla Social Ballots v1.18.0 -->
+  <style id="starvallaSocialBallots1180">
+    .sv-ballot-feed{
+      display:grid;
+      gap:16px;
+      margin-bottom:16px;
+    }
+    .sv-ballot-card{
+      overflow:hidden;
+      border-color:rgba(244,185,66,.27)!important;
+      background:
+        radial-gradient(circle at 92% 0%,rgba(124,58,237,.10),transparent 34%),
+        rgba(7,17,31,.96)!important;
+    }
+    .sv-ballot-head{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      margin-bottom:14px;
+    }
+    .sv-ballot-head .avatar{
+      width:46px;
+      height:46px;
+      flex:0 0 46px;
+    }
+    .sv-ballot-head-copy{
+      min-width:0;
+      flex:1;
+    }
+    .sv-ballot-head-copy strong{
+      display:block;
+      color:#fff;
+      font-size:15px;
+    }
+    .sv-ballot-head-copy small{
+      display:block;
+      color:#8ea0b6;
+      margin-top:3px;
+      line-height:1.35;
+    }
+    .sv-ballot-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid rgba(244,185,66,.30);
+      color:#ffd978;
+      background:rgba(244,185,66,.07);
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:10px;
+      font-weight:950;
+      letter-spacing:.09em;
+      white-space:nowrap;
+    }
+    .sv-ballot-title{
+      font-size:22px;
+      line-height:1.2;
+      margin:8px 0 8px;
+      color:#fff;
+    }
+    .sv-ballot-description{
+      margin:0;
+      color:#c2cedb;
+      line-height:1.58;
+      white-space:pre-wrap;
+    }
+    .sv-ballot-meta{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:13px;
+      color:#8293a8;
+      font-size:12px;
+    }
+    .sv-ballot-meta span{
+      display:inline-flex;
+      align-items:center;
+      min-height:25px;
+      padding:3px 8px;
+      border-radius:999px;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.07);
+    }
+    .sv-ballot-actions{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+      margin-top:15px;
+    }
+    .sv-ballot-actions button,
+    .sv-candidate-vote{
+      min-height:46px;
+      border-radius:13px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.035);
+      color:#fff;
+      padding:10px 12px;
+      font:inherit;
+      font-weight:900;
+    }
+    .sv-ballot-actions button:hover,
+    .sv-candidate-vote:hover{
+      border-color:rgba(244,185,66,.34);
+      background:rgba(244,185,66,.07);
+    }
+    .sv-ballot-actions button.selected,
+    .sv-candidate-vote.selected{
+      border-color:rgba(79,214,158,.40);
+      background:rgba(79,214,158,.10);
+      color:#8ce9c2;
+    }
+    .sv-ballot-actions button:disabled,
+    .sv-candidate-vote:disabled{
+      opacity:.70;
+    }
+    .sv-result-wrap{
+      margin-top:14px;
+      display:grid;
+      gap:9px;
+    }
+    .sv-result-row{
+      display:grid;
+      grid-template-columns:72px 1fr 48px;
+      gap:9px;
+      align-items:center;
+      font-size:12px;
+      color:#cbd5e1;
+    }
+    .sv-result-bar{
+      height:8px;
+      border-radius:999px;
+      overflow:hidden;
+      background:rgba(255,255,255,.07);
+    }
+    .sv-result-bar > span{
+      display:block;
+      height:100%;
+      border-radius:999px;
+      background:#ffd45e;
+    }
+    .sv-ballot-status{
+      margin-top:13px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid rgba(75,163,255,.18);
+      background:rgba(75,163,255,.06);
+      color:#b9dcff;
+      font-size:12px;
+      line-height:1.5;
+    }
+    .sv-ballot-status.result{
+      border-color:rgba(244,185,66,.25);
+      background:rgba(244,185,66,.06);
+      color:#ffe39c;
+      font-weight:800;
+    }
+    .sv-candidates{
+      display:grid;
+      gap:9px;
+      margin-top:15px;
+    }
+    .sv-candidate{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      padding:11px 0;
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+    .sv-candidate:first-child{
+      border-top:0;
+    }
+    .sv-candidate strong{
+      display:block;
+      color:#fff;
+    }
+    .sv-candidate small{
+      display:block;
+      margin-top:3px;
+      color:#8798ad;
+      line-height:1.45;
+    }
+    .sv-candidate-count{
+      display:block;
+      margin-top:4px;
+      color:#ffd978;
+      font-size:11px;
+      font-weight:850;
+    }
+    .sv-discussion{
+      margin-top:15px;
+      border-top:1px solid rgba(255,255,255,.08);
+      padding-top:13px;
+    }
+    .sv-discussion summary{
+      cursor:pointer;
+      color:#d7e1ed;
+      font-weight:850;
+      list-style:none;
+    }
+    .sv-discussion summary::-webkit-details-marker{display:none}
+    .sv-comments{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .sv-comment{
+      padding:10px 11px;
+      border-radius:12px;
+      background:rgba(255,255,255,.025);
+      border:1px solid rgba(255,255,255,.065);
+    }
+    .sv-comment strong{
+      display:block;
+      color:#fff;
+      font-size:12px;
+    }
+    .sv-comment small{
+      display:block;
+      color:#8293a8;
+      margin-top:2px;
+      font-size:10px;
+    }
+    .sv-comment p{
+      margin:6px 0 0;
+      color:#c9d4df;
+      line-height:1.48;
+      white-space:pre-wrap;
+      font-size:13px;
+    }
+    .sv-comment-form{
+      display:flex;
+      gap:8px;
+      margin-top:11px;
+      align-items:flex-end;
+    }
+    .sv-comment-form textarea{
+      flex:1;
+      min-height:44px;
+      max-height:110px;
+      resize:vertical;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:12px;
+      background:#07111f;
+      color:#fff;
+      padding:10px 11px;
+      font:inherit;
+    }
+    .sv-comment-form button{
+      min-height:44px;
+    }
+    .sv-feed-link{
+      display:inline-flex;
+      margin-top:12px;
+      border:0;
+      background:transparent;
+      color:#ffd978;
+      padding:0;
+      font:inherit;
+      font-weight:850;
+    }
+    @media(max-width:520px){
+      .sv-ballot-head{
+        align-items:flex-start;
+      }
+      .sv-ballot-badge{
+        white-space:normal;
+      }
+      .sv-candidate{
+        grid-template-columns:1fr;
+      }
+      .sv-candidate-vote{
+        width:100%;
+      }
+      .sv-result-row{
+        grid-template-columns:62px 1fr 42px;
+      }
+    }
+  </style>
+
+  <script type="module">
+  const waitForSocialBallotDb1180 = async () => {
+    for (let i = 0; i < 120; i++) {
+      if (window.projectOrbitDb) return window.projectOrbitDb;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw new Error('Starvalla database client did not initialize');
+  };
+
+  const svDb1180 = await waitForSocialBallotDb1180();
+
+  const svBallot1180 = {
+    profile:null,
+    citizens:[],
+    propositions:[],
+    propositionTallies:[],
+    propositionVotes:[],
+    houseElections:[],
+    houseCandidates:[],
+    houseTallies:[],
+    houseVotes:[],
+    senateElections:[],
+    senateCandidates:[],
+    senateTallies:[],
+    senateVotes:[],
+    comments:[]
+  };
+
+  const svEsc1180 = value => String(value ?? '').replace(/[&<>'"]/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[c]));
+
+  const svPad1180 = value => String(value ?? '').padStart(6,'0');
+
+  function svToast1180(message){
+    const el=document.querySelector('#toast');
+    if(el){
+      el.textContent=message;
+      el.classList.add('show');
+      setTimeout(()=>el.classList.remove('show'),2400);
+    }else{
+      alert(message);
+    }
+  }
+
+  function svCitizen1180(no){
+    return svBallot1180.citizens.find(c=>Number(c.citizen_no)===Number(no))||null;
+  }
+
+  function svAvatar1180(citizen){
+    const name=citizen?.display_name||'Citizen';
+    const initial=svEsc1180(name.trim().charAt(0).toUpperCase()||'C');
+    const url=String(citizen?.avatar_url||'').trim();
+
+    if(/^https?:\/\//i.test(url)){
+      return `<span class="avatar avatar-live ${citizen?.is_founder?'founder-avatar':''}">
+        <img src="${svEsc1180(url)}" alt="${svEsc1180(name)} avatar">
+      </span>`;
+    }
+
+    return `<span class="avatar ${citizen?.is_founder?'founder-avatar':''}">${initial}</span>`;
+  }
+
+  function svWhen1180(iso){
+    if(!iso) return '';
+    const ms=new Date(iso).getTime()-Date.now();
+    if(ms<=0) return 'Voting closed';
+
+    const mins=Math.ceil(ms/60000);
+    if(mins<60) return `${mins}m remaining`;
+    const hrs=Math.ceil(mins/60);
+    if(hrs<24) return `${hrs}h remaining`;
+    const days=Math.ceil(hrs/24);
+    return `${days}d remaining`;
+  }
+
+  function svOpen1180(item){
+    return item?.status==='open' &&
+      Date.now()>=new Date(item.opens_at).getTime() &&
+      Date.now()<new Date(item.closes_at).getTime();
+  }
+
+  function svRecentClosed1180(item){
+    const stamp=new Date(item?.closes_at||item?.created_at||0).getTime();
+    return !svOpen1180(item) && stamp && (Date.now()-stamp)<=14*86400000;
+  }
+
+  function svComments1180(kind,id){
+    return svBallot1180.comments
+      .filter(c=>c.ballot_kind===kind&&Number(c.ballot_id)===Number(id))
+      .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  }
+
+  function svDiscussion1180(kind,id){
+    const comments=svComments1180(kind,id);
+    const recent=comments.slice(-8);
+
+    return `<details class="sv-discussion">
+      <summary>Discuss · ${comments.length} comment${comments.length===1?'':'s'}</summary>
+      <div class="sv-comments">
+        ${recent.length?recent.map(comment=>{
+          const person=svCitizen1180(comment.citizen_no)||{display_name:'Citizen'};
+          return `<div class="sv-comment">
+            <strong>${svEsc1180(person.display_name)}${person.is_founder?' ✓':''}</strong>
+            <small>Citizen #${svPad1180(comment.citizen_no)}</small>
+            <p>${svEsc1180(comment.body)}</p>
+          </div>`;
+        }).join(''):'<p class="muted">No discussion yet. Be the first to comment.</p>'}
+      </div>
+      ${svBallot1180.profile?`<form class="sv-comment-form" data-sv-ballot-comment="${kind}:${id}">
+        <textarea maxlength="2000" required placeholder="Add to the discussion…"></textarea>
+        <button class="btn secondary" type="submit">Post</button>
+      </form>`:''}
+    </details>`;
+  }
+
+  function svResultRows1180(rows){
+    const total=rows.reduce((sum,row)=>sum+Number(row.count||0),0);
+    if(!rows.length) return '';
+
+    return `<div class="sv-result-wrap">
+      ${rows.map(row=>{
+        const count=Number(row.count||0);
+        const pct=total?Math.round(count/total*100):0;
+        return `<div class="sv-result-row">
+          <span>${svEsc1180(row.label)}</span>
+          <div class="sv-result-bar"><span style="width:${pct}%"></span></div>
+          <strong>${pct}%</strong>
+        </div>`;
+      }).join('')}
+      <small class="muted">${total} ballot${total===1?'':'s'} cast</small>
+    </div>`;
+  }
+
+  function svPropositionCard1180(prop){
+    const open=svOpen1180(prop);
+    const tally=svBallot1180.propositionTallies.find(t=>Number(t.proposition_id)===Number(prop.id))||{yes_count:0,no_count:0};
+    const mine=svBallot1180.propositionVotes.find(v=>Number(v.proposition_id)===Number(prop.id));
+    const creator=svCitizen1180(prop.created_by_citizen_no)||svCitizen1180(1)||{display_name:'Starvalla'};
+    const yes=Number(tally.yes_count||0),no=Number(tally.no_count||0);
+    const showResults=!!mine||!open;
+    const finalStatus=prop.status==='passed'?'PASSED':prop.status==='failed'?'FAILED':yes===no?'TIED':yes>no?'PASSED':'FAILED';
+
+    return `<article class="card sv-ballot-card" data-sv-ballot-card="proposition:${prop.id}">
+      <div class="sv-ballot-head">
+        ${svAvatar1180(creator)}
+        <div class="sv-ballot-head-copy">
+          <strong>${svEsc1180(creator.display_name)}${creator.is_founder?' ✓':''}</strong>
+          <small>${creator.is_founder?'President of Starvalla · ':''}Official civic post</small>
+        </div>
+        <span class="sv-ballot-badge">OFFICIAL PROPOSITION</span>
+      </div>
+
+      <div class="eyebrow">PROPOSITION ${svEsc1180(prop.proposition_number)}</div>
+      <h3 class="sv-ballot-title">${svEsc1180(prop.title)}</h3>
+      ${prop.description?`<p class="sv-ballot-description">${svEsc1180(prop.description)}</p>`:''}
+
+      <div class="sv-ballot-meta">
+        <span>${open?svWhen1180(prop.closes_at):'Voting closed'}</span>
+        <span>Direct citizen vote</span>
+      </div>
+
+      ${open?`<div class="sv-ballot-actions">
+        <button data-sv-prop-vote="${prop.id}:yes" class="${mine?.vote==='yes'?'selected':''}" ${mine?.vote==='yes'?'disabled':''}>
+          ${mine?.vote==='yes'?'✓ Your vote: YES':mine?'Change to YES':'YES'}
+        </button>
+        <button data-sv-prop-vote="${prop.id}:no" class="${mine?.vote==='no'?'selected':''}" ${mine?.vote==='no'?'disabled':''}>
+          ${mine?.vote==='no'?'✓ Your vote: NO':mine?'Change to NO':'NO'}
+        </button>
+      </div>`:''}
+
+      ${showResults?svResultRows1180([
+        {label:'Yes',count:yes},
+        {label:'No',count:no}
+      ]):`<div class="sv-ballot-status">Results stay hidden until you vote, so you can make your choice without seeing which side is ahead.</div>`}
+
+      ${mine&&open?`<div class="sv-ballot-status">You may change your ballot until voting closes.</div>`:''}
+      ${!open?`<div class="sv-ballot-status result">${finalStatus}${prop.status==='passed'||prop.status==='failed'?' · official result':''}</div>`:''}
+
+      ${svDiscussion1180('proposition',prop.id)}
+      <button class="sv-feed-link" type="button" data-route="elections">View full proposition →</button>
+    </article>`;
+  }
+
+  function svElectionData1180(kind){
+    return kind==='house'
+      ? {
+          label:'House of Representatives',
+          member:'Representative',
+          elections:svBallot1180.houseElections,
+          candidates:svBallot1180.houseCandidates,
+          tallies:svBallot1180.houseTallies,
+          votes:svBallot1180.houseVotes
+        }
+      : {
+          label:'Senate',
+          member:'Senator',
+          elections:svBallot1180.senateElections,
+          candidates:svBallot1180.senateCandidates,
+          tallies:svBallot1180.senateTallies,
+          votes:svBallot1180.senateVotes
+        };
+  }
+
+  function svElectionCard1180(kind,election){
+    const d=svElectionData1180(kind);
+    const open=svOpen1180(election);
+    const candidates=d.candidates.filter(c=>Number(c.election_id)===Number(election.id));
+    const mine=d.votes.find(v=>Number(v.election_id)===Number(election.id));
+    const showResults=!!mine||!open;
+    const creator=svCitizen1180(election.created_by_citizen_no)||svCitizen1180(1)||{display_name:'Starvalla'};
+    const winner=svCitizen1180(election.winner_citizen_no);
+
+    const rows=candidates.map(candidate=>{
+      const person=svCitizen1180(candidate.citizen_no)||{display_name:'Citizen'};
+      const tally=d.tallies.find(t=>Number(t.election_id)===Number(election.id)&&Number(t.candidate_citizen_no)===Number(candidate.citizen_no));
+      const count=Number(tally?.vote_count||0);
+      const selected=Number(mine?.candidate_citizen_no)===Number(candidate.citizen_no);
+
+      return `<div class="sv-candidate">
+        <div>
+          <strong>${svEsc1180(person.display_name)}${person.is_founder?' ✓':''}</strong>
+          <small>Citizen #${svPad1180(candidate.citizen_no)}${candidate.statement?` · ${svEsc1180(candidate.statement)}`:''}</small>
+          ${showResults?`<span class="sv-candidate-count">${count} vote${count===1?'':'s'}</span>`:''}
+        </div>
+        ${open?`<button class="sv-candidate-vote ${selected?'selected':''}" data-sv-election-vote="${kind}:${election.id}:${candidate.citizen_no}" ${selected?'disabled':''}>
+          ${selected?'✓ Your vote':mine?'Change vote':'Vote'}
+        </button>`:''}
+      </div>`;
+    }).join('');
+
+    const resultRows=showResults?svResultRows1180(candidates.map(candidate=>{
+      const person=svCitizen1180(candidate.citizen_no)||{display_name:'Citizen'};
+      const tally=d.tallies.find(t=>Number(t.election_id)===Number(election.id)&&Number(t.candidate_citizen_no)===Number(candidate.citizen_no));
+      return {label:person.display_name,count:Number(tally?.vote_count||0)};
+    })):`<div class="sv-ballot-status">Vote counts stay hidden until you cast your ballot.</div>`;
+
+    return `<article class="card sv-ballot-card" data-sv-ballot-card="${kind}:${election.id}">
+      <div class="sv-ballot-head">
+        ${svAvatar1180(creator)}
+        <div class="sv-ballot-head-copy">
+          <strong>${svEsc1180(creator.display_name)}${creator.is_founder?' ✓':''}</strong>
+          <small>${creator.is_founder?'President of Starvalla · ':''}Election administration</small>
+        </div>
+        <span class="sv-ballot-badge">OFFICIAL ${kind==='house'?'HOUSE':'SENATE'} ELECTION</span>
+      </div>
+
+      <div class="eyebrow">${svEsc1180(d.label.toUpperCase())} · SEAT ${svEsc1180(election.seat_no)}</div>
+      <h3 class="sv-ballot-title">${svEsc1180(election.title)}</h3>
+      ${election.description?`<p class="sv-ballot-description">${svEsc1180(election.description)}</p>`:''}
+
+      <div class="sv-ballot-meta">
+        <span>${open?svWhen1180(election.closes_at):'Voting closed'}</span>
+        <span>Elect one ${svEsc1180(d.member)}</span>
+      </div>
+
+      <div class="sv-candidates">
+        ${rows||'<p class="muted">No candidates are registered yet.</p>'}
+      </div>
+
+      ${resultRows}
+      ${mine&&open?`<div class="sv-ballot-status">You may change your candidate selection until voting closes.</div>`:''}
+      ${!open?`<div class="sv-ballot-status result">${winner?`WINNER · ${svEsc1180(winner.display_name)}`:election.status==='tied'?'TIED · no winner seated yet':'Voting closed'}</div>`:''}
+
+      ${svDiscussion1180(kind,election.id)}
+      <button class="sv-feed-link" type="button" data-route="elections">View full election →</button>
+    </article>`;
+  }
+
+  async function svLoad1180(){
+    const [
+      profileRes,citizensRes,
+      propsRes,propTalliesRes,propVotesRes,
+      houseElectionsRes,houseCandidatesRes,houseTalliesRes,houseVotesRes,
+      senateElectionsRes,senateCandidatesRes,senateTalliesRes,senateVotesRes,
+      commentsRes
+    ]=await Promise.all([
+      svDb1180.rpc('my_profile'),
+      svDb1180.from('profiles').select('citizen_no,display_name,avatar_url,role,is_founder,account_type').order('citizen_no').limit(500),
+      svDb1180.from('propositions').select('id,proposition_number,title,description,status,opens_at,closes_at,decided_at,created_at,created_by_citizen_no').order('created_at',{ascending:false}),
+      svDb1180.from('proposition_tallies').select('proposition_id,yes_count,no_count'),
+      svDb1180.from('proposition_votes').select('proposition_id,citizen_no,vote,created_at'),
+      svDb1180.from('house_elections').select('id,title,description,seat_no,status,opens_at,closes_at,winner_citizen_no,created_at,created_by_citizen_no').order('created_at',{ascending:false}),
+      svDb1180.from('house_candidates').select('election_id,citizen_no,statement,created_at').order('created_at'),
+      svDb1180.from('house_candidate_tallies').select('election_id,candidate_citizen_no,vote_count'),
+      svDb1180.from('house_election_votes').select('election_id,voter_citizen_no,candidate_citizen_no,created_at'),
+      svDb1180.from('senate_elections').select('id,title,description,seat_no,status,opens_at,closes_at,winner_citizen_no,created_at,created_by_citizen_no').order('created_at',{ascending:false}),
+      svDb1180.from('senate_candidates').select('election_id,citizen_no,statement,created_at').order('created_at'),
+      svDb1180.from('senate_candidate_tallies').select('election_id,candidate_citizen_no,vote_count'),
+      svDb1180.from('senate_election_votes').select('election_id,voter_citizen_no,candidate_citizen_no,created_at'),
+      svDb1180.from('civic_ballot_comments').select('id,ballot_kind,ballot_id,citizen_no,body,created_at').order('created_at',{ascending:true}).limit(1000)
+    ]);
+
+    if(profileRes.error) console.warn('Social ballot profile',profileRes.error);
+    if(citizensRes.error) console.warn('Social ballot citizens',citizensRes.error);
+
+    svBallot1180.profile=profileRes.data?.[0]||null;
+    svBallot1180.citizens=citizensRes.data||[];
+    svBallot1180.propositions=propsRes.data||[];
+    svBallot1180.propositionTallies=propTalliesRes.data||[];
+    svBallot1180.propositionVotes=propVotesRes.data||[];
+    svBallot1180.houseElections=houseElectionsRes.data||[];
+    svBallot1180.houseCandidates=houseCandidatesRes.data||[];
+    svBallot1180.houseTallies=houseTalliesRes.data||[];
+    svBallot1180.houseVotes=houseVotesRes.data||[];
+    svBallot1180.senateElections=senateElectionsRes.data||[];
+    svBallot1180.senateCandidates=senateCandidatesRes.data||[];
+    svBallot1180.senateTallies=senateTalliesRes.data||[];
+    svBallot1180.senateVotes=senateVotesRes.data||[];
+    svBallot1180.comments=commentsRes.data||[];
+  }
+
+  function svCards1180(){
+    const cards=[];
+
+    svBallot1180.propositions
+      .filter(p=>svOpen1180(p)||svRecentClosed1180(p))
+      .forEach(p=>cards.push({
+        open:svOpen1180(p),
+        stamp:new Date(p.created_at||p.opens_at).getTime(),
+        html:svPropositionCard1180(p)
+      }));
+
+    svBallot1180.houseElections
+      .filter(e=>svOpen1180(e)||svRecentClosed1180(e))
+      .forEach(e=>cards.push({
+        open:svOpen1180(e),
+        stamp:new Date(e.created_at||e.opens_at).getTime(),
+        html:svElectionCard1180('house',e)
+      }));
+
+    svBallot1180.senateElections
+      .filter(e=>svOpen1180(e)||svRecentClosed1180(e))
+      .forEach(e=>cards.push({
+        open:svOpen1180(e),
+        stamp:new Date(e.created_at||e.opens_at).getTime(),
+        html:svElectionCard1180('senate',e)
+      }));
+
+    cards.sort((a,b)=>Number(b.open)-Number(a.open)||b.stamp-a.stamp);
+    return cards.map(x=>x.html).join('');
+  }
+
+  function svIsHome1180(){
+    const title=document.querySelector('#sectionTitle')?.textContent?.trim();
+    return title==='Home'||location.hash==='#home'||!location.hash;
+  }
+
+  function svRender1180(){
+    const list=document.querySelector('#feedList');
+    if(!list||!svIsHome1180()) return;
+
+    let host=list.querySelector('#svBallotFeed1180');
+    if(!host){
+      host=document.createElement('div');
+      host.id='svBallotFeed1180';
+      host.className='sv-ballot-feed';
+      list.prepend(host);
+    }
+
+    const markup=svCards1180();
+    host.innerHTML=markup;
+    host.hidden=!markup;
+  }
+
+  async function svRefresh1180(){
+    await svLoad1180();
+    svRender1180();
+  }
+
+  document.addEventListener('click',async event=>{
+    const propBtn=event.target.closest?.('[data-sv-prop-vote]');
+    if(propBtn){
+      event.preventDefault();
+      const [idRaw,vote]=propBtn.dataset.svPropVote.split(':');
+      const id=Number(idRaw);
+      propBtn.disabled=true;
+
+      const mine=svBallot1180.propositionVotes.find(v=>Number(v.proposition_id)===id);
+      const query=mine
+        ? svDb1180.from('proposition_votes').update({vote}).eq('proposition_id',id).eq('citizen_no',svBallot1180.profile.citizen_no)
+        : svDb1180.from('proposition_votes').insert({proposition_id:id,vote});
+
+      const {error}=await query;
+      if(error) svToast1180(error.message);
+      else svToast1180(mine?'Your proposition vote was changed.':'Your proposition vote was recorded.');
+
+      await svRefresh1180();
+      return;
+    }
+
+    const electionBtn=event.target.closest?.('[data-sv-election-vote]');
+    if(electionBtn){
+      event.preventDefault();
+      const [kind,electionRaw,candidateRaw]=electionBtn.dataset.svElectionVote.split(':');
+      const electionId=Number(electionRaw),candidateNo=Number(candidateRaw);
+      const d=svElectionData1180(kind);
+      const mine=d.votes.find(v=>Number(v.election_id)===electionId);
+      const table=kind==='house'?'house_election_votes':'senate_election_votes';
+
+      electionBtn.disabled=true;
+
+      const query=mine
+        ? svDb1180.from(table).update({candidate_citizen_no:candidateNo}).eq('election_id',electionId).eq('voter_citizen_no',svBallot1180.profile.citizen_no)
+        : svDb1180.from(table).insert({election_id:electionId,candidate_citizen_no:candidateNo});
+
+      const {error}=await query;
+      if(error) svToast1180(error.message);
+      else svToast1180(mine?'Your election vote was changed.':'Your election vote was recorded.');
+
+      await svRefresh1180();
+    }
+  },true);
+
+  document.addEventListener('submit',async event=>{
+    const form=event.target.closest?.('[data-sv-ballot-comment]');
+    if(!form) return;
+
+    event.preventDefault();
+
+    const [kind,idRaw]=form.dataset.svBallotComment.split(':');
+    const body=form.querySelector('textarea')?.value.trim();
+    if(!body) return;
+
+    const button=form.querySelector('button');
+    if(button) button.disabled=true;
+
+    const {error}=await svDb1180.from('civic_ballot_comments').insert({
+      ballot_kind:kind,
+      ballot_id:Number(idRaw),
+      citizen_no:svBallot1180.profile.citizen_no,
+      body
+    });
+
+    if(error) svToast1180(error.message);
+    else svToast1180('Comment posted.');
+
+    await svRefresh1180();
+  },true);
+
+  /* Correct the older Elections-page wording now that ballots are changeable. */
+  function svFixLegacyBallotCopy1180(){
+    document.querySelectorAll('#view .live-vote-status').forEach(el=>{
+      const text=el.textContent||'';
+      if(text.includes('Your ballot is final once submitted.')){
+        el.textContent='Your ballot may be changed from the Home feed until voting closes. Individual ballots remain private.';
+      }
+    });
+  }
+
+  let svDomTimer1180=null;
+  const svView1180=document.querySelector('#view');
+  if(svView1180){
+    const observer=new MutationObserver(()=>{
+      clearTimeout(svDomTimer1180);
+      svDomTimer1180=setTimeout(()=>{
+        svRender1180();
+        svFixLegacyBallotCopy1180();
+      },45);
+    });
+    observer.observe(svView1180,{childList:true,subtree:true});
+  }
+
+  await svRefresh1180();
+
+  let svRealtimeTimer1180=null;
+  const svSchedule1180=()=>{
+    clearTimeout(svRealtimeTimer1180);
+    svRealtimeTimer1180=setTimeout(svRefresh1180,140);
+  };
+
+  svDb1180.channel('starvalla-social-ballots-v1180')
+    .on('postgres_changes',{event:'*',schema:'public',table:'propositions'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'proposition_votes'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'house_elections'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'house_candidates'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'house_election_votes'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'senate_elections'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'senate_candidates'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'senate_election_votes'},svSchedule1180)
+    .on('postgres_changes',{event:'*',schema:'public',table:'civic_ballot_comments'},svSchedule1180)
+    .subscribe();
+
+  svDb1180.auth.onAuthStateChange(()=>setTimeout(svRefresh1180,0));
+  </script>
+  <!-- /Starvalla Social Ballots v1.18.0 -->
+
 </body>
 </html>
