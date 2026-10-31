@@ -1266,5 +1266,294 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Launch Readiness v1.16.0 -->
 
+
+  <!-- Starvalla Navigation Cleanup v1.17.0 -->
+  <style id="starvallaNavigationCleanup1170">
+    /* Remove the duplicate top-left navigation control. */
+    #menuBtn{
+      display:none!important;
+    }
+    #drawer,
+    #drawerBackdrop{
+      display:none!important;
+    }
+
+    /* Change the STARVALLA wordmark from gold to white. */
+    #sectionKicker,
+    .national-emblem-topcopy .eyebrow{
+      color:#fff!important;
+    }
+
+    /* Small dropdown anchored to the top-right profile photo. */
+    .starvalla-account-menu{
+      position:fixed;
+      z-index:12000;
+      width:min(250px,calc(100vw - 24px));
+      padding:8px;
+      border:1px solid rgba(255,255,255,.11);
+      border-radius:16px;
+      background:#08111f;
+      box-shadow:0 22px 70px rgba(0,0,0,.55);
+      color:#fff;
+    }
+    .starvalla-account-menu[hidden]{display:none!important}
+    .starvalla-account-menu-head{
+      padding:11px 12px 10px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      margin-bottom:5px;
+    }
+    .starvalla-account-menu-head strong{
+      display:block;
+      font-size:15px;
+      line-height:1.25;
+    }
+    .starvalla-account-menu-head small{
+      display:block;
+      margin-top:4px;
+      color:#8496ad;
+      font-size:12px;
+    }
+    .starvalla-account-menu button{
+      width:100%;
+      border:0;
+      border-radius:11px;
+      padding:11px 12px;
+      background:transparent;
+      color:#e7edf5;
+      text-align:left;
+      font:inherit;
+      font-weight:800;
+    }
+    .starvalla-account-menu button:hover,
+    .starvalla-account-menu button:focus{
+      background:rgba(255,255,255,.06);
+      outline:none;
+    }
+    .starvalla-account-menu .signout{
+      color:#ff9d9d;
+    }
+
+    @media(max-width:760px){
+      .topbar{
+        grid-template-columns:1fr auto!important;
+      }
+      .topbar-title{
+        margin-left:0!important;
+      }
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const SPACE_ROUTE = 'space';
+    let accountMenu = null;
+    let accountProfile = null;
+
+    function currentRoute() {
+      return location.hash.replace(/^#/, '') || 'home';
+    }
+
+    function removeSpaceProgram() {
+      document.querySelectorAll('[data-route="space"]').forEach(el => el.remove());
+
+      if (currentRoute() === SPACE_ROUTE) {
+        location.hash = 'home';
+        return;
+      }
+
+      const title = document.querySelector('#sectionTitle')?.textContent?.trim();
+      if (title === 'Space Program') location.hash = 'home';
+    }
+
+    function removeTopLeftMenu() {
+      document.querySelector('#menuBtn')?.remove();
+      document.querySelector('#drawer')?.remove();
+      document.querySelector('#drawerBackdrop')?.remove();
+    }
+
+    function makeWordmarkWhite() {
+      const kicker = document.querySelector('#sectionKicker');
+      if (kicker) kicker.style.setProperty('color', '#fff', 'important');
+
+      document.querySelectorAll('.national-emblem-topcopy .eyebrow').forEach(el => {
+        el.style.setProperty('color', '#fff', 'important');
+      });
+    }
+
+    function ensureAccountMenu() {
+      if (accountMenu?.isConnected) return accountMenu;
+
+      accountMenu = document.createElement('div');
+      accountMenu.className = 'starvalla-account-menu';
+      accountMenu.id = 'starvallaAccountMenu1170';
+      accountMenu.hidden = true;
+      accountMenu.innerHTML = `
+        <div class="starvalla-account-menu-head">
+          <strong id="starvallaAccountMenuName">My account</strong>
+          <small id="starvallaAccountMenuMeta">Starvalla citizen</small>
+        </div>
+        <button type="button" id="starvallaViewProfile1170">View my profile</button>
+        <button type="button" class="signout" id="starvallaSignOut1170">Sign out</button>
+      `;
+
+      document.body.appendChild(accountMenu);
+
+      accountMenu.querySelector('#starvallaViewProfile1170')?.addEventListener('click', () => {
+        closeAccountMenu();
+
+        if (accountProfile?.citizen_no) {
+          const url = new URL(location.href);
+          url.searchParams.set('citizen', String(accountProfile.citizen_no).padStart(6, '0'));
+          url.hash = 'citizens';
+          location.href = url.toString();
+        } else {
+          location.hash = 'citizens';
+        }
+      });
+
+      accountMenu.querySelector('#starvallaSignOut1170')?.addEventListener('click', async () => {
+        const button = accountMenu.querySelector('#starvallaSignOut1170');
+
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Signing out…';
+        }
+
+        try {
+          const db = window.projectOrbitDb;
+          if (!db) throw new Error('Account service is not ready.');
+
+          const { error } = await db.auth.signOut();
+          if (error) throw error;
+
+          closeAccountMenu();
+        } catch (err) {
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Sign out';
+          }
+          alert(err?.message || 'Could not sign out. Please try again.');
+        }
+      });
+
+      return accountMenu;
+    }
+
+    function positionAccountMenu() {
+      const button = document.querySelector('#accountBtn');
+      const menu = ensureAccountMenu();
+
+      if (!button || !menu) return;
+
+      const rect = button.getBoundingClientRect();
+      const right = Math.max(12, window.innerWidth - rect.right);
+      const top = Math.min(window.innerHeight - 180, rect.bottom + 8);
+
+      menu.style.right = right + 'px';
+      menu.style.top = Math.max(12, top) + 'px';
+    }
+
+    async function loadAccountProfile() {
+      const db = window.projectOrbitDb;
+      if (!db) return;
+
+      try {
+        const { data, error } = await db.rpc('my_profile');
+        if (error) throw error;
+
+        accountProfile = data?.[0] || null;
+
+        const name = accountMenu?.querySelector('#starvallaAccountMenuName');
+        const meta = accountMenu?.querySelector('#starvallaAccountMenuMeta');
+
+        if (name) name.textContent = accountProfile?.display_name || 'My account';
+
+        if (meta) {
+          meta.textContent = accountProfile?.citizen_no
+            ? 'Citizen #' + String(accountProfile.citizen_no).padStart(6, '0')
+            : 'Starvalla citizen';
+        }
+      } catch (_) {
+        accountProfile = null;
+      }
+    }
+
+    function closeAccountMenu() {
+      if (accountMenu) accountMenu.hidden = true;
+    }
+
+    async function openAccountMenu() {
+      const menu = ensureAccountMenu();
+      positionAccountMenu();
+      menu.hidden = false;
+      await loadAccountProfile();
+      positionAccountMenu();
+    }
+
+    function bindAccountButton() {
+      document.addEventListener('click', event => {
+        const accountButton = event.target.closest?.('#accountBtn');
+
+        if (accountButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+
+          if (accountMenu && !accountMenu.hidden) closeAccountMenu();
+          else openAccountMenu();
+
+          return;
+        }
+
+        if (
+          accountMenu &&
+          !accountMenu.hidden &&
+          !event.target.closest?.('#starvallaAccountMenu1170')
+        ) {
+          closeAccountMenu();
+        }
+      }, true);
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeAccountMenu();
+      });
+
+      window.addEventListener('resize', () => {
+        if (accountMenu && !accountMenu.hidden) positionAccountMenu();
+      });
+    }
+
+    function simplifyNavigation() {
+      removeTopLeftMenu();
+      removeSpaceProgram();
+      makeWordmarkWhite();
+
+      document.querySelectorAll('.bottom-nav [data-route="more"]').forEach(el => {
+        el.setAttribute('aria-label', 'More');
+        el.setAttribute('title', 'More');
+      });
+    }
+
+    bindAccountButton();
+    simplifyNavigation();
+
+    let timer = null;
+    const observer = new MutationObserver(() => {
+      clearTimeout(timer);
+      timer = setTimeout(simplifyNavigation, 30);
+    });
+
+    observer.observe(document.body, {
+      childList:true,
+      subtree:true
+    });
+
+    window.addEventListener('hashchange', simplifyNavigation);
+  })();
+  </script>
+  <!-- /Starvalla Navigation Cleanup v1.17.0 -->
+
 </body>
 </html>
