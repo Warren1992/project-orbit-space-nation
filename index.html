@@ -2805,5 +2805,398 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Social Ballots v1.18.0 -->
 
+
+  <!-- Starvalla Bottom Compose v1.18.1 -->
+  <style id="starvallaBottomCompose1181">
+    .bottom-nav{
+      grid-template-columns:repeat(6,minmax(0,1fr))!important;
+    }
+
+    .sv-compose-nav-btn{
+      appearance:none;
+      -webkit-appearance:none;
+      border:0;
+      outline:0;
+      background:transparent;
+      color:inherit;
+      padding:0;
+      margin:0;
+      display:grid;
+      place-items:center;
+      min-width:0;
+      position:relative;
+    }
+    .sv-compose-nav-btn svg{
+      width:25px;
+      height:25px;
+      display:block;
+    }
+    .sv-compose-nav-btn.active{
+      color:#f4b942!important;
+    }
+
+    .sv-inline-composer-hidden{
+      display:none!important;
+    }
+
+    body.sv-compose-open{
+      overflow:hidden;
+    }
+
+    .sv-compose-overlay{
+      position:fixed;
+      inset:0;
+      z-index:11000;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      background:rgba(2,7,14,.70);
+      backdrop-filter:blur(6px);
+      padding:20px 14px calc(18px + env(safe-area-inset-bottom));
+    }
+    .sv-compose-overlay.show{
+      display:flex;
+    }
+    .sv-compose-shell{
+      width:min(720px,100%);
+      max-height:min(88vh,900px);
+      overflow:auto;
+      border-radius:26px;
+      border:1px solid rgba(244,185,66,.22);
+      background:linear-gradient(180deg,rgba(8,19,35,.98),rgba(5,14,27,.98));
+      box-shadow:0 30px 90px rgba(0,0,0,.55);
+      color:#fff;
+    }
+    .sv-compose-head{
+      position:sticky;
+      top:0;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(6,15,28,.96);
+      backdrop-filter:blur(10px);
+    }
+    .sv-compose-head h3{
+      margin:0;
+      font-size:22px;
+      line-height:1.2;
+    }
+    .sv-compose-head small{
+      display:block;
+      margin-top:3px;
+      color:#8fa1b7;
+      font-size:12px;
+      line-height:1.4;
+    }
+    .sv-compose-close{
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
+      color:#fff;
+      font-size:26px;
+      line-height:1;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      flex:0 0 auto;
+    }
+    .sv-compose-body{
+      padding:18px;
+    }
+    .sv-compose-loading{
+      min-height:140px;
+      display:grid;
+      place-items:center;
+      color:#b4c0d0;
+      text-align:center;
+      line-height:1.55;
+    }
+
+    .sv-compose-shell .composer,
+    .sv-compose-shell .card,
+    .sv-compose-shell .composer.card{
+      margin:0!important;
+      width:100%!important;
+      max-width:none!important;
+      box-shadow:none!important;
+    }
+
+    .sv-compose-shell textarea{
+      min-height:160px!important;
+    }
+
+    .sv-compose-shell .composer-actions,
+    .sv-compose-shell .post-actions,
+    .sv-compose-shell .media-actions{
+      position:sticky;
+      bottom:0;
+      background:linear-gradient(180deg,rgba(7,17,31,0),rgba(7,17,31,.95) 24%);
+      padding-top:12px;
+    }
+
+    @media (max-width: 560px){
+      .sv-compose-shell{
+        border-radius:22px;
+      }
+      .sv-compose-body{
+        padding:14px;
+      }
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const COMPOSE_PLACEHOLDER = 'Share an update with the nation';
+    const state = {
+      navReady: false,
+      modal: null,
+      body: null,
+      movedComposer: null,
+      originalParent: null,
+      originalNextSibling: null
+    };
+
+    function createComposeIcon(active) {
+      const color = active ? '#f4b942' : 'currentColor';
+      return `
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 18.5H18a3.5 3.5 0 0 0 .5-6.97A5.5 5.5 0 0 0 8.24 8.7 4.5 4.5 0 0 0 7 18.5Z"
+                stroke="${color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 18V9.35" stroke="${color}" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M8.9 12.4 12 9.3l3.1 3.1" stroke="${color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      `;
+    }
+
+    function ensureModal() {
+      if (state.modal) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'sv-compose-overlay';
+      overlay.id = 'svComposeOverlay1181';
+      overlay.innerHTML = `
+        <div class="sv-compose-shell" role="dialog" aria-modal="true" aria-labelledby="svComposeTitle1181">
+          <div class="sv-compose-head">
+            <div>
+              <h3 id="svComposeTitle1181">Create post</h3>
+              <small>Post to the Starvalla feed from this dedicated compose button.</small>
+            </div>
+            <button type="button" class="sv-compose-close" aria-label="Close composer">×</button>
+          </div>
+          <div class="sv-compose-body">
+            <div class="sv-compose-loading">Loading composer…</div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', event => {
+        if (event.target === overlay) closeCompose();
+      });
+      overlay.querySelector('.sv-compose-close').addEventListener('click', closeCompose);
+
+      state.modal = overlay;
+      state.body = overlay.querySelector('.sv-compose-body');
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && state.modal?.classList.contains('show')) {
+          closeCompose();
+        }
+      });
+    }
+
+    function closestComposerContainer(textarea) {
+      if (!textarea) return null;
+      return textarea.closest('.composer, .card, form, section, article, .stack > div') || textarea.parentElement;
+    }
+
+    function composerCandidates() {
+      const textareas = [...document.querySelectorAll('#view textarea, main textarea')]
+        .filter(el => (el.getAttribute('placeholder') || '').toLowerCase().includes(COMPOSE_PLACEHOLDER.toLowerCase()));
+      return textareas
+        .map(closestComposerContainer)
+        .filter(Boolean)
+        .filter(el => !el.closest('#svComposeOverlay1181'));
+    }
+
+    function hideInlineComposers() {
+      composerCandidates().forEach(el => {
+        if (!el.closest('#svComposeOverlay1181')) {
+          el.classList.add('sv-inline-composer-hidden');
+        }
+      });
+    }
+
+    function restoreComposer() {
+      if (!state.movedComposer || !state.originalParent) return;
+
+      if (state.originalNextSibling && state.originalNextSibling.parentNode === state.originalParent) {
+        state.originalParent.insertBefore(state.movedComposer, state.originalNextSibling);
+      } else {
+        state.originalParent.appendChild(state.movedComposer);
+      }
+
+      state.movedComposer.classList.add('sv-inline-composer-hidden');
+      state.movedComposer = null;
+      state.originalParent = null;
+      state.originalNextSibling = null;
+    }
+
+    function currentUserRouteFallback() {
+      const currentProfileButton = document.querySelector('[data-route="profile"]');
+      if (currentProfileButton) {
+        currentProfileButton.click();
+      } else {
+        location.hash = '#home';
+      }
+    }
+
+    function findOrCreateComposerForModal() {
+      let composer = composerCandidates()[0];
+      if (composer) return Promise.resolve(composer);
+
+      return new Promise(resolve => {
+        currentUserRouteFallback();
+
+        const started = Date.now();
+        const timer = setInterval(() => {
+          composer = composerCandidates()[0];
+          if (composer) {
+            clearInterval(timer);
+            resolve(composer);
+            return;
+          }
+          if (Date.now() - started > 2500) {
+            clearInterval(timer);
+            resolve(null);
+          }
+        }, 80);
+      });
+    }
+
+    async function mountComposerInModal() {
+      ensureModal();
+      state.body.innerHTML = '<div class="sv-compose-loading">Loading composer…</div>';
+
+      let composer = state.movedComposer;
+      if (!composer) {
+        composer = await findOrCreateComposerForModal();
+      }
+
+      if (!composer) {
+        state.body.innerHTML = '<div class="sv-compose-loading">Could not find the Starvalla composer. Open Home or your profile, then try again.</div>';
+        return;
+      }
+
+      if (!state.movedComposer) {
+        state.originalParent = composer.parentNode;
+        state.originalNextSibling = composer.nextSibling;
+        state.movedComposer = composer;
+      }
+
+      composer.classList.remove('sv-inline-composer-hidden');
+      state.body.innerHTML = '';
+      state.body.appendChild(composer);
+
+      // If a post is submitted and the text box clears, close the modal automatically.
+      const textarea = composer.querySelector('textarea');
+      const postButtons = [...composer.querySelectorAll('button')].filter(btn => {
+        const txt = (btn.textContent || '').trim().toLowerCase();
+        return btn.id === 'postBtn' || txt === 'post';
+      });
+      postButtons.forEach(btn => {
+        if (btn.dataset.svComposeBound1181) return;
+        btn.dataset.svComposeBound1181 = '1';
+        btn.addEventListener('click', () => {
+          setTimeout(() => {
+            const value = (textarea?.value || '').trim();
+            if (!value) {
+              closeCompose();
+            }
+          }, 900);
+        });
+      });
+    }
+
+    async function openCompose() {
+      ensureModal();
+      document.body.classList.add('sv-compose-open');
+      state.modal.classList.add('show');
+      syncComposeNavActive(true);
+      await mountComposerInModal();
+    }
+
+    function closeCompose() {
+      if (!state.modal) return;
+      restoreComposer();
+      state.modal.classList.remove('show');
+      document.body.classList.remove('sv-compose-open');
+      syncComposeNavActive(false);
+      hideInlineComposers();
+    }
+
+    function syncComposeNavActive(active) {
+      const btn = document.getElementById('svComposeNavBtn1181');
+      if (!btn) return;
+      btn.classList.toggle('active', !!active);
+      btn.innerHTML = createComposeIcon(!!active);
+    }
+
+    function enhanceBottomNav() {
+      const nav = document.getElementById('bottomNav');
+      if (!nav) return;
+
+      let composeBtn = document.getElementById('svComposeNavBtn1181');
+      if (!composeBtn) {
+        composeBtn = document.createElement('button');
+        composeBtn.type = 'button';
+        composeBtn.id = 'svComposeNavBtn1181';
+        composeBtn.className = (nav.firstElementChild?.className || '') + ' sv-compose-nav-btn';
+        composeBtn.setAttribute('aria-label', 'Create post');
+        composeBtn.setAttribute('title', 'Create post');
+        composeBtn.innerHTML = createComposeIcon(false);
+        composeBtn.addEventListener('click', openCompose);
+
+        const children = [...nav.children].filter(el => el.id !== 'svComposeNavBtn1181');
+        const insertBefore = children[2] || null;
+        nav.insertBefore(composeBtn, insertBefore);
+      }
+
+      syncComposeNavActive(state.modal?.classList.contains('show'));
+    }
+
+    function stabilize() {
+      enhanceBottomNav();
+      hideInlineComposers();
+    }
+
+    ensureModal();
+    stabilize();
+
+    let timer = null;
+    const observer = new MutationObserver(() => {
+      clearTimeout(timer);
+      timer = setTimeout(stabilize, 50);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener('hashchange', () => {
+      setTimeout(stabilize, 60);
+      if (state.modal?.classList.contains('show')) {
+        mountComposerInModal();
+      }
+    });
+  })();
+  </script>
+  <!-- /Starvalla Bottom Compose v1.18.1 -->
+
 </body>
 </html>
