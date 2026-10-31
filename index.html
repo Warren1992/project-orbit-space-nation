@@ -2670,12 +2670,25 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
     const list=document.querySelector('#feedList');
     if(!list||!svIsHome1180()) return;
 
-    let host=list.querySelector('#svBallotFeed1180');
+    /*
+      Official ballots must live OUTSIDE #feedList.
+      live-app-v1100.js replaces feedList.innerHTML whenever normal social
+      posts refresh, which used to delete propositions/elections immediately.
+    */
+    const parent=list.parentElement;
+    if(!parent) return;
+
+    let host=parent.querySelector('#svBallotFeed1180');
+
     if(!host){
       host=document.createElement('div');
       host.id='svBallotFeed1180';
       host.className='sv-ballot-feed';
-      list.prepend(host);
+      host.dataset.pinnedCivicFeed='1';
+      list.insertAdjacentElement('beforebegin',host);
+    }else if(host.nextElementSibling!==list){
+      /* Keep the official civic feed pinned directly above normal posts. */
+      list.insertAdjacentElement('beforebegin',host);
     }
 
     const markup=svCards1180();
@@ -3195,6 +3208,37 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   })();
   </script>
   <!-- /Starvalla Bottom Compose v1.18.2 -->
+
+
+  <!-- Starvalla Civic Feed Persistence v1.18.3 -->
+  <script>
+  (() => {
+    'use strict';
+
+    /*
+      Safety net for legacy feed refreshes: official ballot cards are mounted
+      as a sibling of #feedList, never as its child.
+    */
+    function keepPinnedCivicFeed1183(){
+      const list=document.querySelector('#feedList');
+      const host=document.querySelector('#svBallotFeed1180');
+      if(!list||!host) return;
+
+      if(host.parentElement!==list.parentElement||host.nextElementSibling!==list){
+        list.insertAdjacentElement('beforebegin',host);
+      }
+    }
+
+    const view=document.querySelector('#view');
+    if(view){
+      const observer=new MutationObserver(()=>keepPinnedCivicFeed1183());
+      observer.observe(view,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>setTimeout(keepPinnedCivicFeed1183,0));
+  })();
+  </script>
+  <!-- /Starvalla Civic Feed Persistence v1.18.3 -->
 
 </body>
 </html>
