@@ -1878,5 +1878,164 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Emblem Route/Home Card Fix v1.17.3 -->
 
+
+  <!-- Starvalla Star Reactions v1.17.4 -->
+  <style id="starvallaStarReactions1174">
+    /* Starvalla's own reaction language: stars instead of hearts. */
+    #view [data-like-post].liked,
+    #view [data-like-comment].liked,
+    #view [data-modal-like-comment].liked,
+    #view .comment-like-btn.liked{
+      color:#ffd45e!important;
+    }
+
+    #view [data-like-post],
+    #view [data-like-comment],
+    #view [data-modal-like-comment]{
+      transition:color .16s ease,transform .16s ease;
+    }
+
+    #view [data-like-post]:active,
+    #view [data-like-comment]:active,
+    #view [data-modal-like-comment]:active{
+      transform:scale(.96);
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    function numberAtEnd1174(text) {
+      const match = String(text || '').match(/(\d[\d,]*)\s*$/);
+      return match ? match[1] : '0';
+    }
+
+    function decoratePostStars1174(root = document) {
+      root.querySelectorAll?.('[data-like-post]').forEach(button => {
+        const liked = button.classList.contains('liked');
+        const count = numberAtEnd1174(button.textContent);
+        const desired = `${liked ? '★' : '☆'} ${count}`;
+
+        if (button.textContent.trim() !== desired) {
+          button.textContent = desired;
+        }
+
+        button.setAttribute(
+          'aria-label',
+          liked ? `Remove star · ${count} stars` : `Star this post · ${count} stars`
+        );
+        button.title = liked ? 'Starred' : 'Star';
+      });
+    }
+
+    function decorateCommentStars1174(root = document) {
+      root.querySelectorAll?.('[data-like-comment],[data-modal-like-comment]').forEach(button => {
+        const liked = button.classList.contains('liked');
+        const count = numberAtEnd1174(button.textContent);
+        const desired = `${liked ? '★ Starred' : '☆ Star'} · ${count}`;
+
+        if (button.textContent.trim() !== desired) {
+          button.textContent = desired;
+        }
+
+        button.setAttribute(
+          'aria-label',
+          liked ? `Remove star from comment · ${count} stars` : `Star this comment · ${count} stars`
+        );
+        button.title = liked ? 'Starred' : 'Star';
+      });
+    }
+
+    function decorateProfileStats1174(root = document) {
+      root.querySelectorAll?.('.profile-post-stats span').forEach(span => {
+        const text = span.textContent || '';
+        if (text.includes('♡') || text.includes('♥')) {
+          span.textContent = text.replace(/[♡♥]/g, '☆');
+        }
+      });
+
+      root.querySelectorAll?.('.profile-page-main p,.profile-page p').forEach(p => {
+        const text = p.textContent || '';
+        if (/\blikes received\b/i.test(text)) {
+          p.textContent = text.replace(/\blikes received\b/gi, 'stars received');
+        }
+      });
+    }
+
+    function decorateNotificationLanguage1174(root = document) {
+      root.querySelectorAll?.('.more-tile,strong,small,.setting-row strong,.setting-row small').forEach(el => {
+        if (el.children.length) return;
+        const text = el.textContent || '';
+
+        if (text.trim() === 'Likes') {
+          el.textContent = 'Stars';
+          return;
+        }
+
+        if (text.includes('Notify me when someone likes my post')) {
+          el.textContent = text.replace(
+            'Notify me when someone likes my post',
+            'Notify me when someone stars my post'
+          );
+        }
+
+        if (text.includes('Likes, comments, events, elections, and Senate alerts')) {
+          el.textContent = text.replace(
+            'Likes, comments, events, elections, and Senate alerts',
+            'Stars, comments, events, elections, and Senate alerts'
+          );
+        }
+      });
+    }
+
+    function decorateLegacyHearts1174(root = document) {
+      /* Covers the brief legacy/static render before live social data replaces it. */
+      root.querySelectorAll?.('#feedList .post-actions button').forEach(button => {
+        const text = button.textContent || '';
+        if (text.includes('♡') || text.includes('♥')) {
+          button.textContent = text.replace(/[♡♥]/g, '☆');
+        }
+      });
+    }
+
+    function applyStarReactions1174(root = document) {
+      decoratePostStars1174(root);
+      decorateCommentStars1174(root);
+      decorateProfileStats1174(root);
+      decorateNotificationLanguage1174(root);
+      decorateLegacyHearts1174(root);
+    }
+
+    applyStarReactions1174();
+
+    const view = document.querySelector('#view');
+    if (view) {
+      let timer = null;
+
+      const observer = new MutationObserver(mutations => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          for (const mutation of mutations) {
+            mutation.addedNodes?.forEach(node => {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                applyStarReactions1174(node);
+              }
+            });
+          }
+          applyStarReactions1174(view);
+        }, 20);
+      });
+
+      observer.observe(view, {
+        childList:true,
+        subtree:true,
+        characterData:true
+      });
+    }
+  })();
+  </script>
+  <!-- /Starvalla Star Reactions v1.17.4 -->
+
 </body>
 </html>
