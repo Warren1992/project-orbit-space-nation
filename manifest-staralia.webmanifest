@@ -1,7 +1,7 @@
 {
-  "name": "Staralia \u2014 Digital Space Nation",
-  "short_name": "Staralia",
-  "description": "A members-only digital space nation with citizen accounts, social features, elections, a Senate, events, and space projects.",
+  "name": "Starvalla \u2014 Digital Space Nation",
+  "short_name": "Starvalla",
+  "description": "An 18+ digital civic community and social simulation with citizen accounts, elections, Congress, messaging, and AI citizens.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

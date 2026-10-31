@@ -10,6 +10,7 @@
 
   <link rel="manifest" href="manifest-staralia.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="shortcut icon" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -1736,6 +1737,91 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   })();
   </script>
   <!-- /Starvalla More Menu Stability v1.17.1 -->
+
+
+  <!-- Starvalla Emblem/Home Cleanup v1.17.2 -->
+  <script>
+  (() => {
+    'use strict';
+
+    function isHome1172() {
+      const title = document.querySelector('#sectionTitle')?.textContent?.trim();
+      return title === 'Home' || location.hash === '#home' || !location.hash;
+    }
+
+    function removeHomeSpaceProgram1172() {
+      if (!isHome1172()) return;
+
+      document.querySelectorAll('#view .card').forEach(card => {
+        const heading = card.querySelector('h3')?.textContent?.trim().toLowerCase() || '';
+        const text = card.textContent?.trim().toLowerCase() || '';
+
+        if (
+          heading === 'space program' ||
+          text.includes('lunar archive mission') && text.includes('planning-stage demonstration goal')
+        ) {
+          card.remove();
+        }
+      });
+    }
+
+    function removeLiveCitizenAccount1172() {
+      if (!isHome1172()) return;
+
+      document.querySelectorAll('#view .card').forEach(card => {
+        const text = card.textContent?.trim().toUpperCase() || '';
+        if (text.includes('LIVE CITIZEN ACCOUNT')) {
+          card.remove();
+        }
+      });
+    }
+
+    function ensureNationalEmblemTile1172() {
+      const title = document.querySelector('#sectionTitle')?.textContent?.trim();
+      if (title !== 'More') return;
+
+      const grid = document.querySelector('#view .more-grid');
+      if (!grid || grid.querySelector('[data-national-emblem]')) return;
+
+      const tile = document.createElement('button');
+      tile.type = 'button';
+      tile.className = 'more-tile';
+      tile.dataset.nationalEmblem = '1';
+      tile.innerHTML = `
+        <img class="national-emblem-more-icon" src="national-emblem.png" alt="" />
+        <strong>National Emblem</strong>
+        <small>Official symbolism and meaning</small>
+      `;
+
+      const flagTile = [...grid.querySelectorAll('.more-tile')]
+        .find(el => el.textContent?.includes('National Flag'));
+
+      if (flagTile) flagTile.insertAdjacentElement('afterend', tile);
+      else grid.prepend(tile);
+    }
+
+    function sync1172() {
+      removeHomeSpaceProgram1172();
+      removeLiveCitizenAccount1172();
+      ensureNationalEmblemTile1172();
+    }
+
+    sync1172();
+
+    const view = document.querySelector('#view');
+    if (view) {
+      let timer = null;
+      const observer = new MutationObserver(() => {
+        clearTimeout(timer);
+        timer = setTimeout(sync1172, 35);
+      });
+      observer.observe(view, { childList:true, subtree:true });
+    }
+
+    window.addEventListener('hashchange', () => setTimeout(sync1172, 0));
+  })();
+  </script>
+  <!-- /Starvalla Emblem/Home Cleanup v1.17.2 -->
 
 </body>
 </html>
