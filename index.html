@@ -2,6 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <!-- Starvalla First-Paint Branding Guard v1.18.4 -->
+  <script>
+  (() => {
+    'use strict';
+
+    const replaceBrand = value => String(value ?? '')
+      .replace(/STARALIA/g, 'STARVALLA')
+      .replace(/Staralia/g, 'Starvalla')
+      .replace(/staralia/g, 'starvalla');
+
+    function fixNode(node) {
+      if (!node) return;
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const next = replaceBrand(node.nodeValue);
+        if (next !== node.nodeValue) node.nodeValue = next;
+        return;
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      for (const attr of ['title','aria-label','placeholder','alt']) {
+        if (node.hasAttribute?.(attr)) {
+          const oldValue = node.getAttribute(attr);
+          const newValue = replaceBrand(oldValue);
+          if (newValue !== oldValue) node.setAttribute(attr, newValue);
+        }
+      }
+
+      node.childNodes?.forEach(fixNode);
+    }
+
+    const root = document.documentElement;
+
+    /*
+      Older JavaScript modules still contain the former Staralia name.
+      MutationObserver callbacks run at the microtask checkpoint after those
+      DOM writes and before the browser paints the next frame, so the user
+      never sees the old branding flash during startup or route changes.
+    */
+    const observer = new MutationObserver(mutations => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'characterData') {
+          fixNode(mutation.target);
+        } else {
+          mutation.addedNodes?.forEach(fixNode);
+        }
+      }
+
+      const nextTitle = replaceBrand(document.title);
+      if (nextTitle !== document.title) document.title = nextTitle;
+    });
+
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fixNode(document.body);
+      document.title = replaceBrand(document.title);
+    }, { once: true });
+  })();
+  </script>
+  <!-- /Starvalla First-Paint Branding Guard v1.18.4 -->
+
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#07111f" />
   <meta name="description" content="Starvalla — a digital space nation with real citizen accounts." />
