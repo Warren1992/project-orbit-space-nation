@@ -1777,9 +1777,25 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
     // If #more is opened from a bookmark/back navigation, override the legacy render once.
     window.addEventListener('hashchange', () => {
       if (location.hash === '#more') {
-        setTimeout(renderStableMore1171, 0);
+        setTimeout(() => {
+          const title = document.querySelector('#sectionTitle')?.textContent?.trim();
+          if (!title || title === 'More') renderStableMore1171();
+        }, 0);
       }
     });
+
+    /*
+      A number of newer More tiles open custom pages without using setRoute().
+      Suppress the legacy More stabilizer during that click so those pages can
+      render before we decide whether #more still represents the visible screen.
+    */
+    let moreTransition1171 = false;
+    document.addEventListener('click', event => {
+      const tile = event.target.closest?.('#view .more-grid .more-tile');
+      if (!tile) return;
+      moreTransition1171 = true;
+      setTimeout(() => { moreTransition1171 = false; }, 500);
+    }, true);
 
     // If an older module replaces the More view during one of its delayed
     // "stabilization" passes, restore the stable version immediately.
@@ -1787,7 +1803,7 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
     if (view) {
       let restoring = false;
       const observer = new MutationObserver(() => {
-        if (restoring) return;
+        if (restoring || moreTransition1171) return;
 
         let onMore = false;
         try {
@@ -1799,9 +1815,27 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
         if (!onMore) return;
         if (view.querySelector('[data-stable-more-v1171]')) return;
 
+        /*
+          Do not redraw More over a custom page such as Settings, National Flag,
+          Citizen Card, National Anthem, Blocked Citizens, or a citizen profile.
+          Those pages may intentionally leave the URL at #more because their
+          older modules predate the modern route system.
+        */
+        const title = document.querySelector('#sectionTitle')?.textContent?.trim() || '';
+        const visiblyMore =
+          title === 'More' ||
+          !!view.querySelector('.more-grid');
+
+        if (!visiblyMore) return;
+
         restoring = true;
         setTimeout(() => {
-          renderStableMore1171();
+          const latestTitle = document.querySelector('#sectionTitle')?.textContent?.trim() || '';
+          const stillMore =
+            latestTitle === 'More' ||
+            !!view.querySelector('.more-grid');
+
+          if (stillMore) renderStableMore1171();
           restoring = false;
         }, 0);
       });
@@ -4820,6 +4854,28 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla National Anthem v1.19.5 -->
+
+
+  <!-- Starvalla More Navigation Compatibility v1.19.6 -->
+  <script>
+  (() => {
+    'use strict';
+
+    document.addEventListener('click', event => {
+      const profileTile = event.target.closest?.('#view .more-grid [data-route="profile"]');
+      if (!profileTile) return;
+
+      /*
+        Do not stop the normal route click. Just ensure no stale custom-page
+        state survives while the legacy delegated router handles the profile.
+      */
+      try {
+        if (typeof state !== 'undefined') state.route = 'profile';
+      } catch {}
+    }, true);
+  })();
+  </script>
+  <!-- /Starvalla More Navigation Compatibility v1.19.6 -->
 
 </body>
 </html>
