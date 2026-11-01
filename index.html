@@ -147,6 +147,12 @@
     .auth-gate-loading{text-align:center;color:#a8b7ca;font-weight:800}
   </style>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Starvalla National Anthem startup guard v1.19.5 -->
+  <script>
+    window.__starvallaRequestedAnthem1195 = location.hash === '#anthem';
+  </script>
+
 </head>
 <body>
 
@@ -4381,6 +4387,439 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   })();
   </script>
   <!-- /Starvalla Desktop Parity v1.19.4 -->
+
+
+  <!-- Starvalla National Anthem v1.19.5 -->
+  <style id="starvallaNationalAnthem1195">
+    .sv-anthem-page{
+      display:grid;
+      gap:18px;
+      max-width:900px;
+      margin:0 auto;
+    }
+
+    .sv-anthem-hero{
+      position:relative;
+      overflow:hidden;
+      text-align:center;
+      padding:34px 24px 30px;
+      border:1px solid rgba(180,132,255,.28);
+      background:
+        radial-gradient(circle at 50% 0%,rgba(122,64,255,.20),transparent 38%),
+        linear-gradient(180deg,rgba(12,24,43,.98),rgba(6,14,27,.98));
+    }
+
+    .sv-anthem-hero::after{
+      content:"";
+      position:absolute;
+      width:420px;
+      height:420px;
+      border-radius:50%;
+      left:50%;
+      bottom:-340px;
+      transform:translateX(-50%);
+      border:1px solid rgba(174,122,255,.16);
+      box-shadow:
+        0 0 0 42px rgba(115,66,255,.025),
+        0 0 0 88px rgba(115,66,255,.018);
+      pointer-events:none;
+    }
+
+    .sv-anthem-emblem{
+      width:126px;
+      height:126px;
+      object-fit:contain;
+      display:block;
+      margin:0 auto 15px;
+      filter:drop-shadow(0 0 22px rgba(122,64,255,.34));
+      position:relative;
+      z-index:1;
+    }
+
+    .sv-anthem-kicker{
+      position:relative;
+      z-index:1;
+      color:#ffd978;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.13em;
+    }
+
+    .sv-anthem-title{
+      position:relative;
+      z-index:1;
+      margin:9px 0 4px;
+      font-size:clamp(36px,6vw,58px);
+      line-height:1.04;
+      color:#fff;
+    }
+
+    .sv-anthem-subtitle{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#aebed1;
+      font-size:16px;
+    }
+
+    .sv-anthem-meta{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .sv-anthem-meta span{
+      display:inline-flex;
+      align-items:center;
+      min-height:28px;
+      padding:5px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.09);
+      background:rgba(255,255,255,.035);
+      color:#b8c6d7;
+      font-size:11px;
+      font-weight:800;
+    }
+
+    .sv-anthem-audio-note{
+      position:relative;
+      z-index:1;
+      margin:20px auto 0;
+      max-width:620px;
+      border:1px solid rgba(244,185,66,.18);
+      border-radius:14px;
+      padding:11px 13px;
+      background:rgba(244,185,66,.045);
+      color:#aab9ca;
+      font-size:12px;
+      line-height:1.55;
+    }
+
+    .sv-anthem-lyrics{
+      padding:26px;
+    }
+
+    .sv-anthem-lyrics-head{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:end;
+      padding-bottom:14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+
+    .sv-anthem-lyrics-head h2{
+      margin:4px 0 0;
+    }
+
+    .sv-anthem-section{
+      padding:22px 0;
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+
+    .sv-anthem-section:last-child{
+      border-bottom:0;
+      padding-bottom:2px;
+    }
+
+    .sv-anthem-section h3{
+      margin:0 0 10px;
+      color:#ffd978;
+      font-size:12px;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+    }
+
+    .sv-anthem-section p{
+      margin:0;
+      color:#e7edf5;
+      font-size:17px;
+      line-height:1.8;
+      white-space:pre-line;
+    }
+
+    .sv-anthem-chorus{
+      border-left:3px solid rgba(244,185,66,.62);
+      padding-left:18px;
+    }
+
+    .sv-anthem-about{
+      line-height:1.65;
+    }
+
+    .sv-anthem-about strong{
+      color:#fff;
+    }
+
+    .sv-anthem-more-icon{
+      font-size:44px;
+      line-height:1;
+      display:block;
+    }
+
+    @media(max-width:760px){
+      .sv-anthem-page{
+        max-width:none;
+      }
+      .sv-anthem-hero{
+        padding:28px 18px 24px;
+      }
+      .sv-anthem-emblem{
+        width:104px;
+        height:104px;
+      }
+      .sv-anthem-lyrics{
+        padding:20px;
+      }
+      .sv-anthem-section p{
+        font-size:16px;
+        line-height:1.75;
+      }
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const ANTHEM_HASH1195 = '#anthem';
+
+    function setAnthemShell1195(){
+      try{
+        if(typeof state !== 'undefined') state.route='anthem';
+      }catch{}
+
+      const title=document.querySelector('#sectionTitle');
+      const kicker=document.querySelector('#sectionKicker');
+
+      if(title) title.textContent='National Anthem';
+      if(kicker){
+        kicker.textContent='STARVALLA';
+        kicker.style.setProperty('color','#fff','important');
+      }
+
+      document.querySelectorAll('#bottomNav .bottom-link').forEach(el=>el.classList.remove('active'));
+      document.querySelector('#bottomNav [data-route="more"]')?.classList.add('active');
+
+      document.querySelectorAll('#sideNav .nav-link').forEach(el=>el.classList.remove('active'));
+      document.querySelector('#sideNav [data-sv-anthem-nav="1195"]')?.classList.add('active');
+    }
+
+    function anthemPage1195(){
+      return `
+        <div class="sv-anthem-page">
+          <section class="card sv-anthem-hero">
+            <img class="sv-anthem-emblem" src="national-emblem.png" alt="Starvalla National Emblem">
+            <div class="sv-anthem-kicker">OFFICIAL NATIONAL ANTHEM</div>
+            <h1 class="sv-anthem-title">Carry the Dawn</h1>
+            <p class="sv-anthem-subtitle">National Anthem of Starvalla</p>
+
+            <div class="sv-anthem-meta">
+              <span>Official lyrics</span>
+              <span>Adopted 2026</span>
+              <span>Theme: unity · exploration · civic participation</span>
+            </div>
+
+            <div class="sv-anthem-audio-note">
+              The official lyrics are established here. An original audio recording can be added to this page later when Starvalla adopts an official musical arrangement.
+            </div>
+          </section>
+
+          <section class="card sv-anthem-lyrics">
+            <div class="sv-anthem-lyrics-head">
+              <div>
+                <span class="eyebrow">OFFICIAL LYRICS</span>
+                <h2>Carry the Dawn</h2>
+              </div>
+            </div>
+
+            <div class="sv-anthem-section">
+              <h3>Verse I</h3>
+              <p>From the dark where distant starlight
+Calls beyond the world we know,
+We arise with hearts united,
+Toward the endless skies we go.
+Hand in hand we build tomorrow,
+Free to dream and free to strive,
+Through the night we carry forward
+All the hopes that make us rise.</p>
+            </div>
+
+            <div class="sv-anthem-section sv-anthem-chorus">
+              <h3>Chorus</h3>
+              <p>Starvalla, rise among the stars,
+Carry the dawn beyond the sky.
+Bound by hope and joined together,
+Lift our light forever high.
+Through the unknown, ever onward,
+Bold in heart and clear in sight,
+Starvalla, home of those who venture,
+Carry dawn into the night.</p>
+            </div>
+
+            <div class="sv-anthem-section">
+              <h3>Verse II</h3>
+              <p>Not by borders are we bounded,
+Not by distance kept apart.
+Every citizen stands equal,
+Every voice can shape our path.
+We will question, learn, discover,
+We will build what none have seen,
+Turning distant worlds before us
+Into places once only dreamed.</p>
+            </div>
+
+            <div class="sv-anthem-section sv-anthem-chorus">
+              <h3>Chorus</h3>
+              <p>Starvalla, rise among the stars,
+Carry the dawn beyond the sky.
+Bound by hope and joined together,
+Lift our light forever high.
+Through the unknown, ever onward,
+Bold in heart and clear in sight,
+Starvalla, home of those who venture,
+Carry dawn into the night.</p>
+            </div>
+
+            <div class="sv-anthem-section">
+              <h3>Bridge</h3>
+              <p>Let no darkness end the journey,
+Let no fear command our way.
+Where the horizon meets forever,
+We will greet another day.
+For the future is not given—
+It is shaped by what we do.
+And the stars that shine above us
+Call us onward, brave and true.</p>
+            </div>
+
+            <div class="sv-anthem-section sv-anthem-chorus">
+              <h3>Final Chorus</h3>
+              <p>Starvalla, rise among the stars,
+Carry the dawn beyond the sky.
+Bound by hope and joined together,
+Lift our light forever high.
+Through the unknown, ever onward,
+One great future shining bright,
+Starvalla, home of those who venture,
+Carry dawn into the night.</p>
+            </div>
+
+            <div class="sv-anthem-section">
+              <h3>Closing</h3>
+              <p>Starvalla, ever onward—
+Carry dawn beyond the sky.</p>
+            </div>
+          </section>
+
+          <section class="card sv-anthem-about">
+            <span class="eyebrow">ABOUT THE ANTHEM</span>
+            <h3>National symbolism</h3>
+            <p class="muted">
+              <strong>Carry the Dawn</strong> expresses Starvalla's founding themes of equal citizenship,
+              shared civic responsibility, exploration, discovery, and building a future together.
+              Its recurring line “Carry the dawn beyond the sky” connects the anthem to Starvalla's
+              established national motto and broader visual identity.
+            </p>
+          </section>
+        </div>`;
+    }
+
+    function renderAnthem1195(){
+      const view=document.querySelector('#view');
+      if(!view) return;
+
+      setAnthemShell1195();
+
+      try{
+        history.replaceState(
+          history.state,
+          '',
+          location.pathname + location.search + ANTHEM_HASH1195
+        );
+      }catch{}
+
+      view.innerHTML=anthemPage1195();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function ensureAnthemTile1195(){
+      const grid=document.querySelector('#view .more-grid');
+      if(!grid || grid.querySelector('[data-sv-anthem-tile="1195"]')) return;
+
+      const tile=document.createElement('button');
+      tile.type='button';
+      tile.className='more-tile';
+      tile.dataset.svAnthemTile='1195';
+      tile.innerHTML=`
+        <span class="sv-anthem-more-icon">♫</span>
+        <strong>National Anthem</strong>
+        <small>Carry the Dawn · official lyrics</small>`;
+
+      const emblem=[...grid.querySelectorAll('.more-tile')]
+        .find(el=>el.textContent?.includes('National Emblem'));
+
+      const flag=[...grid.querySelectorAll('.more-tile')]
+        .find(el=>el.textContent?.includes('National Flag'));
+
+      const anchor=emblem || flag;
+      if(anchor) anchor.insertAdjacentElement('afterend',tile);
+      else grid.prepend(tile);
+    }
+
+    function ensureAnthemDesktopNav1195(){
+      const side=document.querySelector('#sideNav');
+      if(!side || side.querySelector('[data-sv-anthem-nav="1195"]')) return;
+
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='nav-link';
+      btn.dataset.svAnthemNav='1195';
+      btn.innerHTML='<span class="nav-icon">♫</span><span class="nav-label">National Anthem</span>';
+
+      const more=side.querySelector('[data-route="more"]');
+      if(more) side.insertBefore(btn,more);
+      else side.appendChild(btn);
+    }
+
+    document.addEventListener('click',event=>{
+      const trigger=event.target.closest?.(
+        '[data-sv-anthem-tile="1195"],[data-sv-anthem-nav="1195"]'
+      );
+      if(!trigger) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      renderAnthem1195();
+    },true);
+
+    const observer1195=new MutationObserver(()=>{
+      ensureAnthemTile1195();
+      ensureAnthemDesktopNav1195();
+    });
+
+    observer1195.observe(document.body,{
+      childList:true,
+      subtree:true
+    });
+
+    ensureAnthemTile1195();
+    ensureAnthemDesktopNav1195();
+
+    if(
+      window.__starvallaRequestedAnthem1195 ||
+      location.hash===ANTHEM_HASH1195
+    ){
+      setTimeout(renderAnthem1195,0);
+    }
+  })();
+  </script>
+  <!-- /Starvalla National Anthem v1.19.5 -->
 
 </body>
 </html>
