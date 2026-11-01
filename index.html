@@ -146,6 +146,7 @@
     .auth-gate-note{font-size:12px;color:#718399;line-height:1.5;text-align:center;margin:14px 0 0}
     .auth-gate-loading{text-align:center;color:#a8b7ca;font-weight:800}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -3306,6 +3307,869 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   })();
   </script>
   <!-- /Starvalla Civic Feed Persistence v1.18.3 -->
+
+
+  <!-- Starvalla Digital Citizen Card v1.19.0 -->
+  <style id="starvallaCitizenCard1190">
+    .sv-card-page{
+      display:grid;
+      gap:16px;
+    }
+    .sv-card-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .sv-card-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .sv-citizen-card{
+      position:relative;
+      overflow:hidden;
+      min-height:430px;
+      border-radius:28px;
+      border:1px solid rgba(180,132,255,.32);
+      background:
+        radial-gradient(circle at 88% 18%,rgba(128,63,255,.28),transparent 25%),
+        radial-gradient(circle at 20% 90%,rgba(45,114,255,.16),transparent 32%),
+        linear-gradient(145deg,#050914 0%,#091426 55%,#120925 100%);
+      box-shadow:0 28px 90px rgba(0,0,0,.42);
+      color:#fff;
+      padding:24px;
+    }
+    .sv-citizen-card::after{
+      content:"";
+      position:absolute;
+      width:340px;
+      height:340px;
+      right:-130px;
+      bottom:-150px;
+      border-radius:50%;
+      border:1px solid rgba(173,121,255,.16);
+      box-shadow:
+        0 0 0 34px rgba(121,71,255,.035),
+        0 0 0 72px rgba(121,71,255,.025);
+      pointer-events:none;
+    }
+    .sv-card-top{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+    }
+    .sv-card-brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .sv-card-emblem{
+      width:72px;
+      height:72px;
+      object-fit:contain;
+      filter:drop-shadow(0 0 18px rgba(121,71,255,.35));
+      flex:0 0 auto;
+    }
+    .sv-card-brand strong{
+      display:block;
+      font-size:24px;
+      letter-spacing:.12em;
+    }
+    .sv-card-brand span{
+      display:block;
+      margin-top:4px;
+      color:#ffd978;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.11em;
+    }
+    .sv-card-status{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      border:1px solid rgba(79,214,158,.35);
+      border-radius:999px;
+      padding:7px 10px;
+      color:#87e7bf;
+      background:rgba(79,214,158,.07);
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.07em;
+      white-space:nowrap;
+    }
+    .sv-card-status.revoked{
+      border-color:rgba(255,97,120,.35);
+      color:#ff9cab;
+      background:rgba(255,97,120,.07);
+    }
+    .sv-card-main{
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:150px minmax(0,1fr) 170px;
+      gap:20px;
+      align-items:center;
+      margin-top:30px;
+    }
+    .sv-card-photo{
+      width:150px;
+      height:150px;
+      border-radius:24px;
+      object-fit:cover;
+      border:2px solid rgba(244,185,66,.55);
+      background:#151d2b;
+    }
+    .sv-card-photo-fallback{
+      width:150px;
+      height:150px;
+      border-radius:24px;
+      border:2px solid rgba(244,185,66,.55);
+      background:linear-gradient(145deg,#251477,#122f73);
+      display:grid;
+      place-items:center;
+      font-size:54px;
+      font-weight:950;
+    }
+    .sv-card-name{
+      font-size:34px;
+      font-weight:950;
+      line-height:1.05;
+      margin:0;
+    }
+    .sv-card-number{
+      margin-top:9px;
+      color:#d6e0ed;
+      font-size:21px;
+      font-weight:800;
+    }
+    .sv-card-role{
+      margin-top:7px;
+      color:#9eafc3;
+      font-size:16px;
+      line-height:1.4;
+    }
+    .sv-card-details{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px 18px;
+      margin-top:20px;
+    }
+    .sv-card-detail span{
+      display:block;
+      color:#71849b;
+      font-size:9px;
+      font-weight:950;
+      letter-spacing:.10em;
+      text-transform:uppercase;
+    }
+    .sv-card-detail strong{
+      display:block;
+      margin-top:3px;
+      color:#fff;
+      font-size:13px;
+      line-height:1.35;
+      overflow-wrap:anywhere;
+    }
+    .sv-card-qr-wrap{
+      border-radius:18px;
+      background:#fff;
+      padding:10px;
+      align-self:center;
+      justify-self:end;
+    }
+    .sv-card-qr-wrap canvas,
+    .sv-card-qr-wrap img{
+      display:block!important;
+      width:150px!important;
+      height:150px!important;
+    }
+    .sv-card-bottom{
+      position:relative;
+      z-index:1;
+      margin-top:28px;
+      padding-top:14px;
+      border-top:1px solid rgba(255,255,255,.10);
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-end;
+    }
+    .sv-card-disclaimer{
+      max-width:640px;
+      color:#8da0b6;
+      font-size:11px;
+      line-height:1.5;
+    }
+    .sv-card-version{
+      color:#ffd978;
+      font-size:10px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .sv-card-explainer{
+      line-height:1.6;
+    }
+    .sv-card-explainer strong{
+      color:#fff;
+    }
+    .sv-verify-overlay{
+      position:fixed;
+      inset:0;
+      z-index:25000;
+      overflow:auto;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(105,53,220,.28),transparent 34%),
+        linear-gradient(180deg,#020711,#07111f 62%,#050a12);
+      color:#fff;
+      padding:max(28px,env(safe-area-inset-top)) 18px max(28px,env(safe-area-inset-bottom));
+    }
+    .sv-verify-card{
+      width:min(620px,100%);
+      margin:40px auto;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:26px;
+      background:rgba(8,19,35,.96);
+      padding:24px;
+      text-align:center;
+      box-shadow:0 28px 90px rgba(0,0,0,.48);
+    }
+    .sv-verify-card img{
+      width:100px;
+      height:100px;
+      object-fit:contain;
+    }
+    .sv-verify-state{
+      display:inline-flex;
+      margin:14px auto 4px;
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.08em;
+      border:1px solid rgba(79,214,158,.35);
+      background:rgba(79,214,158,.07);
+      color:#85e8be;
+    }
+    .sv-verify-state.bad{
+      border-color:rgba(255,97,120,.35);
+      background:rgba(255,97,120,.07);
+      color:#ff9cab;
+    }
+    .sv-verify-name{
+      font-size:31px;
+      margin:14px 0 5px;
+    }
+    .sv-verify-meta{
+      color:#9cafc4;
+      line-height:1.6;
+    }
+    .sv-verify-disclaimer{
+      margin-top:20px;
+      padding:13px;
+      border:1px solid rgba(244,185,66,.18);
+      border-radius:13px;
+      color:#aebdce;
+      background:rgba(244,185,66,.04);
+      font-size:12px;
+      line-height:1.55;
+    }
+    .sv-card-more-icon{
+      width:52px;
+      height:52px;
+      object-fit:contain;
+      display:block;
+    }
+    @media(max-width:720px){
+      .sv-citizen-card{padding:19px;min-height:0}
+      .sv-card-main{
+        grid-template-columns:94px minmax(0,1fr);
+        gap:14px;
+      }
+      .sv-card-photo,.sv-card-photo-fallback{
+        width:94px;
+        height:94px;
+        border-radius:18px;
+      }
+      .sv-card-photo-fallback{font-size:34px}
+      .sv-card-name{font-size:25px}
+      .sv-card-number{font-size:17px}
+      .sv-card-role{font-size:14px}
+      .sv-card-qr-wrap{
+        grid-column:1 / -1;
+        justify-self:start;
+        margin-top:4px;
+      }
+      .sv-card-qr-wrap canvas,
+      .sv-card-qr-wrap img{
+        width:128px!important;
+        height:128px!important;
+      }
+      .sv-card-bottom{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+      .sv-card-emblem{width:58px;height:58px}
+      .sv-card-brand strong{font-size:19px}
+    }
+  </style>
+
+  <script type="module">
+  const waitForCitizenCardDb1190 = async () => {
+    for (let i = 0; i < 120; i++) {
+      if (window.projectOrbitDb) return window.projectOrbitDb;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw new Error('Starvalla database client did not initialize');
+  };
+
+  const cardDb1190 = await waitForCitizenCardDb1190();
+  const cardState1190 = { card:null };
+
+  const cardEsc1190 = value => String(value ?? '').replace(/[&<>'"]/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[c]));
+
+  const padCard1190 = value => String(value ?? '').padStart(6,'0');
+
+  function cardDate1190(value){
+    if(!value) return '—';
+    return new Intl.DateTimeFormat(undefined,{
+      year:'numeric',month:'short',day:'numeric'
+    }).format(new Date(value));
+  }
+
+  function verificationUrl1190(token){
+    const url=new URL(location.origin+location.pathname);
+    url.searchParams.set('verify',token);
+    return url.toString();
+  }
+
+  function setCustomCardRoute1190(){
+    try{
+      if(typeof state!=='undefined') state.route='citizen-card';
+    }catch{}
+
+    history.replaceState(
+      history.state,
+      '',
+      location.pathname+location.search.replace(/([?&])verify=[^&]*/,'$1').replace(/[?&]$/,'')+'#citizen-card'
+    );
+
+    const title=document.querySelector('#sectionTitle');
+    const kicker=document.querySelector('#sectionKicker');
+    if(title) title.textContent='Citizen Card';
+    if(kicker){
+      kicker.textContent='STARVALLA';
+      kicker.style.setProperty('color','#fff','important');
+    }
+
+    document.querySelectorAll('#bottomNav .bottom-link').forEach(b=>b.classList.remove('active'));
+    document.querySelector('#bottomNav [data-route="more"]')?.classList.add('active');
+  }
+
+  function qr1190(target,text,size=150){
+    target.innerHTML='';
+    if(typeof QRCode==='undefined'){
+      target.innerHTML='<div style="color:#111;font-size:11px;padding:12px;width:126px">QR unavailable</div>';
+      return null;
+    }
+
+    return new QRCode(target,{
+      text,
+      width:size,
+      height:size,
+      colorDark:'#111827',
+      colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
+    });
+  }
+
+  async function loadMyCard1190(){
+    const {data,error}=await cardDb1190.rpc('my_starvalla_citizen_card');
+    if(error) throw error;
+    cardState1190.card=data?.[0]||null;
+    return cardState1190.card;
+  }
+
+  function renderCitizenCardHtml1190(card){
+    const initial=cardEsc1190((card.display_name||'C').trim().charAt(0).toUpperCase());
+    const photo=card.avatar_url
+      ? `<img class="sv-card-photo" src="${cardEsc1190(card.avatar_url)}" alt="${cardEsc1190(card.display_name)} profile photo">`
+      : `<div class="sv-card-photo-fallback">${initial}</div>`;
+
+    return `
+      <div class="sv-card-page">
+        <div class="sv-card-toolbar">
+          <button class="btn secondary" type="button" id="svCardBack1190">← More</button>
+          <div class="sv-card-actions">
+            <button class="btn secondary" type="button" id="svCardCopy1190">Copy verification link</button>
+            <button class="btn secondary" type="button" id="svCardSave1190">Save card</button>
+            <button class="btn primary" type="button" id="svCardShare1190">Share card</button>
+          </div>
+        </div>
+
+        <section class="sv-citizen-card" id="svCitizenCard1190">
+          <div class="sv-card-top">
+            <div class="sv-card-brand">
+              <img src="national-emblem.png" class="sv-card-emblem" alt="">
+              <div>
+                <strong>STARVALLA</strong>
+                <span>DIGITAL CITIZEN CARD</span>
+              </div>
+            </div>
+            <span class="sv-card-status ${card.card_status==='active'?'':'revoked'}">
+              ${card.card_status==='active'?'● ACTIVE':'● REVOKED'}
+            </span>
+          </div>
+
+          <div class="sv-card-main">
+            ${photo}
+            <div>
+              <h2 class="sv-card-name">${cardEsc1190(card.display_name)}</h2>
+              <div class="sv-card-number">Citizen #${padCard1190(card.citizen_no)}</div>
+              <div class="sv-card-role">${cardEsc1190(card.role||'Citizen')}</div>
+
+              <div class="sv-card-details">
+                <div class="sv-card-detail">
+                  <span>Card ID</span>
+                  <strong>${cardEsc1190(card.card_id)}</strong>
+                </div>
+                <div class="sv-card-detail">
+                  <span>Member since</span>
+                  <strong>${cardDate1190(card.joined_at)}</strong>
+                </div>
+                <div class="sv-card-detail">
+                  <span>Issued</span>
+                  <strong>${cardDate1190(card.issued_at)}</strong>
+                </div>
+                <div class="sv-card-detail">
+                  <span>Credential</span>
+                  <strong>Private community</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="sv-card-qr-wrap" id="svCitizenCardQr1190" aria-label="Verification QR code"></div>
+          </div>
+
+          <div class="sv-card-bottom">
+            <div class="sv-card-disclaimer">
+              Private digital community credential. Not government-issued identification.
+              Does not establish legal citizenship, nationality, age, identity, immigration status,
+              or territorial rights.
+            </div>
+            <div class="sv-card-version">CARD v${Number(card.card_version||1)}</div>
+          </div>
+        </section>
+
+        <section class="card sv-card-explainer">
+          <h3>About your Starvalla Citizen Card</h3>
+          <p class="muted">
+            This credential verifies your Starvalla account and current in-app role only.
+            Your date of birth, home address, authentication information, and other private
+            account data are not printed on the card or exposed by its QR verification page.
+          </p>
+        </section>
+      </div>`;
+  }
+
+  async function renderCitizenCard1190(){
+    const view=document.querySelector('#view');
+    if(!view) return;
+
+    setCustomCardRoute1190();
+    view.innerHTML='<div class="card"><h3>Loading your Citizen Card…</h3><p class="muted">Preparing your Starvalla credential.</p></div>';
+
+    try{
+      const card=await loadMyCard1190();
+      if(!card){
+        view.innerHTML='<div class="card"><h3>Citizen Card unavailable</h3><p class="muted">This feature is issued automatically to human Starvalla citizen accounts.</p></div>';
+        return;
+      }
+
+      view.innerHTML=renderCitizenCardHtml1190(card);
+      qr1190(
+        view.querySelector('#svCitizenCardQr1190'),
+        verificationUrl1190(card.verification_token),
+        150
+      );
+
+      view.querySelector('#svCardBack1190')?.addEventListener('click',()=>{
+        location.hash='#more';
+      });
+
+      view.querySelector('#svCardCopy1190')?.addEventListener('click',async()=>{
+        try{
+          await navigator.clipboard.writeText(verificationUrl1190(card.verification_token));
+          document.querySelector('#toast').textContent='Verification link copied.';
+          document.querySelector('#toast').classList.add('show');
+          setTimeout(()=>document.querySelector('#toast')?.classList.remove('show'),1800);
+        }catch{
+          alert(verificationUrl1190(card.verification_token));
+        }
+      });
+
+      view.querySelector('#svCardSave1190')?.addEventListener('click',async()=>{
+        const blob=await exportCitizenCard1190(card);
+        if(!blob) return;
+        downloadCardBlob1190(blob,card);
+      });
+
+      view.querySelector('#svCardShare1190')?.addEventListener('click',async()=>{
+        const blob=await exportCitizenCard1190(card);
+        if(!blob) return;
+        const file=new File(
+          [blob],
+          `Starvalla-Citizen-${padCard1190(card.citizen_no)}.png`,
+          {type:'image/png'}
+        );
+
+        if(navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))){
+          try{
+            await navigator.share({
+              title:'My Starvalla Citizen Card',
+              text:`Starvalla Citizen #${padCard1190(card.citizen_no)}`,
+              files:[file]
+            });
+            return;
+          }catch(err){
+            if(err?.name==='AbortError') return;
+          }
+        }
+
+        downloadCardBlob1190(blob,card);
+      });
+    }catch(error){
+      view.innerHTML=`<div class="card"><h3>Could not load Citizen Card</h3><p class="muted">${cardEsc1190(error?.message||'Please try again.')}</p></div>`;
+    }
+  }
+
+  function image1190(src,crossOrigin=false){
+    return new Promise(resolve=>{
+      if(!src){ resolve(null); return; }
+      const img=new Image();
+      if(crossOrigin) img.crossOrigin='anonymous';
+      img.onload=()=>resolve(img);
+      img.onerror=()=>resolve(null);
+      img.src=src;
+    });
+  }
+
+  function roundRect1190(ctx,x,y,w,h,r,fill,stroke){
+    ctx.beginPath();
+    ctx.roundRect(x,y,w,h,r);
+    if(fill){ctx.fillStyle=fill;ctx.fill()}
+    if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
+  }
+
+  function fitText1190(ctx,text,maxWidth,startSize,minSize=22){
+    let size=startSize;
+    while(size>minSize){
+      ctx.font=`800 ${size}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      if(ctx.measureText(text).width<=maxWidth) return size;
+      size-=2;
+    }
+    return minSize;
+  }
+
+  async function exportCitizenCard1190(card){
+    try{
+      const canvas=document.createElement('canvas');
+      canvas.width=1600;
+      canvas.height=1000;
+      const ctx=canvas.getContext('2d');
+
+      const grad=ctx.createLinearGradient(0,0,1600,1000);
+      grad.addColorStop(0,'#050914');
+      grad.addColorStop(.58,'#091426');
+      grad.addColorStop(1,'#170a2b');
+      ctx.fillStyle=grad;
+      ctx.fillRect(0,0,1600,1000);
+
+      const glow=ctx.createRadialGradient(1380,150,20,1380,150,520);
+      glow.addColorStop(0,'rgba(122,64,255,.35)');
+      glow.addColorStop(1,'rgba(122,64,255,0)');
+      ctx.fillStyle=glow;
+      ctx.fillRect(850,0,750,700);
+
+      ctx.lineWidth=2;
+      roundRect1190(ctx,30,30,1540,940,42,null,'rgba(186,143,255,.40)');
+
+      const emblem=await image1190('national-emblem.png');
+      if(emblem) ctx.drawImage(emblem,70,62,150,150);
+
+      ctx.fillStyle='#ffffff';
+      ctx.font='900 54px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText('STARVALLA',250,126);
+
+      ctx.fillStyle='#ffd978';
+      ctx.font='900 25px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText('DIGITAL CITIZEN CARD',252,166);
+
+      const active=card.card_status==='active';
+      roundRect1190(
+        ctx,1230,80,270,68,34,
+        active?'rgba(79,214,158,.10)':'rgba(255,97,120,.10)',
+        active?'rgba(79,214,158,.45)':'rgba(255,97,120,.45)'
+      );
+      ctx.fillStyle=active?'#86e7bf':'#ff9cab';
+      ctx.font='900 25px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(active?'● ACTIVE':'● REVOKED',1280,124);
+
+      const avatar=await image1190(card.avatar_url,true);
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(85,280,320,320,38);
+      ctx.clip();
+
+      if(avatar){
+        const scale=Math.max(320/avatar.width,320/avatar.height);
+        const w=avatar.width*scale,h=avatar.height*scale;
+        ctx.drawImage(avatar,85+(320-w)/2,280+(320-h)/2,w,h);
+      }else{
+        const ag=ctx.createLinearGradient(85,280,405,600);
+        ag.addColorStop(0,'#251477');
+        ag.addColorStop(1,'#122f73');
+        ctx.fillStyle=ag;
+        ctx.fillRect(85,280,320,320);
+        ctx.fillStyle='#fff';
+        ctx.font='900 110px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.fillText((card.display_name||'C').trim().charAt(0).toUpperCase(),245,440);
+        ctx.textAlign='start';
+        ctx.textBaseline='alphabetic';
+      }
+      ctx.restore();
+
+      ctx.strokeStyle='rgba(244,185,66,.60)';
+      ctx.lineWidth=4;
+      ctx.strokeRect(85,280,320,320);
+
+      const name=String(card.display_name||'Citizen');
+      const nameSize=fitText1190(ctx,name,650,72,42);
+      ctx.font=`900 ${nameSize}px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.fillStyle='#fff';
+      ctx.fillText(name,470,340);
+
+      ctx.font='800 38px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillStyle='#d6e0ed';
+      ctx.fillText(`Citizen #${padCard1190(card.citizen_no)}`,470,402);
+
+      ctx.font='600 30px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillStyle='#9eafc3';
+      ctx.fillText(String(card.role||'Citizen'),470,455);
+
+      const details=[
+        ['CARD ID',card.card_id],
+        ['MEMBER SINCE',cardDate1190(card.joined_at)],
+        ['ISSUED',cardDate1190(card.issued_at)],
+        ['CREDENTIAL','Private digital community']
+      ];
+
+      let dy=535;
+      for(let i=0;i<details.length;i++){
+        const col=i%2,row=Math.floor(i/2);
+        const x=470+col*360,y=dy+row*115;
+        ctx.fillStyle='#71849b';
+        ctx.font='900 16px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+        ctx.fillText(details[i][0],x,y);
+        ctx.fillStyle='#fff';
+        ctx.font='700 24px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+        ctx.fillText(String(details[i][1]||'—'),x,y+36);
+      }
+
+      const qrHost=document.createElement('div');
+      qr1190(qrHost,verificationUrl1190(card.verification_token),260);
+      const qrCanvas=qrHost.querySelector('canvas');
+
+      roundRect1190(ctx,1220,300,300,340,28,'#fff',null);
+      if(qrCanvas) ctx.drawImage(qrCanvas,1240,320,260,260);
+      ctx.fillStyle='#111827';
+      ctx.font='900 21px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.textAlign='center';
+      ctx.fillText('SCAN TO VERIFY',1370,615);
+      ctx.textAlign='start';
+
+      ctx.strokeStyle='rgba(255,255,255,.10)';
+      ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(70,790);
+      ctx.lineTo(1530,790);
+      ctx.stroke();
+
+      ctx.fillStyle='#91a3b8';
+      ctx.font='500 22px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      const lines=[
+        'Private digital community credential. Not government-issued identification.',
+        'Does not establish legal citizenship, nationality, age, identity, immigration status, or territorial rights.'
+      ];
+      ctx.fillText(lines[0],80,850);
+      ctx.fillText(lines[1],80,890);
+
+      ctx.fillStyle='#ffd978';
+      ctx.font='900 19px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(`CARD v${Number(card.card_version||1)}`,1510,890);
+      ctx.textAlign='start';
+
+      return await new Promise(resolve=>canvas.toBlob(resolve,'image/png',.96));
+    }catch(error){
+      alert(error?.message||'Could not export the Citizen Card.');
+      return null;
+    }
+  }
+
+  function downloadCardBlob1190(blob,card){
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`Starvalla-Citizen-${padCard1190(card.citizen_no)}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }
+
+  function ensureCitizenCardTile1190(){
+    const grid=document.querySelector('#view .more-grid');
+    if(!grid||grid.querySelector('[data-sv-citizen-card]')) return;
+
+    const tile=document.createElement('button');
+    tile.type='button';
+    tile.className='more-tile';
+    tile.dataset.svCitizenCard='1';
+    tile.innerHTML=`
+      <img class="sv-card-more-icon" src="national-emblem.png" alt="">
+      <strong>Citizen Card</strong>
+      <small>Your private Starvalla digital credential</small>`;
+
+    const emblem=[...grid.querySelectorAll('.more-tile')]
+      .find(el=>el.textContent?.includes('National Emblem'));
+
+    if(emblem) emblem.insertAdjacentElement('afterend',tile);
+    else grid.prepend(tile);
+  }
+
+  function ensureAccountCardButton1190(){
+    const menu=document.querySelector('#starvallaAccountMenu1170');
+    if(!menu||menu.querySelector('#svAccountCitizenCard1190')) return;
+
+    const signout=menu.querySelector('#starvallaSignOut1170');
+    const button=document.createElement('button');
+    button.type='button';
+    button.id='svAccountCitizenCard1190';
+    button.textContent='View Citizen Card';
+    button.addEventListener('click',()=>{
+      menu.hidden=true;
+      renderCitizenCard1190();
+    });
+
+    menu.insertBefore(button,signout||null);
+  }
+
+  document.addEventListener('click',event=>{
+    const tile=event.target.closest?.('[data-sv-citizen-card]');
+    if(!tile) return;
+    event.preventDefault();
+    event.stopPropagation();
+    renderCitizenCard1190();
+  },true);
+
+  const uiObserver1190=new MutationObserver(()=>{
+    ensureCitizenCardTile1190();
+    ensureAccountCardButton1190();
+  });
+  uiObserver1190.observe(document.body,{childList:true,subtree:true});
+
+  ensureCitizenCardTile1190();
+  ensureAccountCardButton1190();
+
+  if(location.hash==='#citizen-card'){
+    setTimeout(renderCitizenCard1190,0);
+  }
+
+  async function renderVerification1190(token){
+    const overlay=document.createElement('div');
+    overlay.className='sv-verify-overlay';
+    overlay.id='svVerifyOverlay1190';
+    overlay.innerHTML=`
+      <div class="sv-verify-card">
+        <img src="national-emblem.png" alt="Starvalla National Emblem">
+        <h2>Verifying Starvalla credential…</h2>
+        <p class="sv-verify-meta">Checking the credential record.</p>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    try{
+      const {data,error}=await cardDb1190.rpc('verify_starvalla_citizen_card',{p_token:token});
+      if(error) throw error;
+      const card=data?.[0];
+
+      if(!card){
+        overlay.innerHTML=`
+          <div class="sv-verify-card">
+            <img src="national-emblem.png" alt="Starvalla National Emblem">
+            <div class="sv-verify-state bad">INVALID CREDENTIAL</div>
+            <h2 class="sv-verify-name">Card not recognized</h2>
+            <p class="sv-verify-meta">This verification token does not match a Starvalla Citizen Card.</p>
+            <div class="sv-verify-disclaimer">
+              Starvalla Citizen Cards are private digital community credentials,
+              not government-issued identification.
+            </div>
+            <button class="btn primary" type="button" data-sv-open-app>Open Starvalla</button>
+          </div>`;
+      }else{
+        const active=card.card_status==='active';
+        overlay.innerHTML=`
+          <div class="sv-verify-card">
+            <img src="national-emblem.png" alt="Starvalla National Emblem">
+            <div class="sv-verify-state ${active?'':'bad'}">${active?'✓ ACTIVE STARVALLA CREDENTIAL':'REVOKED CREDENTIAL'}</div>
+            <h2 class="sv-verify-name">${cardEsc1190(card.display_name)}</h2>
+            <p class="sv-verify-meta">
+              Citizen #${padCard1190(card.citizen_no)}<br>
+              ${cardEsc1190(card.role||'Citizen')}<br>
+              Card ID ${cardEsc1190(card.card_id)}<br>
+              Member since ${cardDate1190(card.joined_at)}
+            </p>
+            <div class="sv-verify-disclaimer">
+              This verifies a Starvalla account and in-app credential only.
+              It does not verify the holder's real-world identity, age, nationality,
+              immigration status, or government identification.
+            </div>
+            <button class="btn primary" type="button" data-sv-open-app>Open Starvalla</button>
+          </div>`;
+      }
+
+      overlay.querySelector('[data-sv-open-app]')?.addEventListener('click',()=>{
+        const url=new URL(location.href);
+        url.searchParams.delete('verify');
+        url.hash='home';
+        location.href=url.toString();
+      });
+    }catch(error){
+      overlay.innerHTML=`
+        <div class="sv-verify-card">
+          <img src="national-emblem.png" alt="Starvalla National Emblem">
+          <div class="sv-verify-state bad">VERIFICATION UNAVAILABLE</div>
+          <h2 class="sv-verify-name">Could not verify this card</h2>
+          <p class="sv-verify-meta">${cardEsc1190(error?.message||'Please try again.')}</p>
+        </div>`;
+    }
+  }
+
+  const verifyToken1190=new URL(location.href).searchParams.get('verify');
+  if(verifyToken1190){
+    renderVerification1190(verifyToken1190);
+  }
+  </script>
+  <!-- /Starvalla Digital Citizen Card v1.19.0 -->
 
 </body>
 </html>
