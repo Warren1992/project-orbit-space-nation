@@ -4171,5 +4171,54 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla Digital Citizen Card v1.19.0 -->
 
+
+  <!-- Starvalla More Citizenship Card Removal v1.19.1 -->
+  <style id="starvallaMoreCitizenshipRemoval1191">
+    #view .sv-more-citizenship-hidden{
+      display:none!important;
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    function removeMoreCitizenshipCard1191(){
+      const title = document.querySelector('#sectionTitle')?.textContent?.trim();
+      if(title !== 'More') return;
+
+      document.querySelectorAll('#view .card, #view section, #view article, #view > div').forEach(el => {
+        const text = (el.textContent || '').replace(/\s+/g,' ').trim().toUpperCase();
+
+        if(
+          text.includes('MY CITIZENSHIP') &&
+          (
+            text.includes('VIEW MY PROFILE') ||
+            text.includes('VIEW MY ACCOUNT')
+          )
+        ){
+          el.classList.add('sv-more-citizenship-hidden');
+          el.remove();
+        }
+      });
+    }
+
+    removeMoreCitizenshipCard1191();
+
+    const view=document.querySelector('#view');
+    if(view){
+      const observer=new MutationObserver(()=>{
+        removeMoreCitizenshipCard1191();
+      });
+      observer.observe(view,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>{
+      setTimeout(removeMoreCitizenshipCard1191,0);
+    });
+  })();
+  </script>
+  <!-- /Starvalla More Citizenship Card Removal v1.19.1 -->
+
 </body>
 </html>
