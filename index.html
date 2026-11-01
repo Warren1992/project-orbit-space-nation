@@ -4220,5 +4220,167 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
   </script>
   <!-- /Starvalla More Citizenship Card Removal v1.19.1 -->
 
+
+  <!-- Starvalla Desktop Parity v1.19.4 -->
+  <style id="starvallaDesktopParity1194">
+    @media (min-width:761px){
+      /* Let the full desktop navigation be reachable on shorter laptop screens. */
+      .sidebar{
+        overflow-y:auto!important;
+        overflow-x:hidden!important;
+        scrollbar-gutter:stable;
+        padding-bottom:28px!important;
+      }
+      .side-nav{
+        flex:0 0 auto!important;
+      }
+      .sidebar-card{
+        margin-top:14px!important;
+        flex:0 0 auto!important;
+      }
+      .sidebar::-webkit-scrollbar{
+        width:8px;
+      }
+      .sidebar::-webkit-scrollbar-thumb{
+        background:rgba(129,147,170,.28);
+        border-radius:999px;
+      }
+      .sidebar::-webkit-scrollbar-track{
+        background:transparent;
+      }
+
+      /* Desktop content gets normal breathing room at the page bottom. */
+      .view{
+        padding-bottom:64px!important;
+      }
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    function removeSpaceRoute1194(){
+      /*
+        Remove the legacy Space Program route from the shared navigation model
+        itself, so desktop renderNav() cannot keep recreating it.
+      */
+      try{
+        if(typeof routes!=='undefined' && Array.isArray(routes)){
+          for(let i=routes.length-1;i>=0;i--){
+            if(routes[i]?.[0]==='space') routes.splice(i,1);
+          }
+        }
+      }catch{}
+
+      try{
+        if(typeof routeMeta!=='undefined' && routeMeta?.space){
+          delete routeMeta.space;
+        }
+      }catch{}
+
+      document.querySelectorAll('[data-route="space"]').forEach(el=>el.remove());
+
+      if(location.hash==='#space'){
+        location.hash='#home';
+      }
+    }
+
+    function removeDesktopSpaceCards1194(){
+      /* Remove any old Home hero/right-rail Space Program UI after legacy renders. */
+      document.querySelectorAll('#view .card, #view .hero-card').forEach(card=>{
+        const text=(card.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+        const heading=card.querySelector('h2,h3')?.textContent?.trim().toLowerCase()||'';
+
+        if(
+          heading==='space program' ||
+          text.includes('view space program') ||
+          (
+            text.includes('lunar archive mission') &&
+            text.includes('planning-stage demonstration goal')
+          )
+        ){
+          if(card.classList.contains('hero-card')){
+            card.querySelectorAll('[data-route="space"]').forEach(el=>el.remove());
+          }else{
+            card.remove();
+          }
+        }
+      });
+
+      document.querySelectorAll('#view [data-route="space"]').forEach(el=>el.remove());
+    }
+
+    function ensureDesktopMore1194(){
+      const side=document.querySelector('#sideNav');
+      if(!side) return;
+
+      side.querySelectorAll('[data-route="space"]').forEach(el=>el.remove());
+
+      if(!side.querySelector('[data-route="more"]')){
+        const btn=document.createElement('button');
+        btn.className='nav-link';
+        btn.dataset.route='more';
+        btn.innerHTML='<span class="nav-icon">☰</span><span class="nav-label">More</span>';
+        side.appendChild(btn);
+      }
+
+      /* Keep More active when desktop is on the shared More page. */
+      const onMore=location.hash==='#more';
+      side.querySelector('[data-route="more"]')?.classList.toggle('active',onMore);
+    }
+
+    function ensureDesktopParity1194(){
+      removeSpaceRoute1194();
+      removeDesktopSpaceCards1194();
+      ensureDesktopMore1194();
+    }
+
+    /*
+      renderNav()/renderHome() are legacy functions that redraw desktop UI.
+      Wrap them when available so parity changes happen in the same call.
+    */
+    try{
+      if(typeof renderNav==='function' && !window.__svDesktopRenderNav1194){
+        window.__svDesktopRenderNav1194=true;
+        const originalRenderNav1194=renderNav;
+        renderNav=function(...args){
+          const result=originalRenderNav1194.apply(this,args);
+          ensureDesktopMore1194();
+          return result;
+        };
+      }
+    }catch{}
+
+    try{
+      if(typeof renderHome==='function' && !window.__svDesktopRenderHome1194){
+        window.__svDesktopRenderHome1194=true;
+        const originalRenderHome1194=renderHome;
+        renderHome=function(...args){
+          const result=originalRenderHome1194.apply(this,args);
+          removeDesktopSpaceCards1194();
+          return result;
+        };
+      }
+    }catch{}
+
+    ensureDesktopParity1194();
+
+    const observer1194=new MutationObserver(()=>{
+      ensureDesktopParity1194();
+    });
+
+    observer1194.observe(document.body,{
+      childList:true,
+      subtree:true
+    });
+
+    window.addEventListener('hashchange',()=>{
+      setTimeout(ensureDesktopParity1194,0);
+    });
+  })();
+  </script>
+  <!-- /Starvalla Desktop Parity v1.19.4 -->
+
 </body>
 </html>
