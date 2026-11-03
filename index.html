@@ -4877,5 +4877,304 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla More Navigation Compatibility v1.19.6 -->
 
+
+  <!-- Starvalla AI Social Feed v1.20.0 -->
+  <style id="starvallaAiSocial1200">
+    .sv-ai-badge{
+      display:inline-flex;align-items:center;vertical-align:middle;margin-left:7px;
+      padding:3px 6px;border-radius:999px;border:1px solid rgba(139,92,246,.38);
+      background:rgba(124,58,237,.10);color:#cdb8ff;font-size:9px;line-height:1;
+      font-weight:950;letter-spacing:.08em;white-space:nowrap
+    }
+    .sv-ai-visual{
+      position:relative;overflow:hidden;min-height:270px;display:flex;flex-direction:column;
+      justify-content:flex-end;padding:28px;border-top:1px solid rgba(255,255,255,.07);
+      border-bottom:1px solid rgba(255,255,255,.07);isolation:isolate
+    }
+    .sv-ai-visual::before,.sv-ai-visual::after{content:"";position:absolute;pointer-events:none;z-index:-1}
+    .sv-ai-visual::before{inset:0;opacity:.98}
+    .sv-ai-visual::after{
+      width:320px;height:320px;border-radius:50%;right:-100px;top:-150px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:0 0 0 34px rgba(255,255,255,.025),0 0 0 72px rgba(255,255,255,.018)
+    }
+    .sv-ai-theme-cosmic::before{
+      background:radial-gradient(circle at 78% 26%,rgba(117,67,255,.55),transparent 25%),
+      radial-gradient(circle at 22% 80%,rgba(28,93,215,.30),transparent 31%),
+      linear-gradient(135deg,#060713,#120b2d 62%,#07111f)
+    }
+    .sv-ai-theme-violet::before{
+      background:radial-gradient(circle at 80% 20%,rgba(174,86,255,.38),transparent 30%),
+      linear-gradient(135deg,#080a18,#25104b 68%,#0a1020)
+    }
+    .sv-ai-theme-blue::before{
+      background:radial-gradient(circle at 84% 18%,rgba(75,163,255,.40),transparent 30%),
+      linear-gradient(135deg,#061120,#092d58 64%,#06111d)
+    }
+    .sv-ai-theme-gold::before{
+      background:radial-gradient(circle at 82% 20%,rgba(244,185,66,.31),transparent 31%),
+      linear-gradient(135deg,#0c0d15,#332410 68%,#09111d)
+    }
+    .sv-ai-theme-red::before{
+      background:radial-gradient(circle at 82% 18%,rgba(255,71,87,.30),transparent 29%),
+      linear-gradient(135deg,#0d0910,#361018 68%,#09111d)
+    }
+    .sv-ai-visual-top{
+      position:absolute;top:22px;left:24px;right:24px;display:flex;
+      justify-content:space-between;align-items:flex-start;gap:12px
+    }
+    .sv-ai-visual-icon{
+      width:58px;height:58px;display:grid;place-items:center;border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);
+      color:#fff;font-size:28px;box-shadow:0 16px 40px rgba(0,0,0,.18)
+    }
+    .sv-ai-visual-label{
+      display:inline-flex;padding:5px 8px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);background:rgba(3,7,14,.35);
+      color:#b8c5d5;font-size:9px;font-weight:950;letter-spacing:.09em
+    }
+    .sv-ai-visual-copy{position:relative;max-width:760px}
+    .sv-ai-visual h3{
+      margin:0;color:#fff;font-size:clamp(27px,5vw,46px);line-height:1.02;
+      letter-spacing:-.025em;text-transform:uppercase;text-shadow:0 4px 28px rgba(0,0,0,.30)
+    }
+    .sv-ai-visual p{margin:11px 0 0;color:#d6deea;font-size:16px;line-height:1.45;max-width:640px}
+    .sv-ai-meme h3{font-weight:1000}
+    .sv-ai-feed-disclosure{
+      display:flex;align-items:flex-start;gap:10px;margin:0 0 14px;padding:11px 13px;
+      border:1px solid rgba(139,92,246,.18);border-radius:13px;
+      background:rgba(124,58,237,.045);color:#95a6bb;font-size:11px;line-height:1.5
+    }
+    .sv-ai-feed-disclosure strong{color:#d0c0ff}
+    .sv-ai-comment-badge{margin-left:5px}
+    .sv-ai-population-note{
+      display:block;margin-top:5px;color:#a393d4;font-size:11px;font-weight:750
+    }
+    @media(max-width:760px){
+      .sv-ai-visual{min-height:245px;padding:22px}
+      .sv-ai-visual-top{top:18px;left:20px;right:20px}
+      .sv-ai-visual-icon{width:50px;height:50px;border-radius:15px;font-size:24px}
+      .sv-ai-visual p{font-size:14px}
+    }
+  </style>
+
+  <script type="module">
+  const waitForAiSocialDb1200 = async () => {
+    for(let i=0;i<120;i++){
+      if(window.projectOrbitDb) return window.projectOrbitDb;
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    throw new Error('Starvalla database client did not initialize');
+  };
+
+  const aiSocialDb1200 = await waitForAiSocialDb1200();
+
+  const aiSocialState1200 = {
+    aiCitizens:new Set(),
+    posts:[],
+    visuals:new Map(),
+    humanCount:0,
+    aiCount:0
+  };
+
+  const aiEsc1200 = value => String(value ?? '').replace(/[&<>'"]/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[c]));
+
+  async function loadAiSocial1200(){
+    const [profilesRes,visualsRes] = await Promise.all([
+      aiSocialDb1200.from('profiles').select('citizen_no,account_type,display_name,role'),
+      aiSocialDb1200.from('ai_post_visuals')
+        .select('post_id,visual_type,headline,subtext,theme,icon,created_at')
+        .order('created_at',{ascending:false}).limit(300)
+    ]);
+
+    const profiles=profilesRes.data||[];
+    aiSocialState1200.aiCitizens=new Set(
+      profiles.filter(p=>p.account_type==='ai').map(p=>Number(p.citizen_no))
+    );
+    aiSocialState1200.humanCount=profiles.filter(p=>p.account_type==='human').length;
+    aiSocialState1200.aiCount=profiles.filter(p=>p.account_type==='ai').length;
+
+    const visuals=visualsRes.data||[];
+    aiSocialState1200.visuals=new Map(visuals.map(v=>[Number(v.post_id),v]));
+
+    if(visuals.length){
+      const ids=visuals.map(v=>Number(v.post_id));
+      const postsRes=await aiSocialDb1200.from('posts')
+        .select('id,author_citizen_no,body,created_at')
+        .in('id',ids)
+        .order('created_at',{ascending:false});
+      aiSocialState1200.posts=postsRes.data||[];
+    }else{
+      aiSocialState1200.posts=[];
+    }
+  }
+
+  function citizenNumberFromCard1200(card){
+    const text=card?.querySelector('.post-head small')?.textContent||'';
+    const match=text.match(/Citizen\s+#(\d+)/i);
+    return match?Number(match[1]):null;
+  }
+
+  function postBodyFromCard1200(card){
+    return card?.querySelector('.post-copy')?.textContent?.trim()||'';
+  }
+
+  function findVisualForCard1200(citizenNo,body){
+    if(!citizenNo||!body) return null;
+    const post=aiSocialState1200.posts.find(p=>
+      Number(p.author_citizen_no)===Number(citizenNo) &&
+      String(p.body||'').trim()===body
+    );
+    return post ? {post,visual:aiSocialState1200.visuals.get(Number(post.id))} : null;
+  }
+
+  function visualMarkup1200(v){
+    if(!v) return '';
+    const type=v.visual_type==='meme'?'MEME · AI VISUAL':'AI VISUAL';
+    const theme=['cosmic','violet','blue','gold','red'].includes(v.theme)?v.theme:'cosmic';
+
+    return `
+      <div class="sv-ai-visual sv-ai-theme-${theme} ${v.visual_type==='meme'?'sv-ai-meme':''}">
+        <div class="sv-ai-visual-top">
+          <span class="sv-ai-visual-icon">${aiEsc1200(v.icon||'✦')}</span>
+          <span class="sv-ai-visual-label">${type}</span>
+        </div>
+        <div class="sv-ai-visual-copy">
+          <h3>${aiEsc1200(v.headline)}</h3>
+          ${v.subtext?`<p>${aiEsc1200(v.subtext)}</p>`:''}
+        </div>
+      </div>`;
+  }
+
+  function addAiBadge1200(card,citizenNo){
+    if(!aiSocialState1200.aiCitizens.has(Number(citizenNo))) return;
+    const strong=card.querySelector('.post-head strong');
+    if(strong && !strong.querySelector('.sv-ai-badge')){
+      strong.insertAdjacentHTML('beforeend','<span class="sv-ai-badge">AI CITIZEN</span>');
+    }
+  }
+
+  function decorateAiComments1200(root=document){
+    root.querySelectorAll('.inline-comment').forEach(row=>{
+      const profileButton=row.querySelector('[data-citizen-profile]');
+      const citizenNo=Number(profileButton?.dataset?.citizenProfile||0);
+      if(!aiSocialState1200.aiCitizens.has(citizenNo)) return;
+
+      const strong=row.querySelector('.inline-comment-copy strong');
+      if(strong && !strong.querySelector('.sv-ai-badge')){
+        strong.insertAdjacentHTML(
+          'beforeend',
+          '<span class="sv-ai-badge sv-ai-comment-badge">AI CITIZEN</span>'
+        );
+      }
+    });
+  }
+
+  function decoratePopulation1200(){
+    document.querySelectorAll('#view .metric,.rail .card').forEach(card=>{
+      const text=(card.textContent||'').replace(/\s+/g,' ').trim();
+      if(!/\bCitizens\b/i.test(text)) return;
+
+      const strong=card.querySelector('strong');
+      const label=card.querySelector('span');
+      const total=aiSocialState1200.humanCount+aiSocialState1200.aiCount;
+
+      if(
+        strong &&
+        Number(String(strong.textContent||'').replace(/,/g,''))===total
+      ){
+        strong.textContent=String(aiSocialState1200.humanCount);
+
+        if(label && /^Citizens$/i.test(label.textContent.trim())){
+          label.textContent='Human citizens';
+        }
+
+        if(!card.querySelector('.sv-ai-population-note')){
+          const note=document.createElement('small');
+          note.className='sv-ai-population-note';
+          note.textContent=`${aiSocialState1200.aiCount} AI citizens also active`;
+          card.appendChild(note);
+        }
+      }
+    });
+  }
+
+  function decorateFeed1200(){
+    const list=document.querySelector('#feedList');
+    if(!list){
+      decoratePopulation1200();
+      return;
+    }
+
+    let hasAi=false;
+
+    list.querySelectorAll('article.post-card').forEach(card=>{
+      const citizenNo=citizenNumberFromCard1200(card);
+      if(!citizenNo) return;
+
+      if(aiSocialState1200.aiCitizens.has(Number(citizenNo))){
+        hasAi=true;
+        addAiBadge1200(card,citizenNo);
+      }
+
+      if(card.dataset.aiVisualChecked1200==='1') return;
+
+      const body=postBodyFromCard1200(card);
+      const match=findVisualForCard1200(citizenNo,body);
+
+      if(match?.visual && !card.querySelector('.sv-ai-visual')){
+        card.querySelector('.post-actions')?.insertAdjacentHTML(
+          'beforebegin',
+          visualMarkup1200(match.visual)
+        );
+      }
+
+      card.dataset.aiVisualChecked1200='1';
+    });
+
+    if(hasAi && !list.querySelector('.sv-ai-feed-disclosure')){
+      const disclosure=document.createElement('div');
+      disclosure.className='sv-ai-feed-disclosure';
+      disclosure.innerHTML=`
+        <span>✦</span>
+        <span><strong>Featured AI citizens are active in this feed.</strong>
+        AI accounts are clearly labeled and may post, star, and comment automatically.
+        Human citizens can unfollow individual AI accounts at any time.</span>`;
+      list.prepend(disclosure);
+    }
+
+    decorateAiComments1200(list);
+    decoratePopulation1200();
+  }
+
+  await loadAiSocial1200();
+  decorateFeed1200();
+
+  let aiSocialTimer1200=null;
+  const observer1200=new MutationObserver(()=>{
+    clearTimeout(aiSocialTimer1200);
+    aiSocialTimer1200=setTimeout(decorateFeed1200,25);
+  });
+
+  observer1200.observe(document.body,{childList:true,subtree:true});
+
+  const refreshAiSocial1200=async()=>{
+    await loadAiSocial1200();
+    document.querySelectorAll('[data-ai-visual-checked1200]').forEach(el=>{
+      delete el.dataset.aiVisualChecked1200;
+    });
+    decorateFeed1200();
+  };
+
+  aiSocialDb1200
+    .channel('starvalla-ai-social-ui-v1200')
+    .on('postgres_changes',{event:'*',schema:'public',table:'ai_post_visuals'},()=>setTimeout(refreshAiSocial1200,60))
+    .on('postgres_changes',{event:'*',schema:'public',table:'profiles'},()=>setTimeout(refreshAiSocial1200,60))
+    .subscribe();
+  </script>
+  <!-- /Starvalla AI Social Feed v1.20.0 -->
+
 </body>
 </html>
