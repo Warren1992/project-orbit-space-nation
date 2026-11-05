@@ -6241,5 +6241,126 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Mobile Nav + Founder Auto-Publish v1.21.8 -->
 
+
+  <!-- Starvalla Public Launch Safety v1.22.0 -->
+  <style id="starvallaPublicLaunchSafety1220">
+    .sv1220-modal{position:fixed;inset:0;z-index:14000;display:none;place-items:center;padding:14px;background:rgba(2,7,14,.78);backdrop-filter:blur(8px)}
+    .sv1220-modal.show{display:grid}
+    .sv1220-dialog{width:min(720px,100%);max-height:92vh;overflow:auto;border-radius:24px;border:1px solid rgba(244,185,66,.22);background:linear-gradient(180deg,#091526,#06101d);box-shadow:0 34px 100px rgba(0,0,0,.58);color:#fff}
+    .sv1220-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;gap:14px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(7,17,31,.97)}
+    .sv1220-head h2{margin:4px 0 0}.sv1220-close{width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:white;font-size:25px}
+    .sv1220-body{padding:20px}.sv1220-form{display:grid;gap:13px}.sv1220-form label{display:grid;gap:7px;font-size:12px;font-weight:850;color:#dce5ef}
+    .sv1220-form input,.sv1220-form textarea,.sv1220-form select{width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:#06101d;color:#fff;padding:12px;font:inherit}
+    .sv1220-form textarea{min-height:96px;resize:vertical}.sv1220-check{display:grid!important;grid-template-columns:auto 1fr!important;gap:10px!important;align-items:start!important;font-weight:650!important;line-height:1.5!important;color:#b8c5d6!important}.sv1220-check input{width:auto!important;margin-top:3px}
+    .sv1220-note{padding:12px 14px;border:1px solid rgba(139,92,246,.22);border-radius:13px;background:rgba(124,58,237,.055);color:#aebcd0;font-size:12px;line-height:1.55}.sv1220-note strong{color:#d7c6ff}
+    .sv1220-stack{display:grid;gap:16px}.sv1220-row{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.025)}
+    .sv1220-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.sv1220-danger{border-color:rgba(255,93,115,.35)!important;color:#ffb0bb!important;background:rgba(255,93,115,.07)!important}
+    .sv1220-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:950;letter-spacing:.06em;background:rgba(244,185,66,.10);color:#ffd978;border:1px solid rgba(244,185,66,.24)}
+    .sv1220-auth-link{margin-top:12px;width:100%;border:0;background:transparent;color:#ffd978;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer}
+    .sv1220-policy p{line-height:1.65;color:#b6c3d2}.sv1220-report{color:#aebdd0!important}.sv1220-report:hover{color:#ffd978!important}
+    @media(max-width:760px){.sv1220-modal{padding:7px}.sv1220-dialog{border-radius:20px}}
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    const st={db:null,profile:null,citizens:[],modal:null};
+    const waitDb=async()=>{for(let i=0;i<120;i++){if(window.projectOrbitDb)return window.projectOrbitDb;await new Promise(r=>setTimeout(r,50));}throw new Error('Database did not initialize');};
+    const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const pad=v=>String(v??'').padStart(6,'0');
+    const toast=m=>{const e=document.querySelector('#toast');if(!e){alert(m);return;}e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2700);};
+    const person=n=>st.citizens.find(c=>Number(c.citizen_no)===Number(n))||null;
+
+    async function refreshIdentity(){
+      const [p,c]=await Promise.all([
+        st.db.rpc('my_profile'),
+        st.db.from('profiles').select('citizen_no,display_name,role,is_founder,account_type').order('citizen_no')
+      ]);
+      st.profile=p.data?.[0]||null;st.citizens=c.data||[];
+    }
+
+    function modal(){
+      if(st.modal)return st.modal;
+      const w=document.createElement('div');w.className='sv1220-modal';w.id='sv1220Modal';
+      w.innerHTML='<div class="sv1220-dialog"><div class="sv1220-head"><div><span class="eyebrow" id="sv1220Kicker">STARVALLA SAFETY</span><h2 id="sv1220Title">Safety</h2></div><button class="sv1220-close" type="button">×</button></div><div class="sv1220-body" id="sv1220Body"></div></div>';
+      document.body.appendChild(w);w.querySelector('.sv1220-close').onclick=()=>w.classList.remove('show');w.onclick=e=>{if(e.target===w)w.classList.remove('show');};st.modal=w;return w;
+    }
+    function show(title,body,kicker='STARVALLA SAFETY'){const w=modal();w.querySelector('#sv1220Title').textContent=title;w.querySelector('#sv1220Kicker').textContent=kicker;w.querySelector('#sv1220Body').innerHTML=body;w.classList.add('show');return w;}
+    function shell(title){document.querySelector('#sectionTitle')&&(document.querySelector('#sectionTitle').textContent=title);document.querySelector('#sectionKicker')&&(document.querySelector('#sectionKicker').textContent='STARVALLA');}
+
+    async function report(target_type,target_id,label){
+      if(!st.profile){document.querySelector('#accountBtn')?.click();return;}
+      const w=show('Report content',`<form id="sv1220Report" class="sv1220-form"><div class="sv1220-note">Report <strong>${esc(label)}</strong>. The reported citizen will not see who filed the report.</div><label>Reason<select name="reason" required><option value="">Choose…</option><option value="harassment">Harassment or bullying</option><option value="hate">Hateful content</option><option value="threats">Threats or intimidation</option><option value="sexual">Sexual or inappropriate content</option><option value="violence">Graphic or violent content</option><option value="spam">Spam or scam</option><option value="impersonation">Impersonation</option><option value="copyright">Copyright concern</option><option value="privacy">Privacy concern</option><option value="other">Other</option></select></label><label>Details<textarea name="details" maxlength="2000"></textarea></label><button class="btn primary" type="submit">Submit report</button></form>`);
+      w.querySelector('#sv1220Report').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),b=e.currentTarget.querySelector('button');b.disabled=true;const r=await st.db.rpc('submit_content_report',{p_target_type:target_type,p_target_id:Number(target_id),p_reason:String(f.get('reason')||''),p_details:String(f.get('details')||'')});if(r.error){b.disabled=false;return toast(r.error.message.includes('duplicate')?'You already have an open report for this item.':r.error.message);}w.classList.remove('show');toast('Report submitted for review.');};
+    }
+
+    function decorateReports(){
+      if(!st.profile)return;
+      document.querySelectorAll('#feedList article.post-card').forEach(card=>{
+        const a=card.querySelector('.post-actions'),s=a?.querySelector('[data-share-post]'),p=card.querySelector('[data-citizen-profile]');
+        if(!a||!s||!p||a.querySelector('[data-sv1220-post]'))return;
+        if(Number(p.dataset.citizenProfile)===Number(st.profile.citizen_no))return;
+        const b=document.createElement('button');b.className='sv1220-report';b.dataset.sv1220Post=s.dataset.sharePost;b.textContent='⚑ Report';b.onclick=()=>report('post',Number(s.dataset.sharePost),`post #${s.dataset.sharePost}`);a.appendChild(b);
+      });
+      const root=document.querySelector('#view .profile-page'),acts=root?.querySelector('.profile-actions'),meta=root?.querySelector('.profile-meta')?.textContent||'',m=meta.match(/Citizen\s*#(\d+)/i),no=m?Number(m[1]):0;
+      if(acts&&no&&no!==Number(st.profile.citizen_no)&&!acts.querySelector('[data-sv1220-profile]')){const b=document.createElement('button');b.className='btn secondary';b.dataset.sv1220Profile=no;b.textContent='Report';b.onclick=()=>report('profile',no,person(no)?.display_name||`Citizen #${pad(no)}`);acts.appendChild(b);}
+      const head=document.querySelector('#view .dm-thread-head'),bar=document.querySelector('#view .dm-toolbar'),sm=head?.querySelector('small')?.textContent||'',dm=sm.match(/Citizen\s*#(\d+)/i),other=dm?Number(dm[1]):0;
+      if(bar&&other&&other!==Number(st.profile.citizen_no)&&!bar.querySelector('[data-sv1220-conversation]')){const b=document.createElement('button');b.className='btn secondary';b.dataset.sv1220Conversation=other;b.textContent='Report conversation';b.onclick=()=>report('conversation',other,`conversation with ${person(other)?.display_name||`Citizen #${pad(other)}`}`);bar.appendChild(b);}
+    }
+
+    function copyrightStatements(type){
+      return type==='counter_notice'
+        ? ['I state under penalty of perjury that I have a good-faith belief the material was removed or disabled because of mistake or misidentification.','I consent to the appropriate U.S. federal court jurisdiction and will accept service of process from the person who submitted the original notice or that person’s agent.']
+        : ['I have a good-faith belief that the complained-of use is not authorized by the copyright owner, its agent, or the law.','I state that the information in this notice is accurate and, under penalty of perjury, that I am the copyright owner or authorized to act for the owner.'];
+    }
+
+    function openCopyright(){
+      const w=show('Copyright / DMCA',`<div class="sv1220-stack"><section class="card sv1220-policy"><h3>Copyright & repeat-infringer policy</h3><p>Citizens may only upload content they own or are authorized to use. Starvalla may remove or disable material after a valid copyright complaint and may suspend or terminate repeat infringers in appropriate circumstances.</p><p>Use this form for a takedown notice or counter-notice. Starvalla may request additional information before acting.</p></section><form id="sv1220Copyright" class="sv1220-form"><label>Request type<select name="request_type" id="sv1220CopyType"><option value="takedown">Copyright takedown notice</option><option value="counter_notice">Counter-notice</option></select></label><label>Full legal name<input name="full_name" maxlength="200" required></label><label>Email<input type="email" name="email" maxlength="320" required></label><label>Phone (optional)<input name="phone" maxlength="80"></label><label>Mailing address<textarea name="mailing_address" maxlength="1000"></textarea></label><label>Copyrighted work / material<textarea name="work_description" maxlength="5000" required></textarea></label><label>Location of original work (optional)<input name="original_location" maxlength="2000"></label><label>Location of material on Starvalla<input name="target_location" maxlength="2000" required></label><label>Additional explanation<textarea name="explanation" maxlength="5000"></textarea></label><label>Electronic signature<input name="signature" maxlength="200" required></label><label class="sv1220-check"><input type="checkbox" name="one" required><span id="sv1220One"></span></label><label class="sv1220-check"><input type="checkbox" name="two" required><span id="sv1220Two"></span></label><button class="btn primary" type="submit">Submit copyright request</button></form></div>`,'COPYRIGHT');
+      const type=w.querySelector('#sv1220CopyType'),sync=()=>{const x=copyrightStatements(type.value);w.querySelector('#sv1220One').textContent=x[0];w.querySelector('#sv1220Two').textContent=x[1];};type.onchange=sync;sync();
+      w.querySelector('#sv1220Copyright').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);if(f.get('request_type')==='counter_notice'&&!String(f.get('mailing_address')||'').trim())return toast('A mailing address is required for a counter-notice.');const b=e.currentTarget.querySelector('button');b.disabled=true;const r=await st.db.rpc('submit_copyright_notice',{p_request_type:String(f.get('request_type')||''),p_full_name:String(f.get('full_name')||''),p_email:String(f.get('email')||''),p_phone:String(f.get('phone')||''),p_mailing_address:String(f.get('mailing_address')||''),p_work_description:String(f.get('work_description')||''),p_original_location:String(f.get('original_location')||''),p_target_location:String(f.get('target_location')||''),p_explanation:String(f.get('explanation')||''),p_signature:String(f.get('signature')||''),p_statement_one:Boolean(f.get('one')),p_statement_two:Boolean(f.get('two'))});if(r.error){b.disabled=false;return toast(r.error.message);}w.classList.remove('show');toast(`Copyright request #${r.data} submitted.`);};
+    }
+
+    async function privacy(){
+      const v=document.querySelector('#view');if(!v)return;shell('Privacy & Account');v.innerHTML='<div class="card"><h3>Loading privacy controls…</h3></div>';
+      const q=await st.db.from('account_deletion_requests').select('*').order('requested_at',{ascending:false}).limit(1),r=q.data?.[0]||null,founder=Boolean(st.profile?.is_founder);
+      v.innerHTML=`<div class="sv1220-stack"><section class="card"><span class="eyebrow">PRIVACY & ACCOUNT</span><h2 style="margin:7px 0">Account deletion</h2><p class="muted">Delete your login and social/private data from inside Starvalla. Civic-history references are preserved only under an anonymized “Deleted Citizen” record where needed to keep institutional records consistent.</p><button class="btn secondary" data-route="more">← More</button></section>${founder?'<section class="card"><h3>Founder account protected</h3><p class="muted">The founder account cannot be deleted through self-service controls.</p></section>':`<section class="card"><h3>Your deletion request</h3>${r?`<p>Status: <span class="sv1220-status">${esc(String(r.status).toUpperCase())}</span></p><p class="muted">${esc(r.reason||'')}</p>`:'<p class="muted">No deletion request is currently on file.</p>'}<label style="display:grid;gap:7px">Optional reason<textarea id="sv1220DelReason" maxlength="2000" style="min-height:80px;border:1px solid rgba(255,255,255,.11);border-radius:12px;background:#06101d;color:#fff;padding:12px;font:inherit"></textarea></label><div class="sv1220-actions">${!r||['cancelled','denied','completed'].includes(r.status)?'<button class="btn secondary" id="sv1220RequestDel">Request account deletion</button>':''}${r?.status==='requested'?'<button class="btn secondary" id="sv1220CancelDel">Cancel request</button><button class="btn sv1220-danger" id="sv1220DeleteNow">Permanently delete my account now</button>':''}</div></section><section class="card"><h3>What is removed</h3><p class="muted">Login access, direct messages, social posts and uploaded post media, comments, avatar, follows, likes, block relationships, notifications, and other private/social account data. Civic history is anonymized rather than structurally deleted.</p></section>`}</div>`;
+      v.querySelector('#sv1220RequestDel')?.addEventListener('click',async()=>{if(!confirm('Submit an account deletion request?'))return;const x=await st.db.rpc('request_account_deletion',{p_reason:v.querySelector('#sv1220DelReason')?.value||''});if(x.error)return toast(x.error.message);toast('Deletion request submitted.');privacy();});
+      v.querySelector('#sv1220CancelDel')?.addEventListener('click',async()=>{const x=await st.db.rpc('cancel_account_deletion');if(x.error)return toast(x.error.message);toast('Deletion request cancelled.');privacy();});
+      v.querySelector('#sv1220DeleteNow')?.addEventListener('click',async()=>{if(prompt('Type DELETE to permanently delete your account.')!=='DELETE'||!confirm('Final confirmation: permanently delete this account now?'))return;const b=v.querySelector('#sv1220DeleteNow');b.disabled=true;b.textContent='Deleting…';const x=await st.db.functions.invoke('delete-my-account',{body:{}});if(x.error){b.disabled=false;b.textContent='Permanently delete my account now';return toast(x.error.message);}try{await st.db.auth.signOut();}catch{}location.reload();});
+    }
+
+    async function legalQueue(){
+      const v=document.querySelector('#view');if(!v)return;shell('Reports & Legal');if(!st.profile?.is_founder){v.innerHTML='<div class="card"><h3>Founder access required</h3></div>';return;}v.innerHTML='<div class="card"><h3>Loading queues…</h3></div>';
+      const [rr,cc,dd]=await Promise.all([st.db.from('content_reports').select('*').order('created_at',{ascending:false}).limit(100),st.db.from('copyright_notices').select('*').order('created_at',{ascending:false}).limit(100),st.db.from('account_deletion_requests').select('*').order('requested_at',{ascending:false}).limit(100)]);
+      const reports=(rr.data||[]).filter(x=>['pending','reviewed'].includes(x.status)),copy=(cc.data||[]).filter(x=>['pending','in_review'].includes(x.status)),del=(dd.data||[]).filter(x=>['requested','processing'].includes(x.status));
+      const reportRows=reports.map(x=>`<div class="sv1220-row"><strong>${esc(x.reason)} report · ${esc(x.target_type)} #${x.target_id}</strong>${x.details?`<p>${esc(x.details)}</p>`:''}<p class="muted">Reporter: ${esc(person(x.reporter_citizen_no)?.display_name||`Citizen #${pad(x.reporter_citizen_no)}`)}</p><div class="sv1220-actions"><button class="btn secondary" data-r="${x.id}" data-s="actioned">Mark actioned</button><button class="btn secondary" data-r="${x.id}" data-s="dismissed">Dismiss</button></div></div>`).join('')||'<p class="muted">No open content reports.</p>';
+      const copyRows=copy.map(x=>`<div class="sv1220-row"><strong>${x.request_type==='counter_notice'?'Counter-notice':'Takedown notice'} #${x.id}</strong><p>${esc(x.full_name)} · ${esc(x.email)}</p><p>${esc(x.work_description)}</p><p><strong>Target:</strong> ${esc(x.target_location)}</p><div class="sv1220-actions"><button class="btn secondary" data-c="${x.id}" data-s="actioned">Mark actioned</button><button class="btn secondary" data-c="${x.id}" data-s="dismissed">Dismiss</button></div></div>`).join('')||'<p class="muted">No open copyright requests.</p>';
+      const delRows=del.map(x=>`<div class="sv1220-row"><strong>${esc(person(x.citizen_no)?.display_name||`Citizen #${pad(x.citizen_no)}`)}</strong><p class="muted">${esc(x.reason||'No reason provided.')}</p><span class="sv1220-status">${esc(x.status.toUpperCase())}</span></div>`).join('')||'<p class="muted">No open deletion requests.</p>';
+      v.innerHTML=`<div class="sv1220-stack"><section class="card"><span class="eyebrow">FOUNDER MODERATION</span><h2 style="margin:7px 0">Reports & Legal</h2><p class="muted">${reports.length} content reports · ${copy.length} copyright requests · ${del.length} deletion requests open</p><button class="btn secondary" data-route="more">← More</button></section><section class="card"><h3>Content reports</h3><div class="sv1220-stack">${reportRows}</div></section><section class="card"><h3>Copyright / DMCA</h3><div class="sv1220-stack">${copyRows}</div></section><section class="card"><h3>Account deletion requests</h3><div class="sv1220-stack">${delRows}</div></section></div>`;
+      v.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{const x=await st.db.from('content_reports').update({status:b.dataset.s,reviewed_at:new Date().toISOString(),reviewed_by_citizen_no:st.profile.citizen_no}).eq('id',Number(b.dataset.r));if(x.error)return toast(x.error.message);legalQueue();});
+      v.querySelectorAll('[data-c]').forEach(b=>b.onclick=async()=>{const x=await st.db.from('copyright_notices').update({status:b.dataset.s,reviewed_at:new Date().toISOString(),reviewed_by_citizen_no:st.profile.citizen_no}).eq('id',Number(b.dataset.c));if(x.error)return toast(x.error.message);legalQueue();});
+    }
+
+    async function moreTiles(){
+      if(document.querySelector('#sectionTitle')?.textContent?.trim()!=='More')return;
+      const g=document.querySelector('#view .more-grid');if(!g)return;
+      if(!g.querySelector('[data-sv1220-copy]')){const b=document.createElement('button');b.className='more-tile';b.dataset.sv1220Copy='1';b.innerHTML='<span>©</span><strong>Copyright / DMCA</strong><small>Takedown notices and repeat-infringer policy</small>';b.onclick=openCopyright;g.appendChild(b);}
+      if(st.profile&&!g.querySelector('[data-sv1220-privacy]')){const b=document.createElement('button');b.className='more-tile';b.dataset.sv1220Privacy='1';b.innerHTML='<span>◇</span><strong>Privacy & Account</strong><small>Account deletion and privacy controls</small>';b.onclick=privacy;g.appendChild(b);}
+      if(st.profile?.is_founder&&!g.querySelector('[data-sv1220-legal]')){const b=document.createElement('button');b.className='more-tile';b.dataset.sv1220Legal='1';b.innerHTML='<span>⚑</span><strong>Reports & Legal</strong><small>Content reports, copyright requests, and deletion requests</small>';b.onclick=legalQueue;g.appendChild(b);}
+    }
+
+    function authGateLink(){const c=document.querySelector('#authGate .auth-gate-card');if(!c||c.querySelector('[data-sv1220-auth-copy]'))return;const b=document.createElement('button');b.className='sv1220-auth-link';b.dataset.sv1220AuthCopy='1';b.textContent='Copyright / DMCA';b.onclick=openCopyright;c.appendChild(b);}
+    function legalText(){const t=document.querySelector('#sectionTitle')?.textContent?.trim()||'',v=document.querySelector('#view');if(!v)return;if((t==='User Agreement'||t==='Terms of Use')&&!v.querySelector('[data-sv1220-repeat]')){const x=document.createElement('section');x.className='card sv1220-policy';x.dataset.sv1220Repeat='1';x.innerHTML='<h3>Copyright & repeat infringers</h3><p>Citizens may only upload material they own or are authorized to use. Starvalla may remove or disable access to material after valid copyright complaints and may suspend or terminate repeat infringers in appropriate circumstances.</p>';v.appendChild(x);}if(t==='Privacy Policy'&&!v.querySelector('[data-sv1220-delete-policy]')){const x=document.createElement('section');x.className='card sv1220-policy';x.dataset.sv1220DeletePolicy='1';x.innerHTML='<h3>Account deletion</h3><p>Citizens can request and complete account deletion from Privacy & Account. Social/private data is deleted; limited civic-history references may remain only in anonymized form where necessary to preserve institutional records or meet legal/security obligations.</p>';v.appendChild(x);}}
+
+    function decorate(){decorateReports();moreTiles();authGateLink();legalText();}
+    st.db=await waitDb();await refreshIdentity().catch(()=>{});decorate();
+    let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(decorate,40);}).observe(document.body,{childList:true,subtree:true});
+    st.db.auth.onAuthStateChange(async()=>{await refreshIdentity().catch(()=>{});decorate();});
+    window.addEventListener('hashchange',()=>setTimeout(decorate,30));
+  })();
+  </script>
+  <!-- /Starvalla Public Launch Safety v1.22.0 -->
+
 </body>
 </html>
