@@ -6048,5 +6048,149 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Founder Media Review UX v1.21.5 -->
 
+
+
+  <!-- Starvalla Edge Post Drawer v1.21.6 -->
+  <style id="starvallaEdgePostDrawer1216">
+    @media (max-width:760px){
+      /* Move posting off the bottom bar and into a right-edge pull tab. */
+      #bottomNav #svComposeNavBtn1182{
+        display:none!important;
+      }
+
+      #svComposeNavBtn1182{
+        position:fixed!important;
+        top:56%!important;
+        right:-30px!important;
+        z-index:12020!important;
+        width:88px!important;
+        height:132px!important;
+        display:flex!important;
+        flex-direction:column!important;
+        align-items:center!important;
+        justify-content:center!important;
+        gap:8px!important;
+        padding:14px 12px 14px 14px!important;
+        border-radius:28px 0 0 28px!important;
+        border:1px solid rgba(244,185,66,.34)!important;
+        background:linear-gradient(180deg,rgba(7,18,34,.98),rgba(5,14,27,.98))!important;
+        color:#ffd978!important;
+        box-shadow:0 18px 44px rgba(0,0,0,.46)!important;
+        transform:translateY(-50%)!important;
+        transition:right .22s ease, box-shadow .22s ease, filter .22s ease!important;
+        backdrop-filter:blur(10px);
+      }
+
+      #svComposeNavBtn1182:hover,
+      #svComposeNavBtn1182:focus-visible,
+      #svComposeNavBtn1182.active,
+      body.sv-compose-open #svComposeNavBtn1182{
+        right:0!important;
+        box-shadow:0 22px 52px rgba(0,0,0,.54)!important;
+        filter:brightness(1.04);
+      }
+
+      #svComposeNavBtn1182 .nav-icon{
+        display:grid!important;
+        place-items:center!important;
+        width:28px!important;
+        height:28px!important;
+        color:inherit!important;
+      }
+
+      #svComposeNavBtn1182 .nav-icon svg{
+        width:28px!important;
+        height:28px!important;
+        display:block!important;
+        stroke:currentColor!important;
+      }
+
+      #svComposeNavBtn1182 .sv-compose-edge-label{
+        display:block!important;
+        color:inherit!important;
+        font-size:12px!important;
+        font-weight:950!important;
+        letter-spacing:.14em!important;
+        text-transform:uppercase!important;
+        line-height:1!important;
+        writing-mode:vertical-rl!important;
+        transform:rotate(180deg)!important;
+        user-select:none!important;
+      }
+
+      /* Turn the composer overlay into a right-side slide-out drawer. */
+      .sv-compose-overlay{
+        align-items:stretch!important;
+        justify-content:flex-end!important;
+        padding:0!important;
+      }
+
+      .sv-compose-shell{
+        width:min(92vw,430px)!important;
+        max-width:430px!important;
+        height:100%!important;
+        max-height:100vh!important;
+        margin-left:auto!important;
+        border-radius:28px 0 0 28px!important;
+        transform:translateX(108%)!important;
+        transition:transform .24s ease!important;
+      }
+
+      .sv-compose-overlay.show .sv-compose-shell{
+        transform:translateX(0)!important;
+      }
+
+      .sv-compose-body{
+        padding:16px!important;
+      }
+    }
+
+    @media (min-width:761px){
+      #svComposeNavBtn1182{
+        display:none!important;
+      }
+    }
+  </style>
+  <script>
+  (() => {
+    'use strict';
+
+    function decorateComposeLauncher1216(btn){
+      if(!btn) return;
+      btn.setAttribute('aria-label','Create post');
+      btn.setAttribute('title','Create post');
+      if(!btn.querySelector('.sv-compose-edge-label')){
+        const label=document.createElement('span');
+        label.className='sv-compose-edge-label';
+        label.textContent='Post';
+        btn.appendChild(label);
+      }
+    }
+
+    function moveComposeLauncher1216(){
+      const btn=document.querySelector('#svComposeNavBtn1182');
+      if(!btn) return;
+      decorateComposeLauncher1216(btn);
+      if(btn.parentElement!==document.body){
+        document.body.appendChild(btn);
+      }
+    }
+
+    moveComposeLauncher1216();
+
+    const bottomNav1216=document.querySelector('#bottomNav');
+    if(bottomNav1216){
+      const observer1216=new MutationObserver(()=>moveComposeLauncher1216());
+      observer1216.observe(bottomNav1216,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>setTimeout(moveComposeLauncher1216,0));
+    window.addEventListener('resize',()=>setTimeout(moveComposeLauncher1216,0));
+    setTimeout(moveComposeLauncher1216,60);
+    setTimeout(moveComposeLauncher1216,300);
+  })();
+  </script>
+  <!-- /Starvalla Edge Post Drawer v1.21.6 -->
+
 </body>
 </html>
