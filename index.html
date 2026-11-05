@@ -5359,7 +5359,9 @@ Carry dawn beyond the sky.</p>
       if(state1210.files.length){
         if(textarea) textarea.placeholder='Add a caption (optional)…';
         if(liveNote){
-          liveNote.textContent='Private until approved';
+          liveNote.textContent=state1210.profile?.is_founder
+            ? 'Founder account · publishes immediately'
+            : 'Private until approved';
           liveNote.className='muted';
         }
       }else{
@@ -5412,7 +5414,9 @@ Carry dawn beyond the sky.</p>
       if(picker && !picker.querySelector('.sv-media-review-note')){
         const note=document.createElement('div');
         note.className='sv-media-review-note';
-        note.innerHTML='<strong>Media safety:</strong> photos and videos are quarantined and reviewed before they can appear publicly.';
+        note.innerHTML=state1210.profile?.is_founder
+          ? '<strong>Founder media:</strong> uploads still pass the secure quarantine/file checks, then publish automatically without manual approval.'
+          : '<strong>Media safety:</strong> photos and videos are quarantined and reviewed before they can appear publicly.';
         picker.appendChild(note);
       }
     }
@@ -5544,6 +5548,25 @@ Carry dawn beyond the sky.</p>
           if(row.error) throw row.error;
         }
 
+        const founderAutoPublish=state1210.profile?.is_founder===true;
+
+        if(founderAutoPublish){
+          button.textContent='Publishing…';
+
+          /*
+            Founder uploads still use the exact same private quarantine path.
+            The protected review Edge Function independently verifies the
+            authenticated caller is the founder before promoting media.
+          */
+          const publishResult=await state1210.db.functions.invoke('review-media-post',{
+            body:{post_id:postId,decision:'approve',reason:'Founder auto-publish'}
+          });
+
+          if(publishResult.error){
+            throw new Error('Founder auto-publish failed: '+(publishResult.error.message||'unknown error'));
+          }
+        }
+
         if(textarea) textarea.value='';
         state1210.files=[];
         clearPreviewUrls1210();
@@ -5551,12 +5574,15 @@ Carry dawn beyond the sky.</p>
         if(input) input.value='';
         drawSecurePreviews1210();
 
-        showToast1210('Submitted for media review. It will appear after approval.');
+        showToast1210(
+          founderAutoPublish
+            ? 'Published.'
+            : 'Submitted for media review. It will appear after approval.'
+        );
 
         /*
-          Media posting is intercepted by the quarantine module before the
-          legacy composer click handler runs. Close the composer here, only
-          after the pending post + all quarantined uploads have succeeded.
+          Close only after the full posting path succeeds. For founder media,
+          that includes protected automatic publication.
         */
         document.querySelector('#svComposeOverlay1182 .sv-compose-close')?.click();
       }catch(error){
@@ -6052,6 +6078,22 @@ Carry dawn beyond the sky.</p>
   <!-- Starvalla Edge Post Drawer Fix v1.21.7 -->
   <style id="starvallaEdgePostDrawer1217">
     @media (max-width:760px){
+
+      /* With Compose moved to the right edge, distribute the 5 visible nav icons evenly. */
+      #bottomNav{
+        display:grid!important;
+        grid-template-columns:repeat(5,minmax(0,1fr))!important;
+        justify-content:stretch!important;
+        align-items:stretch!important;
+        gap:0!important;
+      }
+
+      #bottomNav .bottom-link:not(#svComposeNavBtn1182){
+        width:100%!important;
+        min-width:0!important;
+        justify-self:stretch!important;
+      }
+
       /* Keep the original compose button in #bottomNav for app stability, but hide it visually. */
       #bottomNav #svComposeNavBtn1182{
         display:none!important;
@@ -6188,6 +6230,16 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla Edge Post Drawer Fix v1.21.7 -->
+
+
+  <!-- Starvalla Mobile Nav + Founder Auto-Publish v1.21.8 -->
+  <script>
+  (() => {
+    'use strict';
+    window.__starvallaNavFounderPublish1218 = true;
+  })();
+  </script>
+  <!-- /Starvalla Mobile Nav + Founder Auto-Publish v1.21.8 -->
 
 </body>
 </html>
