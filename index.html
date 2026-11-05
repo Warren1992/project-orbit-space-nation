@@ -5177,7 +5177,7 @@ Carry dawn beyond the sky.</p>
   <!-- /Starvalla AI Social Feed v1.20.0 -->
 
 
-  <!-- Starvalla Media Quarantine v1.21.1 -->
+  <!-- Starvalla Media Quarantine v1.21.2 -->
   <style id="starvallaMediaQuarantine1210">
     .sv-media-review-note{
       margin-top:8px;
@@ -5345,6 +5345,24 @@ Carry dawn beyond the sky.</p>
         }
       }
 
+      const composer=picker.closest('.composer')||document.querySelector('.composer');
+      const textarea=composer?.querySelector('#postText');
+      const liveNote=composer?.querySelector('.composer-actions .muted, .composer-actions .shared-live-note');
+
+      if(state1210.files.length){
+        if(textarea) textarea.placeholder='Add a caption (optional)…';
+        if(liveNote){
+          liveNote.textContent='Private until approved';
+          liveNote.className='muted';
+        }
+      }else{
+        if(textarea) textarea.placeholder='Share an update with the nation...';
+        if(liveNote){
+          liveNote.textContent='Live · visible to everyone';
+          liveNote.className='shared-live-note';
+        }
+      }
+
       if(!previews) return;
       previews.innerHTML=state1210.files.map((item,index)=>{
         const url=URL.createObjectURL(item.file);
@@ -5468,10 +5486,6 @@ Carry dawn beyond the sky.</p>
       const textarea=composer?.querySelector('#postText');
       const body=textarea?.value?.trim()||'';
 
-      if(!body){
-        showToast1210('Write a caption first.');
-        return;
-      }
       if(!state1210.files.length) return;
 
       const sessionResult=await state1210.db.auth.getSession();
@@ -5594,7 +5608,7 @@ Carry dawn beyond the sky.</p>
               <div class="sv-media-status-head">
                 <div>
                   <small class="muted">${esc1210(formatDate1210(row.created_at))} · ${Number(row.media_count||0)} media item${Number(row.media_count||0)===1?'':'s'}</small>
-                  <p style="margin:8px 0 0;white-space:pre-wrap">${esc1210(row.body)}</p>
+                  <p style="margin:8px 0 0;white-space:pre-wrap">${row.body?esc1210(row.body):'<span class="muted">Media-only post</span>'}</p>
                 </div>
                 ${statusBadge1210(row.moderation_status)}
               </div>
@@ -5655,7 +5669,7 @@ Carry dawn beyond the sky.</p>
               </div>
               <span class="sv-media-status-badge sv-status-pending">PRIVATE · PENDING</span>
             </div>
-            <p style="white-space:pre-wrap;line-height:1.6">${esc1210(first.post_body)}</p>
+            <p style="white-space:pre-wrap;line-height:1.6">${first.post_body?esc1210(first.post_body):'<span class="muted">Media-only post</span>'}</p>
             <div class="sv-review-gallery">${previews.join('')}</div>
             <div class="sv-review-actions">
               <textarea data-sv-reject-reason="${postId}" maxlength="1000" placeholder="Optional rejection reason shown to the user…"></textarea>
@@ -5796,7 +5810,149 @@ Carry dawn beyond the sky.</p>
     });
   })();
   </script>
-  <!-- /Starvalla Media Quarantine v1.21.1 -->
+  <!-- /Starvalla Media Quarantine v1.21.2 -->
+
+
+  <!-- Starvalla Desktop Sidebar v1.21.3 -->
+  <style id="starvallaDesktopSidebar1213">
+    @media (min-width: 761px){
+      /*
+        Force every desktop sidebar navigation glyph to render as a clean
+        white icon, including emoji/symbol glyphs that otherwise inherit a
+        black platform rendering.
+      */
+      .sidebar .side-nav .nav-icon{
+        color:#fff!important;
+        -webkit-text-fill-color:#fff!important;
+        filter:grayscale(1) brightness(0) invert(1)!important;
+        opacity:1!important;
+      }
+
+      .sidebar .side-nav .nav-link.active .nav-icon{
+        color:#fff!important;
+        -webkit-text-fill-color:#fff!important;
+        filter:grayscale(1) brightness(0) invert(1)!important;
+      }
+
+      .sv-desktop-post-1213{
+        width:calc(100% - 2px);
+        min-height:52px;
+        margin:4px 1px 14px;
+        padding:0 18px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:10px;
+        border:1px solid rgba(244,185,66,.52);
+        border-radius:14px;
+        background:linear-gradient(135deg,#ffc447,#f2a51f);
+        color:#111827;
+        font:inherit;
+        font-size:16px;
+        font-weight:950;
+        letter-spacing:.01em;
+        cursor:pointer;
+        box-shadow:0 10px 30px rgba(242,165,31,.14);
+        transition:transform .16s ease,box-shadow .16s ease,filter .16s ease;
+      }
+
+      .sv-desktop-post-1213:hover{
+        transform:translateY(-1px);
+        box-shadow:0 14px 34px rgba(242,165,31,.22);
+        filter:brightness(1.03);
+      }
+
+      .sv-desktop-post-1213:active{
+        transform:translateY(0);
+      }
+
+      .sv-desktop-post-icon-1213{
+        width:21px;
+        height:21px;
+        display:grid;
+        place-items:center;
+        font-size:23px;
+        line-height:1;
+        font-weight:500;
+      }
+    }
+
+    @media (max-width:760px){
+      .sv-desktop-post-1213{display:none!important}
+    }
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    function openComposerFromDesktop1213(){
+      /*
+        Reuse the existing v1.18.2 compose button. It is present in the DOM on
+        desktop even though the mobile bottom nav itself is visually hidden.
+        Programmatic click preserves the exact same post composer behavior.
+      */
+      const existing=document.querySelector('#svComposeNavBtn1182');
+      if(existing){
+        existing.click();
+        return;
+      }
+
+      /*
+        The app rebuilds navigation dynamically. Give the compose module a
+        moment to restore its button, then try once more.
+      */
+      setTimeout(()=>{
+        const restored=document.querySelector('#svComposeNavBtn1182');
+        if(restored){
+          restored.click();
+          return;
+        }
+
+        /*
+          Last-resort path: briefly route Home so the compose module can
+          recreate the composer, then click its hidden mobile control.
+        */
+        const home=document.querySelector('#sideNav [data-route="home"]');
+        if(home) home.click();
+
+        setTimeout(()=>{
+          document.querySelector('#svComposeNavBtn1182')?.click();
+        },80);
+      },30);
+    }
+
+    function ensureDesktopPostButton1213(){
+      const sidebar=document.querySelector('.sidebar');
+      const nav=document.querySelector('#sideNav');
+      if(!sidebar||!nav) return;
+
+      let button=sidebar.querySelector('#svDesktopPostBtn1213');
+      if(button) return;
+
+      button=document.createElement('button');
+      button.type='button';
+      button.id='svDesktopPostBtn1213';
+      button.className='sv-desktop-post-1213';
+      button.setAttribute('aria-label','Create post');
+      button.innerHTML='<span class="sv-desktop-post-icon-1213" aria-hidden="true">＋</span><span>Post</span>';
+      button.addEventListener('click',openComposerFromDesktop1213);
+
+      nav.parentNode.insertBefore(button,nav);
+    }
+
+    ensureDesktopPostButton1213();
+
+    const sidebar1213=document.querySelector('.sidebar');
+    if(sidebar1213){
+      const observer1213=new MutationObserver(()=>{
+        ensureDesktopPostButton1213();
+      });
+      observer1213.observe(sidebar1213,{childList:true,subtree:true});
+    }
+  })();
+  </script>
+  <!-- /Starvalla Desktop Sidebar v1.21.3 -->
 
 </body>
 </html>
