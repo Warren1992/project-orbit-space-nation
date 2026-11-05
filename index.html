@@ -3268,8 +3268,15 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
       if(postButton&&!postButton.dataset.svClose1182){
         postButton.dataset.svClose1182='1';
         postButton.addEventListener('click',()=>{
+          const hadText=Boolean((textarea?.value||'').trim());
+
+          /*
+            Normal text posts clear the textarea only after the database post
+            succeeds. Close only when text existed before the click and was
+            actually cleared afterward, so failed/blank submissions stay open.
+          */
           setTimeout(()=>{
-            if(!(textarea?.value||'').trim()){
+            if(hadText && !(textarea?.value||'').trim()){
               closeCompose1182();
             }
           },1000);
@@ -5545,6 +5552,13 @@ Carry dawn beyond the sky.</p>
         drawSecurePreviews1210();
 
         showToast1210('Submitted for media review. It will appear after approval.');
+
+        /*
+          Media posting is intercepted by the quarantine module before the
+          legacy composer click handler runs. Close the composer here, only
+          after the pending post + all quarantined uploads have succeeded.
+        */
+        document.querySelector('#svComposeOverlay1182 .sv-compose-close')?.click();
       }catch(error){
         console.error('Starvalla quarantine upload failed',error);
         await cleanupFailedUpload1210(postId,uploaded);
@@ -5594,14 +5608,29 @@ Carry dawn beyond the sky.</p>
         return;
       }
 
+      let founderPendingPosts1215=0;
+      if(state1210.profile?.is_founder){
+        const queueResult1215=await state1210.db.rpc('founder_media_review_queue');
+        if(!queueResult1215.error){
+          founderPendingPosts1215=new Set(
+            (queueResult1215.data||[]).map(row=>Number(row.post_id))
+          ).size;
+        }
+      }
+
       const rows=result.data||[];
       view.innerHTML=`
         <div class="sv-media-status-stack">
           <section class="card">
             <span class="eyebrow">MEDIA SAFETY</span>
             <h2 style="margin:7px 0">My Media Uploads</h2>
-            <p class="muted">Photos and videos stay private until they pass review. Text-only posts still publish immediately.</p>
-            <button class="btn secondary" data-route="more">← More</button>
+            <p class="muted">This page only shows media uploaded by the account you are currently signed into. Photos and videos stay private until they pass review.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn secondary" data-route="more">← More</button>
+              ${state1210.profile?.is_founder
+                ? `<button class="btn primary" data-sv-media-review="1210">Open Media Review${founderPendingPosts1215?` · ${founderPendingPosts1215} pending`:''}</button>`
+                : ''}
+            </div>
           </section>
           ${rows.length?rows.map(row=>`
             <section class="card sv-media-status-card">
@@ -5737,19 +5766,19 @@ Carry dawn beyond the sky.</p>
       const grid=document.querySelector('#view .more-grid');
       if(title!=='More' || !grid) return;
 
-      if(state1210.profile && !grid.querySelector('[data-sv-my-media="1210"]')){
-        const tile=document.createElement('button');
-        tile.className='more-tile';
-        tile.dataset.svMyMedia='1210';
-        tile.innerHTML='<span>▣</span><strong>My Media Uploads</strong><small>Pending, published, and rejected photo/video posts</small>';
-        grid.appendChild(tile);
-      }
-
       if(state1210.profile?.is_founder && !grid.querySelector('[data-sv-media-review="1210"]')){
         const tile=document.createElement('button');
         tile.className='more-tile';
         tile.dataset.svMediaReview='1210';
         tile.innerHTML='<span>◉</span><strong>Media Review</strong><small>Review quarantined citizen photos and videos</small>';
+        grid.appendChild(tile);
+      }
+
+      if(state1210.profile && !grid.querySelector('[data-sv-my-media="1210"]')){
+        const tile=document.createElement('button');
+        tile.className='more-tile';
+        tile.dataset.svMyMedia='1210';
+        tile.innerHTML='<span>▣</span><strong>My Media Uploads</strong><small>Your own pending, published, and rejected media posts</small>';
         grid.appendChild(tile);
       }
     }
@@ -5941,7 +5970,45 @@ Carry dawn beyond the sky.</p>
       nav.parentNode.insertBefore(button,nav);
     }
 
+    async function ensureFounderReviewShortcut1215(){
+      const sidebar=document.querySelector('.sidebar');
+      const postButton=sidebar?.querySelector('#svDesktopPostBtn1213');
+      if(!sidebar||!postButton||!window.projectOrbitDb) return;
+
+      const existing=sidebar.querySelector('#svFounderReviewBtn1215');
+      if(existing) existing.remove();
+
+      const mine=await window.projectOrbitDb.rpc('my_profile');
+      const me=mine.data?.[0]||null;
+      if(!me?.is_founder) return;
+
+      const queue=await window.projectOrbitDb.rpc('founder_media_review_queue');
+      if(queue.error) return;
+
+      const pending=new Set((queue.data||[]).map(row=>Number(row.post_id))).size;
+      if(!pending) return;
+
+      const review=document.createElement('button');
+      review.type='button';
+      review.id='svFounderReviewBtn1215';
+      review.className='sv-desktop-post-1213';
+      review.style.background='rgba(244,185,66,.10)';
+      review.style.color='#ffd978';
+      review.style.boxShadow='none';
+      review.innerHTML=`<span class="sv-desktop-post-icon-1213" aria-hidden="true">◉</span><span>Media Review · ${pending}</span>`;
+      review.addEventListener('click',()=>{
+        location.hash='#more';
+        setTimeout(()=>{
+          const tile=document.querySelector('[data-sv-media-review="1210"]');
+          if(tile) tile.click();
+        },120);
+      });
+
+      postButton.insertAdjacentElement('afterend',review);
+    }
+
     ensureDesktopPostButton1213();
+    setTimeout(ensureFounderReviewShortcut1215,250);
 
     const sidebar1213=document.querySelector('.sidebar');
     if(sidebar1213){
@@ -5950,9 +6017,36 @@ Carry dawn beyond the sky.</p>
       });
       observer1213.observe(sidebar1213,{childList:true,subtree:true});
     }
+
+    window.addEventListener('hashchange',()=>setTimeout(ensureFounderReviewShortcut1215,250));
   })();
   </script>
   <!-- /Starvalla Desktop Sidebar v1.21.3 -->
+
+
+  <!-- Starvalla Composer Auto-Close v1.21.4 -->
+  <script>
+  (() => {
+    'use strict';
+
+    /*
+      Traceable compatibility marker. Actual success-aware close behavior is
+      integrated into the existing text and quarantine posting paths above.
+    */
+    window.__starvallaComposerAutoClose1214 = true;
+  })();
+  </script>
+  <!-- /Starvalla Composer Auto-Close v1.21.4 -->
+
+
+  <!-- Starvalla Founder Media Review UX v1.21.5 -->
+  <script>
+  (() => {
+    'use strict';
+    window.__starvallaFounderMediaReviewUx1215 = true;
+  })();
+  </script>
+  <!-- /Starvalla Founder Media Review UX v1.21.5 -->
 
 </body>
 </html>
