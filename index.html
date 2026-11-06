@@ -6362,5 +6362,417 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Public Launch Safety v1.22.0 -->
 
+
+  <!-- Starvalla Share to DM v1.22.1 -->
+  <style id="starvallaShareToDm1221">
+    .sv1221-share-modal{
+      position:fixed;inset:0;z-index:14500;display:none;place-items:center;
+      padding:14px;background:rgba(2,7,14,.78);backdrop-filter:blur(8px)
+    }
+    .sv1221-share-modal.show{display:grid}
+    .sv1221-share-dialog{
+      width:min(580px,100%);max-height:88vh;overflow:auto;border-radius:24px;
+      border:1px solid rgba(244,185,66,.24);
+      background:linear-gradient(180deg,#091526,#06101d);
+      box-shadow:0 34px 100px rgba(0,0,0,.58);color:white
+    }
+    .sv1221-share-head{
+      position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;
+      align-items:flex-start;gap:14px;padding:18px 20px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(7,17,31,.97)
+    }
+    .sv1221-share-head h2{margin:4px 0 0}
+    .sv1221-share-close{
+      width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);color:white;font-size:25px;cursor:pointer
+    }
+    .sv1221-share-body{padding:18px}
+    .sv1221-search{
+      width:100%;box-sizing:border-box;border:1px solid rgba(255,255,255,.11);
+      border-radius:13px;background:#07111f;color:white;padding:12px 13px;
+      font:inherit;outline:none
+    }
+    .sv1221-search:focus{
+      border-color:rgba(244,185,66,.65);
+      box-shadow:0 0 0 3px rgba(244,185,66,.08)
+    }
+    .sv1221-results{display:grid;gap:8px;margin-top:12px}
+    .sv1221-person{
+      width:100%;display:grid;grid-template-columns:48px 1fr auto;gap:11px;
+      align-items:center;text-align:left;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;background:rgba(255,255,255,.035);color:white;padding:11px;
+      cursor:pointer
+    }
+    .sv1221-person:hover{border-color:rgba(244,185,66,.28);background:rgba(244,185,66,.055)}
+    .sv1221-avatar{
+      width:48px;height:48px;border-radius:999px;overflow:hidden;display:grid;place-items:center;
+      background:#14223a;border:2px solid rgba(255,255,255,.08);font-weight:950
+    }
+    .sv1221-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .sv1221-person small{display:block;color:#8395aa;margin-top:3px}
+    .sv1221-post-preview{
+      margin:0 0 14px;padding:12px;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;background:rgba(255,255,255,.025)
+    }
+    .sv1221-post-preview p{margin:7px 0 0;color:#b8c5d6;line-height:1.5}
+    .sv1221-shared-card{
+      margin-top:2px;border:1px solid rgba(244,185,66,.20);border-radius:14px;
+      overflow:hidden;background:rgba(7,17,31,.78)
+    }
+    .sv1221-shared-copy{padding:11px 12px}
+    .sv1221-shared-copy strong{display:block;color:white}
+    .sv1221-shared-copy small{display:block;color:#8395aa;margin-top:3px}
+    .sv1221-shared-copy p{margin:9px 0 0!important;color:#d7e0ea;line-height:1.5}
+    .sv1221-shared-media{width:100%;max-height:360px;object-fit:cover;display:block;background:#02060b}
+    .sv1221-shared-missing{padding:13px;color:#9aacbd;font-size:12px}
+    .sv1221-send-note{font-size:12px;color:#8193aa;line-height:1.5;margin:10px 0 0}
+    @media(max-width:760px){
+      .sv1221-share-modal{padding:7px}
+      .sv1221-share-dialog{max-height:92vh;border-radius:20px}
+    }
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    const state1221={
+      db:null,
+      profile:null,
+      citizens:[],
+      modal:null,
+      selectedPost:null,
+      cardCache:new Map()
+    };
+
+    const waitDb1221=async()=>{
+      for(let i=0;i<120;i++){
+        if(window.projectOrbitDb)return window.projectOrbitDb;
+        await new Promise(r=>setTimeout(r,50));
+      }
+      throw new Error('Starvalla database client did not initialize');
+    };
+
+    const esc1221=value=>String(value??'').replace(/[&<>'"]/g,c=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+    }[c]));
+
+    const pad1221=value=>String(value??'').padStart(6,'0');
+
+    const toast1221=message=>{
+      const el=document.querySelector('#toast');
+      if(!el){alert(message);return;}
+      el.textContent=message;
+      el.classList.add('show');
+      setTimeout(()=>el.classList.remove('show'),2500);
+    };
+
+    function avatar1221(citizen){
+      const url=String(citizen?.avatar_url||'').trim();
+      if(/^https?:\/\//i.test(url)){
+        return `<span class="sv1221-avatar"><img src="${esc1221(url)}" alt=""></span>`;
+      }
+      const initial=esc1221((citizen?.display_name||'C').trim().charAt(0).toUpperCase());
+      return `<span class="sv1221-avatar">${initial}</span>`;
+    }
+
+    async function refreshIdentity1221(){
+      const [mine,citizens]=await Promise.all([
+        state1221.db.rpc('my_profile'),
+        state1221.db
+          .from('profiles')
+          .select('citizen_no,display_name,avatar_url,role,is_founder,account_type')
+          .order('citizen_no')
+      ]);
+
+      state1221.profile=mine.data?.[0]||null;
+      state1221.citizens=citizens.data||[];
+    }
+
+    function ensureModal1221(){
+      if(state1221.modal)return state1221.modal;
+
+      const wrap=document.createElement('div');
+      wrap.className='sv1221-share-modal';
+      wrap.id='sv1221ShareModal';
+      wrap.innerHTML=`
+        <div class="sv1221-share-dialog" role="dialog" aria-modal="true">
+          <div class="sv1221-share-head">
+            <div>
+              <span class="eyebrow">DIRECT MESSAGE</span>
+              <h2>Send post to a citizen</h2>
+            </div>
+            <button type="button" class="sv1221-share-close" aria-label="Close">×</button>
+          </div>
+          <div class="sv1221-share-body">
+            <div id="sv1221PostPreview"></div>
+            <input class="sv1221-search" id="sv1221CitizenSearch"
+              placeholder="Search citizens…" autocomplete="off">
+            <div class="sv1221-results" id="sv1221CitizenResults"></div>
+            <p class="sv1221-send-note">Selecting a citizen sends this post directly into your private Starvalla conversation with them.</p>
+          </div>
+        </div>`;
+
+      document.body.appendChild(wrap);
+      wrap.querySelector('.sv1221-share-close')?.addEventListener('click',()=>wrap.classList.remove('show'));
+      wrap.addEventListener('click',e=>{if(e.target===wrap)wrap.classList.remove('show');});
+      state1221.modal=wrap;
+      return wrap;
+    }
+
+    function closeModal1221(){
+      state1221.modal?.classList.remove('show');
+    }
+
+    async function loadPostSummary1221(postId){
+      const postResult=await state1221.db
+        .from('posts')
+        .select('id,author_citizen_no,body,created_at,moderation_status')
+        .eq('id',Number(postId))
+        .maybeSingle();
+
+      if(postResult.error||!postResult.data)return null;
+      const post=postResult.data;
+
+      const [authorResult,mediaResult]=await Promise.all([
+        state1221.db
+          .from('profiles')
+          .select('citizen_no,display_name,avatar_url,role,is_founder')
+          .eq('citizen_no',post.author_citizen_no)
+          .maybeSingle(),
+        state1221.db
+          .from('post_media')
+          .select('storage_path,media_type,position')
+          .eq('post_id',post.id)
+          .order('position',{ascending:true})
+          .limit(1)
+      ]);
+
+      return {
+        post,
+        author:authorResult.data||null,
+        media:mediaResult.data?.[0]||null
+      };
+    }
+
+    function summaryHtml1221(summary){
+      if(!summary)return '<div class="sv1221-post-preview"><strong>Post unavailable</strong></div>';
+      const body=String(summary.post.body||'').trim();
+      return `<div class="sv1221-post-preview">
+        <strong>${esc1221(summary.author?.display_name||'Citizen')}</strong>
+        <p>${body?esc1221(body.slice(0,220)):'Media-only post'}</p>
+      </div>`;
+    }
+
+    function matchingCitizens1221(query){
+      const me=Number(state1221.profile?.citizen_no||0);
+      const q=String(query||'').trim().toLowerCase();
+
+      return state1221.citizens
+        .filter(c=>Number(c.citizen_no)!==me)
+        .filter(c=>{
+          if(!q)return c.account_type!=='ai';
+          return [
+            c.display_name,
+            c.role,
+            pad1221(c.citizen_no),
+            `#${pad1221(c.citizen_no)}`,
+            c.account_type==='ai'?'ai citizen':''
+          ].filter(Boolean).join(' ').toLowerCase().includes(q);
+        })
+        .slice(0,30);
+    }
+
+    function drawCitizenResults1221(){
+      const modal=ensureModal1221();
+      const search=modal.querySelector('#sv1221CitizenSearch');
+      const results=modal.querySelector('#sv1221CitizenResults');
+      if(!results)return;
+
+      const citizens=matchingCitizens1221(search?.value||'');
+
+      results.innerHTML=citizens.length
+        ? citizens.map(c=>`
+          <button type="button" class="sv1221-person" data-sv1221-recipient="${c.citizen_no}">
+            ${avatar1221(c)}
+            <div>
+              <strong>${esc1221(c.display_name)} ${c.is_founder?'✓':''}</strong>
+              <small>${esc1221(c.role||'Citizen')} · Citizen #${pad1221(c.citizen_no)}${c.account_type==='ai'?' · AI Citizen':''}</small>
+            </div>
+            <span>›</span>
+          </button>`).join('')
+        : '<p class="muted">No citizens found.</p>';
+
+      results.querySelectorAll('[data-sv1221-recipient]').forEach(button=>{
+        button.addEventListener('click',()=>sendPost1221(Number(button.dataset.sv1221Recipient),button));
+      });
+    }
+
+    async function openShare1221(postId){
+      if(!state1221.profile){
+        document.querySelector('#accountBtn')?.click();
+        return;
+      }
+
+      const summary=await loadPostSummary1221(postId);
+      if(!summary||summary.post.moderation_status!=='published'){
+        toast1221('That post is not available to share.');
+        return;
+      }
+
+      state1221.selectedPost=summary;
+
+      const modal=ensureModal1221();
+      modal.querySelector('#sv1221PostPreview').innerHTML=summaryHtml1221(summary);
+      const search=modal.querySelector('#sv1221CitizenSearch');
+      if(search)search.value='';
+      drawCitizenResults1221();
+
+      if(!search?.dataset.sv1221Bound){
+        search.dataset.sv1221Bound='1';
+        search.addEventListener('input',drawCitizenResults1221);
+      }
+
+      modal.classList.add('show');
+      setTimeout(()=>search?.focus(),50);
+    }
+
+    async function sendPost1221(recipientNo,button){
+      const postId=Number(state1221.selectedPost?.post?.id||0);
+      if(!postId||!recipientNo)return;
+
+      button.disabled=true;
+      const original=button.innerHTML;
+      button.innerHTML='<span></span><div><strong>Sending…</strong></div><span></span>';
+
+      const marker=`[[STARVALLA_SHARED_POST:${postId}]]`;
+
+      const result=await state1221.db
+        .from('direct_messages')
+        .insert({
+          recipient_citizen_no:Number(recipientNo),
+          body:marker,
+          shared_post_id:postId
+        });
+
+      if(result.error){
+        button.disabled=false;
+        button.innerHTML=original;
+        toast1221(result.error.message);
+        return;
+      }
+
+      const recipient=state1221.citizens.find(c=>Number(c.citizen_no)===Number(recipientNo));
+      closeModal1221();
+      toast1221(`Sent to ${recipient?.display_name||'citizen'}.`);
+    }
+
+    async function sharedCardHtml1221(postId){
+      const id=Number(postId);
+      if(state1221.cardCache.has(id))return state1221.cardCache.get(id);
+
+      const summary=await loadPostSummary1221(id);
+      if(!summary){
+        const missing='<div class="sv1221-shared-card"><div class="sv1221-shared-missing">This shared post is no longer available.</div></div>';
+        state1221.cardCache.set(id,missing);
+        return missing;
+      }
+
+      let mediaHtml='';
+      if(summary.media?.storage_path){
+        const publicUrl=state1221.db.storage
+          .from('post-media')
+          .getPublicUrl(summary.media.storage_path).data?.publicUrl||'';
+
+        if(publicUrl){
+          if(summary.media.media_type==='video'){
+            mediaHtml=`<video class="sv1221-shared-media" src="${esc1221(publicUrl)}" controls playsinline preload="metadata"></video>`;
+          }else{
+            mediaHtml=`<img class="sv1221-shared-media" src="${esc1221(publicUrl)}" alt="Shared post image" loading="lazy">`;
+          }
+        }
+      }
+
+      const body=String(summary.post.body||'').trim();
+      const card=`<div class="sv1221-shared-card" data-sv1221-shared-card="${id}">
+        <div class="sv1221-shared-copy">
+          <strong>${esc1221(summary.author?.display_name||'Citizen')} ${summary.author?.is_founder?'✓':''}</strong>
+          <small>Shared Starvalla post · #${id}</small>
+          <p>${body?esc1221(body):'Media-only post'}</p>
+        </div>
+        ${mediaHtml}
+      </div>`;
+
+      state1221.cardCache.set(id,card);
+      return card;
+    }
+
+    async function decorateDmSharedPosts1221(){
+      document.querySelectorAll('.dm-bubble p').forEach(async p=>{
+        if(p.dataset.sv1221Decorated)return;
+
+        const text=(p.textContent||'').trim();
+        const match=text.match(/^\[\[STARVALLA_SHARED_POST:(\d+)\]\]$/);
+        if(!match)return;
+
+        p.dataset.sv1221Decorated='1';
+        const id=Number(match[1]);
+        const bubble=p.closest('.dm-bubble');
+        if(!bubble)return;
+
+        p.textContent='Loading shared post…';
+        p.style.color='#8193aa';
+
+        const wrapper=document.createElement('div');
+        wrapper.innerHTML=await sharedCardHtml1221(id);
+        const card=wrapper.firstElementChild;
+        if(card){
+          p.replaceWith(card);
+        }
+      });
+
+      document.querySelectorAll('.dm-preview').forEach(preview=>{
+        const text=(preview.textContent||'').replace(/^You:\s*/,'').trim();
+        if(/^\[\[STARVALLA_SHARED_POST:\d+\]\]$/.test(text)){
+          const mine=(preview.textContent||'').trim().startsWith('You:');
+          preview.textContent=mine?'You: Shared a post':'Shared a post';
+        }
+      });
+    }
+
+    // Capture Share before the legacy external-share click handler runs.
+    document.addEventListener('click',event=>{
+      const share=event.target.closest?.('[data-share-post]');
+      if(!share)return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+
+      const postId=Number(share.dataset.sharePost||0);
+      if(postId)openShare1221(postId);
+    },true);
+
+    state1221.db=await waitDb1221();
+    await refreshIdentity1221().catch(()=>{});
+    decorateDmSharedPosts1221();
+
+    let timer=null;
+    const observer=new MutationObserver(()=>{
+      clearTimeout(timer);
+      timer=setTimeout(decorateDmSharedPosts1221,35);
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+
+    state1221.db.auth.onAuthStateChange(async()=>{
+      await refreshIdentity1221().catch(()=>{});
+    });
+
+    window.addEventListener('hashchange',()=>setTimeout(decorateDmSharedPosts1221,60));
+  })();
+  </script>
+  <!-- /Starvalla Share to DM v1.22.1 -->
+
 </body>
 </html>
