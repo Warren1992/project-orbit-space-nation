@@ -7537,5 +7537,328 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Shared Post Full View v1.22.5 -->
 
+
+  <!-- Starvalla World Apartment v1.22.6 -->
+  <style id="starvallaWorldApartment1226">
+    .sv1226-world{display:grid;gap:16px}
+    .sv1226-world-head{
+      display:flex;justify-content:space-between;gap:14px;align-items:flex-start;
+      padding:18px 20px;border:1px solid rgba(244,185,66,.18);
+      border-radius:20px;background:linear-gradient(145deg,rgba(244,185,66,.06),rgba(10,24,44,.94))
+    }
+    .sv1226-world-head h2{margin:5px 0 4px;font-size:clamp(25px,5vw,38px)}
+    .sv1226-world-head p{margin:0;color:#9fb0c5}
+    .sv1226-residence-badge{
+      padding:8px 11px;border-radius:999px;border:1px solid rgba(244,185,66,.30);
+      background:rgba(244,185,66,.08);color:#ffd978;font-size:11px;font-weight:950;
+      letter-spacing:.08em;white-space:nowrap
+    }
+
+    .sv1226-apartment{
+      position:relative;min-height:650px;overflow:hidden;border-radius:26px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        linear-gradient(180deg,#15273c 0 57%,#0f1b2a 57% 59%,#4b3b2f 59% 100%);
+      box-shadow:0 28px 70px rgba(0,0,0,.30)
+    }
+    .sv1226-ceiling{
+      position:absolute;left:0;right:0;top:0;height:40%;
+      background:linear-gradient(180deg,#0e1c2d,#1b314a);
+      clip-path:polygon(0 0,100% 0,91% 100%,9% 100%);
+      opacity:.92
+    }
+    .sv1226-floor{
+      position:absolute;left:-7%;right:-7%;bottom:-3%;height:43%;
+      background:
+        repeating-linear-gradient(92deg,rgba(255,255,255,.035) 0 2px,transparent 2px 92px),
+        linear-gradient(180deg,#544034,#291f1b);
+      transform:perspective(520px) rotateX(7deg);
+      transform-origin:bottom center
+    }
+    .sv1226-window-frame{
+      position:absolute;left:20%;right:7%;top:8%;height:47%;
+      padding:13px;border-radius:28px;
+      background:linear-gradient(145deg,#60748a,#1b2c40 52%,#8699ab);
+      box-shadow:0 18px 55px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.10)
+    }
+    .sv1226-window{
+      position:relative;width:100%;height:100%;overflow:hidden;border-radius:20px;
+      background:
+        radial-gradient(circle at 70% 20%,rgba(255,244,192,.92) 0 4%,rgba(255,224,145,.28) 5% 14%,transparent 15%),
+        linear-gradient(180deg,#e1a54d 0,#edc77c 29%,#dca55b 45%,#c88b4c 66%,#b67642 100%);
+      box-shadow:inset 0 0 55px rgba(255,244,214,.20)
+    }
+    .sv1226-window:before,.sv1226-window:after{
+      content:'';position:absolute;left:-10%;right:-10%;height:42%;border-radius:50%;
+      filter:blur(7px);opacity:.78
+    }
+    .sv1226-window:before{
+      bottom:4%;background:linear-gradient(180deg,rgba(255,231,186,.72),rgba(212,143,78,.80))
+    }
+    .sv1226-window:after{
+      top:31%;background:linear-gradient(180deg,rgba(255,245,214,.30),rgba(233,181,111,.36));
+      transform:translateX(11%)
+    }
+    .sv1226-city{
+      position:absolute;bottom:27%;width:78px;height:48px;border-radius:50% 50% 38% 38%;
+      background:linear-gradient(180deg,#e2edf3,#738b9e 55%,#24384b);
+      border:2px solid rgba(255,255,255,.55);
+      box-shadow:0 0 18px rgba(193,232,255,.50),0 12px 20px rgba(54,53,41,.22)
+    }
+    .sv1226-city:before{
+      content:'';position:absolute;left:50%;top:-28px;width:5px;height:31px;transform:translateX(-50%);
+      background:#7f99ad;border-radius:6px
+    }
+    .sv1226-city:after{
+      content:'';position:absolute;left:15%;right:15%;top:15px;height:9px;border-radius:999px;
+      background:repeating-linear-gradient(90deg,#c9fbff 0 5px,#6bcde2 5px 9px)
+    }
+    .sv1226-city.c1{left:10%;transform:scale(.64);opacity:.72}
+    .sv1226-city.c2{left:46%;bottom:31%;transform:scale(.44);opacity:.62}
+    .sv1226-city.c3{right:9%;bottom:24%;transform:scale(.78);opacity:.78}
+    .sv1226-city.c4{right:31%;bottom:41%;transform:scale(.30);opacity:.48}
+
+    .sv1226-window-label{
+      position:absolute;left:16px;top:14px;padding:6px 9px;border-radius:999px;
+      background:rgba(5,12,21,.44);backdrop-filter:blur(8px);color:#fff4d0;
+      font-size:10px;font-weight:950;letter-spacing:.08em
+    }
+
+    .sv1226-bed{
+      position:absolute;left:6%;bottom:10%;width:39%;height:24%;
+      background:linear-gradient(180deg,#c4cbd3,#6d7c8e);
+      border-radius:22px 22px 15px 15px;box-shadow:0 18px 30px rgba(0,0,0,.28)
+    }
+    .sv1226-bed:before{
+      content:'';position:absolute;left:5%;right:5%;top:8%;height:36%;
+      border-radius:16px;background:linear-gradient(180deg,#edf1f4,#aeb9c5)
+    }
+    .sv1226-bed:after{
+      content:'';position:absolute;left:0;right:0;bottom:0;height:48%;
+      border-radius:0 0 15px 15px;background:linear-gradient(135deg,#393055,#191f37 58%,#473464)
+    }
+    .sv1226-nightstand{
+      position:absolute;left:46%;bottom:11%;width:11%;height:17%;
+      background:linear-gradient(180deg,#8f7459,#4c3b2d);border-radius:8px;
+      box-shadow:0 12px 22px rgba(0,0,0,.24)
+    }
+    .sv1226-lamp{
+      position:absolute;left:49%;bottom:28%;width:22px;height:72px
+    }
+    .sv1226-lamp:before{
+      content:'';position:absolute;left:9px;bottom:0;width:5px;height:48px;background:#aeb9c5
+    }
+    .sv1226-lamp:after{
+      content:'';position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;
+      background:#ffe09a;box-shadow:0 0 28px rgba(255,213,119,.66)
+    }
+    .sv1226-desk{
+      position:absolute;right:6%;bottom:10%;width:30%;height:18%;
+      border-top:12px solid #816b56;border-left:8px solid #594738;border-right:8px solid #594738
+    }
+    .sv1226-screen{
+      position:absolute;right:13%;bottom:28%;width:16%;height:12%;
+      border-radius:12px;border:5px solid #28394a;
+      background:linear-gradient(150deg,#133a55,#27718e 52%,#0e2434);
+      box-shadow:0 0 22px rgba(79,197,236,.26)
+    }
+    .sv1226-chair{
+      position:absolute;right:14%;bottom:5%;width:12%;height:20%;
+      border-radius:45% 45% 20% 20%;background:#222b3a;transform:skewX(-4deg);
+      box-shadow:0 14px 20px rgba(0,0,0,.25)
+    }
+    .sv1226-kitchen{
+      position:absolute;left:4%;top:13%;width:13%;height:41%;
+      border-radius:13px;background:linear-gradient(180deg,#304153,#162535);
+      box-shadow:0 14px 30px rgba(0,0,0,.25)
+    }
+    .sv1226-kitchen:before{
+      content:'';position:absolute;left:12%;right:12%;top:47%;height:2px;background:rgba(255,255,255,.14);
+      box-shadow:0 44px 0 rgba(255,255,255,.10)
+    }
+    .sv1226-kitchen:after{
+      content:'';position:absolute;left:23%;right:23%;top:12%;height:6px;border-radius:999px;
+      background:#6b8195;box-shadow:0 92px 0 #6b8195,0 136px 0 #6b8195
+    }
+    .sv1226-rug{
+      position:absolute;left:34%;bottom:2%;width:38%;height:14%;
+      border-radius:50%;background:radial-gradient(ellipse at center,#45365f 0,#211d31 67%,transparent 69%);
+      opacity:.82
+    }
+    .sv1226-room-label{
+      position:absolute;left:5%;top:5%;padding:8px 11px;border-radius:999px;
+      background:rgba(5,12,21,.48);border:1px solid rgba(255,255,255,.10);
+      color:#e9eef5;font-size:10px;font-weight:900;letter-spacing:.08em;backdrop-filter:blur(8px)
+    }
+
+    .sv1226-details{
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px
+    }
+    .sv1226-details .card{padding:16px}
+    .sv1226-details strong{display:block;margin-bottom:4px}
+    .sv1226-details span{color:#8fa1b8;font-size:12px}
+
+    @media(max-width:760px){
+      .sv1226-world-head{display:block}
+      .sv1226-residence-badge{display:inline-flex;margin-top:12px}
+      .sv1226-apartment{min-height:590px}
+      .sv1226-window-frame{left:16%;right:4%;top:9%;height:42%}
+      .sv1226-kitchen{width:12%;left:2%}
+      .sv1226-bed{left:4%;width:45%;bottom:9%}
+      .sv1226-nightstand{left:50%;width:12%}
+      .sv1226-desk{right:3%;width:31%}
+      .sv1226-screen{right:10%;width:18%}
+      .sv1226-chair{right:11%;width:13%}
+      .sv1226-details{grid-template-columns:1fr}
+    }
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    const WORLD_ICON_1226=`<svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M4.6 12h14.8M12 3.8c2.2 2.2 3.4 5 3.4 8.2S14.2 18 12 20.2M12 3.8C9.8 6 8.6 8.8 8.6 12s1.2 6 3.4 8.2"
+        fill="none" stroke="currentColor" stroke-width="1.45"/>
+      <path d="M2.5 8.7c3.2-2 7.3-2.7 11.5-1.9 3 .5 5.6 1.7 7.5 3.3"
+        fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/>
+    </svg>`;
+
+    async function getProfile1226(){
+      try{
+        for(let i=0;i<100;i++){
+          if(window.projectOrbitDb){
+            const result=await window.projectOrbitDb.rpc('my_profile');
+            return result.data?.[0]||null;
+          }
+          await new Promise(r=>setTimeout(r,40));
+        }
+      }catch{}
+      return null;
+    }
+
+    function apartmentAddress1226(citizenNo){
+      const n=Math.max(1,Number(citizenNo)||1);
+      const tower=(n%9)+1;
+      const floor=(n%42)+18;
+      const unit=String(n).padStart(6,'0');
+      return {tower,floor,unit};
+    }
+
+    window.renderWorld = async function renderWorld1226(){
+      document.querySelector('#sectionTitle')&&(document.querySelector('#sectionTitle').textContent='World');
+      document.querySelector('#sectionKicker')&&(document.querySelector('#sectionKicker').textContent='NEW VENUS');
+
+      const profile=await getProfile1226();
+      const addr=apartmentAddress1226(profile?.citizen_no);
+      const name=profile?.display_name||'Citizen';
+
+      const viewRoot=document.querySelector('#view');
+      if(!viewRoot)return;
+
+      viewRoot.innerHTML=`
+        <div class="sv1226-world">
+          <section class="sv1226-world-head">
+            <div>
+              <span class="eyebrow">NEW VENUS · CAPITAL CITY</span>
+              <h2>${name}'s Studio Apartment</h2>
+              <p>Your personal residence inside Starvalla's floating capital above the clouds of Venus.</p>
+            </div>
+            <span class="sv1226-residence-badge">CITIZEN #${String(profile?.citizen_no||1).padStart(6,'0')}</span>
+          </section>
+
+          <section class="sv1226-apartment" aria-label="Studio apartment in New Venus">
+            <div class="sv1226-ceiling"></div>
+            <div class="sv1226-floor"></div>
+
+            <div class="sv1226-window-frame">
+              <div class="sv1226-window">
+                <span class="sv1226-window-label">VIEW · VENUS CLOUD DECK</span>
+                <span class="sv1226-city c1"></span>
+                <span class="sv1226-city c2"></span>
+                <span class="sv1226-city c3"></span>
+                <span class="sv1226-city c4"></span>
+              </div>
+            </div>
+
+            <div class="sv1226-kitchen" aria-hidden="true"></div>
+            <div class="sv1226-bed" aria-hidden="true"></div>
+            <div class="sv1226-nightstand" aria-hidden="true"></div>
+            <div class="sv1226-lamp" aria-hidden="true"></div>
+            <div class="sv1226-desk" aria-hidden="true"></div>
+            <div class="sv1226-screen" aria-hidden="true"></div>
+            <div class="sv1226-chair" aria-hidden="true"></div>
+            <div class="sv1226-rug" aria-hidden="true"></div>
+
+            <span class="sv1226-room-label">NEW VENUS · TOWER ${addr.tower} · LEVEL ${addr.floor} · UNIT ${addr.unit}</span>
+          </section>
+
+          <section class="sv1226-details">
+            <div class="card">
+              <strong>Home</strong>
+              <span>Private studio residence in New Venus</span>
+            </div>
+            <div class="card">
+              <strong>Window view</strong>
+              <span>Other floating cloud cities visible across the Venusian atmosphere</span>
+            </div>
+            <div class="card">
+              <strong>Future expansion</strong>
+              <span>Furniture, collectibles, visitors, and larger residences can be added later</span>
+            </div>
+          </section>
+        </div>`;
+    };
+
+    function patchWorldNav1226(){
+      if(typeof routeMeta!=='undefined'){
+        routeMeta.world=routeMeta.world||{};
+        routeMeta.world.icon=WORLD_ICON_1226;
+        routeMeta.world.label='World';
+      }
+
+      if(Array.isArray(mainMobile)){
+        mainMobile.splice(0,mainMobile.length,'home','citizens','messages','world','more');
+      }
+
+      if(typeof renderNav==='function'){
+        renderNav();
+      }
+
+      document.querySelectorAll('#bottomNav [data-route="world"]').forEach(btn=>{
+        btn.setAttribute('aria-label','World');
+        btn.setAttribute('title','World');
+      });
+    }
+
+    patchWorldNav1226();
+
+    let navTimer1226=null;
+    const bottom1226=document.querySelector('#bottomNav');
+    if(bottom1226){
+      const navObserver1226=new MutationObserver(()=>{
+        clearTimeout(navTimer1226);
+        navTimer1226=setTimeout(()=>{
+          const hasWorld=bottom1226.querySelector('[data-route="world"]');
+          const hasNews=bottom1226.querySelector('[data-route="news"]');
+          if(hasNews||!hasWorld)patchWorldNav1226();
+        },20);
+      });
+      navObserver1226.observe(bottom1226,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>{
+      setTimeout(()=>{
+        patchWorldNav1226();
+        if(location.hash==='#world')window.renderWorld?.();
+      },20);
+    });
+
+    if(location.hash==='#world')window.renderWorld?.();
+  })();
+  </script>
+  <!-- /Starvalla World Apartment v1.22.6 -->
+
 </body>
 </html>
