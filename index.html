@@ -7241,5 +7241,301 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Shared Post Hard Renderer v1.22.4 -->
 
+
+  <!-- Starvalla Shared Post Full View v1.22.5 -->
+  <style id="starvallaSharedPostFullView1225">
+    .sv1225-clickable{cursor:pointer}
+    .sv1225-clickable:hover{filter:brightness(1.025)}
+    .sv1225-modal{
+      position:fixed;inset:0;z-index:15000;display:none;place-items:center;
+      padding:10px;background:rgba(2,7,14,.84);backdrop-filter:blur(10px)
+    }
+    .sv1225-modal.show{display:grid}
+    .sv1225-shell{
+      width:min(760px,100%);max-height:94vh;overflow:auto;border-radius:24px;
+      background:#07111f;border:1px solid rgba(244,185,66,.22);
+      box-shadow:0 34px 100px rgba(0,0,0,.62)
+    }
+    .sv1225-head{
+      position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;
+      align-items:center;padding:14px 16px;background:rgba(7,17,31,.97);
+      border-bottom:1px solid rgba(255,255,255,.08)
+    }
+    .sv1225-close{
+      width:42px;height:42px;border-radius:999px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(255,255,255,.04);color:white;font-size:25px
+    }
+    .sv1225-post{padding:0 0 16px}
+    .sv1225-meta{display:flex;gap:11px;align-items:center;padding:16px}
+    .sv1225-avatar{width:52px;height:52px;border-radius:999px;overflow:hidden;display:grid;place-items:center;background:#17233a;font-weight:900}
+    .sv1225-avatar img{width:100%;height:100%;object-fit:cover}
+    .sv1225-copy{padding:0 16px 14px;font-size:18px;line-height:1.55;white-space:pre-wrap}
+    .sv1225-gallery{display:grid;gap:3px;background:#02060b}
+    .sv1225-gallery img,.sv1225-gallery video{width:100%;max-height:72vh;object-fit:contain;display:block;background:#02060b}
+    .sv1225-actions{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 14px;
+      border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)
+    }
+    .sv1225-actions button{
+      border:0;background:transparent;color:#aebdd0;padding:10px 6px;font-weight:850
+    }
+    .sv1225-actions button.active{color:#ffd978}
+    .sv1225-comments{padding:14px 16px 2px;display:none}
+    .sv1225-comments.show{display:block}
+    .sv1225-comment{
+      display:grid;grid-template-columns:38px 1fr;gap:9px;padding:10px 0;
+      border-bottom:1px solid rgba(255,255,255,.07)
+    }
+    .sv1225-comment:last-child{border-bottom:0}
+    .sv1225-comment-avatar{width:38px;height:38px;border-radius:999px;overflow:hidden;display:grid;place-items:center;background:#17233a;font-size:12px;font-weight:900}
+    .sv1225-comment-avatar img{width:100%;height:100%;object-fit:cover}
+    .sv1225-comment small{display:block;color:#8193aa;margin-top:2px}
+    .sv1225-comment p{margin:7px 0 0;white-space:pre-wrap;line-height:1.45}
+    .sv1225-comment-form{display:flex;gap:8px;margin-top:12px}
+    .sv1225-comment-form input{
+      flex:1;min-width:0;border:1px solid rgba(255,255,255,.11);border-radius:12px;
+      background:#06101d;color:white;padding:11px 12px;font:inherit
+    }
+    @media(max-width:640px){
+      .sv1225-modal{padding:0}
+      .sv1225-shell{width:100%;height:100%;max-height:100vh;border-radius:0}
+      .sv1225-actions{grid-template-columns:repeat(4,1fr)}
+      .sv1225-actions button{font-size:12px;padding:9px 2px}
+    }
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    const s1225={db:null,profile:null,citizens:[],modal:null,postId:0};
+
+    const waitDb1225=async()=>{
+      for(let i=0;i<120;i++){
+        if(window.projectOrbitDb)return window.projectOrbitDb;
+        await new Promise(r=>setTimeout(r,50));
+      }
+      throw new Error('Database unavailable');
+    };
+
+    const esc1225=v=>String(v??'').replace(/[&<>'"]/g,c=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+    }[c]));
+
+    const toast1225=m=>{
+      const e=document.querySelector('#toast');
+      if(!e){alert(m);return;}
+      e.textContent=m;e.classList.add('show');
+      setTimeout(()=>e.classList.remove('show'),2200);
+    };
+
+    const rel1225=iso=>{
+      const sec=Math.max(0,Math.floor((Date.now()-new Date(iso).getTime())/1000));
+      if(sec<45)return'just now';
+      const m=Math.floor(sec/60);if(m<60)return`${m}m ago`;
+      const h=Math.floor(m/60);if(h<24)return`${h}h ago`;
+      const d=Math.floor(h/24);if(d<30)return`${d}d ago`;
+      return new Date(iso).toLocaleDateString();
+    };
+
+    function avatar1225(c){
+      const url=String(c?.avatar_url||'');
+      if(/^https?:\/\//i.test(url))return `<span class="sv1225-avatar"><img src="${esc1225(url)}" alt=""></span>`;
+      return `<span class="sv1225-avatar">${esc1225((c?.display_name||'C')[0]||'C')}</span>`;
+    }
+
+    async function refreshIdentity1225(){
+      const [mine,cits]=await Promise.all([
+        s1225.db.rpc('my_profile'),
+        s1225.db.from('profiles').select('citizen_no,display_name,avatar_url,role,is_founder').order('citizen_no')
+      ]);
+      s1225.profile=mine.data?.[0]||null;
+      s1225.citizens=cits.data||[];
+    }
+
+    function ensureModal1225(){
+      if(s1225.modal)return s1225.modal;
+      const w=document.createElement('div');
+      w.className='sv1225-modal';
+      w.innerHTML='<div class="sv1225-shell"><div class="sv1225-head"><strong>Post</strong><button class="sv1225-close" type="button">×</button></div><div id="sv1225Body"></div></div>';
+      document.body.appendChild(w);
+      w.querySelector('.sv1225-close').onclick=()=>w.classList.remove('show');
+      w.addEventListener('click',e=>{if(e.target===w)w.classList.remove('show');});
+      s1225.modal=w;
+      return w;
+    }
+
+    async function load1225(postId){
+      const id=Number(postId);
+      const [postR,statsR,mediaR,commentsR,likeR]=await Promise.all([
+        s1225.db.from('posts').select('id,author_citizen_no,body,created_at,moderation_status').eq('id',id).maybeSingle(),
+        s1225.db.from('post_stats').select('post_id,like_count,comment_count').eq('post_id',id).maybeSingle(),
+        s1225.db.from('post_media').select('storage_path,media_type,position').eq('post_id',id).order('position'),
+        s1225.db.from('comments').select('id,post_id,author_citizen_no,body,created_at').eq('post_id',id).order('created_at'),
+        s1225.profile
+          ? s1225.db.from('post_likes').select('post_id').eq('post_id',id).maybeSingle()
+          : Promise.resolve({data:null,error:null})
+      ]);
+
+      if(postR.error||!postR.data||postR.data.moderation_status!=='published')return null;
+
+      const author=s1225.citizens.find(c=>Number(c.citizen_no)===Number(postR.data.author_citizen_no))||null;
+      return {
+        post:postR.data,
+        stats:statsR.data||{like_count:0,comment_count:0},
+        media:mediaR.data||[],
+        comments:commentsR.data||[],
+        liked:Boolean(likeR.data),
+        author
+      };
+    }
+
+    function mediaHtml1225(items){
+      return items.map(item=>{
+        const url=s1225.db.storage.from('post-media').getPublicUrl(item.storage_path).data?.publicUrl||'';
+        if(!url)return'';
+        return item.media_type==='video'
+          ? `<video src="${esc1225(url)}" controls playsinline preload="metadata"></video>`
+          : `<img src="${esc1225(url)}" alt="Post image">`;
+      }).join('');
+    }
+
+    function commentsHtml1225(comments){
+      if(!comments.length)return '<p class="muted">No comments yet.</p>';
+      return comments.map(c=>{
+        const a=s1225.citizens.find(x=>Number(x.citizen_no)===Number(c.author_citizen_no))||null;
+        const av=String(a?.avatar_url||'');
+        const avHtml=/^https?:\/\//i.test(av)
+          ? `<span class="sv1225-comment-avatar"><img src="${esc1225(av)}" alt=""></span>`
+          : `<span class="sv1225-comment-avatar">${esc1225((a?.display_name||'C')[0]||'C')}</span>`;
+        return `<div class="sv1225-comment">
+          ${avHtml}
+          <div><strong>${esc1225(a?.display_name||'Citizen')} ${a?.is_founder?'✓':''}</strong><small>${rel1225(c.created_at)}</small><p>${esc1225(c.body)}</p></div>
+        </div>`;
+      }).join('');
+    }
+
+    async function render1225(postId,showComments=false){
+      const data=await load1225(postId);
+      const w=ensureModal1225();
+      const body=w.querySelector('#sv1225Body');
+
+      if(!data){
+        body.innerHTML='<div style="padding:22px"><h3>Post unavailable</h3><p class="muted">This post may have been deleted or is no longer public.</p></div>';
+        w.classList.add('show');
+        return;
+      }
+
+      s1225.postId=Number(postId);
+      const canInteract=Boolean(s1225.profile);
+      const commentsClass=showComments?'sv1225-comments show':'sv1225-comments';
+
+      body.innerHTML=`<article class="sv1225-post">
+        <div class="sv1225-meta">
+          ${avatar1225(data.author)}
+          <div>
+            <strong style="font-size:19px">${esc1225(data.author?.display_name||'Citizen')} ${data.author?.is_founder?'✓':''}</strong>
+            <small style="display:block;color:#8193aa;margin-top:3px">${esc1225(data.author?.role||'Citizen')} · ${rel1225(data.post.created_at)}</small>
+          </div>
+        </div>
+        ${data.post.body?`<div class="sv1225-copy">${esc1225(data.post.body)}</div>`:''}
+        ${data.media.length?`<div class="sv1225-gallery">${mediaHtml1225(data.media)}</div>`:''}
+        <div class="sv1225-actions">
+          <button type="button" id="sv1225Star" class="${data.liked?'active':''}">☆ ${Number(data.stats.like_count||0)} ${data.liked?'Starred':'Star'}</button>
+          <button type="button" id="sv1225Comment">Comment</button>
+          <button type="button" id="sv1225Read">Comments ${Number(data.stats.comment_count||0)}</button>
+          <button type="button" id="sv1225Share">↗ Share</button>
+        </div>
+        <section class="${commentsClass}" id="sv1225Comments">
+          <div id="sv1225CommentList">${commentsHtml1225(data.comments)}</div>
+          ${canInteract?`<form class="sv1225-comment-form" id="sv1225CommentForm"><input maxlength="500" placeholder="Write a comment…" required><button class="btn primary" type="submit">Send</button></form>`:'<button class="btn secondary" id="sv1225Login">Log in to comment</button>'}
+        </section>
+      </article>`;
+
+      w.classList.add('show');
+
+      body.querySelector('#sv1225Star')?.addEventListener('click',async()=>{
+        if(!s1225.profile){document.querySelector('#accountBtn')?.click();return;}
+        const btn=body.querySelector('#sv1225Star');btn.disabled=true;
+        const result=data.liked
+          ? await s1225.db.from('post_likes').delete().eq('post_id',Number(postId))
+          : await s1225.db.from('post_likes').insert({post_id:Number(postId)});
+        if(result.error){btn.disabled=false;return toast1225(result.error.message);}
+        await render1225(postId,body.querySelector('#sv1225Comments')?.classList.contains('show'));
+      });
+
+      body.querySelector('#sv1225Read')?.addEventListener('click',()=>{
+        const section=body.querySelector('#sv1225Comments');
+        section?.classList.toggle('show');
+        if(section?.classList.contains('show'))section.scrollIntoView({behavior:'smooth',block:'nearest'});
+      });
+
+      body.querySelector('#sv1225Comment')?.addEventListener('click',()=>{
+        const section=body.querySelector('#sv1225Comments');
+        section?.classList.add('show');
+        if(!s1225.profile){document.querySelector('#accountBtn')?.click();return;}
+        setTimeout(()=>body.querySelector('#sv1225CommentForm input')?.focus(),20);
+      });
+
+      body.querySelector('#sv1225Share')?.addEventListener('click',()=>{
+        const proxy=document.createElement('button');
+        proxy.type='button';
+        proxy.dataset.sharePost=String(postId);
+        proxy.style.display='none';
+        document.body.appendChild(proxy);
+        proxy.click();
+        proxy.remove();
+      });
+
+      body.querySelector('#sv1225CommentForm')?.addEventListener('submit',async e=>{
+        e.preventDefault();
+        const input=e.currentTarget.querySelector('input');
+        const text=(input?.value||'').trim();
+        if(!text)return;
+        const btn=e.currentTarget.querySelector('button');btn.disabled=true;
+        const result=await s1225.db.from('comments').insert({post_id:Number(postId),body:text});
+        if(result.error){btn.disabled=false;return toast1225(result.error.message);}
+        await render1225(postId,true);
+      });
+
+      body.querySelector('#sv1225Login')?.addEventListener('click',()=>document.querySelector('#accountBtn')?.click());
+    }
+
+    function wireSharedCards1225(){
+      document.querySelectorAll('[data-sv1224-post],[data-sv1222-post]').forEach(card=>{
+        if(card.dataset.sv1225Wired==='1')return;
+        card.dataset.sv1225Wired='1';
+        card.classList.add('sv1225-clickable');
+        card.setAttribute('role','button');
+        card.setAttribute('tabindex','0');
+        const id=Number(card.dataset.sv1224Post||card.dataset.sv1222Post||0);
+        card.addEventListener('click',e=>{
+          if(e.target.closest('video,button,a,input,textarea'))return;
+          if(id)render1225(id,false);
+        });
+        card.addEventListener('keydown',e=>{
+          if((e.key==='Enter'||e.key===' ')&&id){e.preventDefault();render1225(id,false);}
+        });
+      });
+    }
+
+    s1225.db=await waitDb1225();
+    await refreshIdentity1225().catch(()=>{});
+    wireSharedCards1225();
+
+    let timer=null;
+    new MutationObserver(()=>{
+      clearTimeout(timer);
+      timer=setTimeout(wireSharedCards1225,40);
+    }).observe(document.body,{childList:true,subtree:true});
+
+    s1225.db.auth.onAuthStateChange(async()=>{
+      await refreshIdentity1225().catch(()=>{});
+      wireSharedCards1225();
+    });
+  })();
+  </script>
+  <!-- /Starvalla Shared Post Full View v1.22.5 -->
+
 </body>
 </html>
