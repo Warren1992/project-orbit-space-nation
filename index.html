@@ -220,20 +220,7 @@
   <template id="homeTemplate">
     <div class="page-grid home-grid">
       <section class="stack">
-        <div class="hero-card">
-          <div>
-            <span class="pill gold">FOUNDING ERA</span>
-            <h2 id="citizenWelcome">Welcome to Starvalla</h2>
-            <p>This is a living digital nation: socialize, vote, build institutions, and shape Starvalla together.</p>
-            <div class="hero-actions">
-              <button class="btn primary" data-route="elections">Vote now</button>
-              <button class="btn secondary" data-route="space">View space program</button>
-            </div>
-          </div>
-          <div class="planet-orb" aria-hidden="true"><span></span></div>
-        </div>
-
-        <div class="composer card">
+<div class="composer card">
           <div class="composer-head">
             <button class="avatar founder-avatar" data-route="profile">W</button>
             <div>
@@ -6773,6 +6760,321 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla Share to DM v1.22.1 -->
+
+
+  <!-- Starvalla Shared Post DM Renderer v1.22.2 -->
+  <style id="starvallaSharedPostDmRenderer1222">
+    .sv1222-shared-card{
+      border:1px solid rgba(244,185,66,.22);
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(7,17,31,.82);
+      min-width:min(320px,72vw);
+      max-width:100%;
+    }
+    .sv1222-shared-copy{padding:11px 12px}
+    .sv1222-shared-copy strong{display:block;color:white}
+    .sv1222-shared-copy small{display:block;color:#8395aa;margin-top:3px}
+    .sv1222-shared-copy p{margin:9px 0 0!important;color:#d7e0ea;line-height:1.5}
+    .sv1222-shared-media{
+      width:100%;max-height:360px;object-fit:cover;display:block;background:#02060b
+    }
+    .sv1222-missing{
+      padding:13px;color:#9aacbd;font-size:12px
+    }
+    .dm-bubble:has(.sv1222-shared-card){
+      padding:0!important;
+      overflow:hidden;
+    }
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    const state1222={
+      db:null,
+      profile:null,
+      citizens:[],
+      timer:null,
+      rendering:false
+    };
+
+    const waitDb1222=async()=>{
+      for(let i=0;i<120;i++){
+        if(window.projectOrbitDb)return window.projectOrbitDb;
+        await new Promise(r=>setTimeout(r,50));
+      }
+      throw new Error('Starvalla database client did not initialize');
+    };
+
+    const esc1222=value=>String(value??'').replace(/[&<>'"]/g,c=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+    }[c]));
+
+    const pad1222=value=>String(value??'').padStart(6,'0');
+
+    async function refreshIdentity1222(){
+      const [mine,citizens]=await Promise.all([
+        state1222.db.rpc('my_profile'),
+        state1222.db
+          .from('profiles')
+          .select('citizen_no,display_name,avatar_url,role,is_founder,account_type')
+          .order('citizen_no')
+      ]);
+
+      state1222.profile=mine.data?.[0]||null;
+      state1222.citizens=citizens.data||[];
+    }
+
+    function activeOtherCitizen1222(){
+      const head=document.querySelector('#view .dm-thread-head');
+      if(!head)return 0;
+
+      const text=head.querySelector('small')?.textContent||'';
+      const match=text.match(/Citizen\s*#(\d+)/i);
+      return match?Number(match[1]):0;
+    }
+
+    function citizen1222(no){
+      return state1222.citizens.find(c=>Number(c.citizen_no)===Number(no))||null;
+    }
+
+    async function fetchSharedData1222(postIds){
+      if(!postIds.length)return {posts:new Map(),media:new Map(),authors:new Map()};
+
+      const [postsResult,mediaResult]=await Promise.all([
+        state1222.db
+          .from('posts')
+          .select('id,author_citizen_no,body,moderation_status,created_at')
+          .in('id',postIds),
+        state1222.db
+          .from('post_media')
+          .select('post_id,storage_path,media_type,position')
+          .in('post_id',postIds)
+          .order('position',{ascending:true})
+      ]);
+
+      const posts=new Map((postsResult.data||[]).map(p=>[Number(p.id),p]));
+      const media=new Map();
+
+      for(const item of (mediaResult.data||[])){
+        const id=Number(item.post_id);
+        if(!media.has(id))media.set(id,item);
+      }
+
+      const authorIds=[...new Set([...posts.values()].map(p=>Number(p.author_citizen_no)))];
+      const authors=new Map();
+
+      if(authorIds.length){
+        const authorResult=await state1222.db
+          .from('profiles')
+          .select('citizen_no,display_name,avatar_url,role,is_founder')
+          .in('citizen_no',authorIds);
+
+        for(const a of (authorResult.data||[])){
+          authors.set(Number(a.citizen_no),a);
+        }
+      }
+
+      return {posts,media,authors};
+    }
+
+    function cardHtml1222(postId,data){
+      const post=data.posts.get(Number(postId));
+      if(!post||post.moderation_status!=='published'){
+        return '<div class="sv1222-shared-card"><div class="sv1222-missing">This shared post is no longer available.</div></div>';
+      }
+
+      const author=data.authors.get(Number(post.author_citizen_no));
+      const item=data.media.get(Number(post.id));
+      const body=String(post.body||'').trim();
+
+      let mediaHtml='';
+      if(item?.storage_path){
+        const publicUrl=state1222.db.storage
+          .from('post-media')
+          .getPublicUrl(item.storage_path).data?.publicUrl||'';
+
+        if(publicUrl){
+          if(item.media_type==='video'){
+            mediaHtml=`<video class="sv1222-shared-media" src="${esc1222(publicUrl)}" controls playsinline preload="metadata"></video>`;
+          }else{
+            mediaHtml=`<img class="sv1222-shared-media" src="${esc1222(publicUrl)}" alt="Shared post image" loading="lazy">`;
+          }
+        }
+      }
+
+      return `<div class="sv1222-shared-card" data-sv1222-post="${post.id}">
+        <div class="sv1222-shared-copy">
+          <strong>${esc1222(author?.display_name||'Citizen')} ${author?.is_founder?'✓':''}</strong>
+          <small>Shared Starvalla post · #${post.id}</small>
+          <p>${body?esc1222(body):'Media-only post'}</p>
+        </div>
+        ${mediaHtml}
+      </div>`;
+    }
+
+    async function renderThread1222(){
+      if(state1222.rendering)return;
+
+      const thread=document.querySelector('#view #dmThread');
+      const me=Number(state1222.profile?.citizen_no||0);
+      const other=activeOtherCitizen1222();
+
+      if(!thread||!me||!other)return;
+
+      state1222.rendering=true;
+
+      try{
+        const result=await state1222.db
+          .from('direct_messages')
+          .select('id,sender_citizen_no,recipient_citizen_no,body,created_at,read_at,shared_post_id')
+          .or(`and(sender_citizen_no.eq.${me},recipient_citizen_no.eq.${other}),and(sender_citizen_no.eq.${other},recipient_citizen_no.eq.${me})`)
+          .order('created_at',{ascending:true})
+          .limit(2000);
+
+        if(result.error)return;
+
+        const messages=result.data||[];
+        const rows=[...thread.querySelectorAll('.dm-bubble-row')];
+
+        if(rows.length!==messages.length){
+          return;
+        }
+
+        const postIds=[
+          ...new Set(
+            messages
+              .map(m=>Number(m.shared_post_id||0))
+              .filter(Boolean)
+          )
+        ];
+
+        const shared=await fetchSharedData1222(postIds);
+
+        rows.forEach((row,index)=>{
+          const msg=messages[index];
+          const bubble=row.querySelector('.dm-bubble');
+          if(!bubble||!msg)return;
+
+          if(msg.shared_post_id){
+            const id=Number(msg.shared_post_id);
+
+            if(bubble.dataset.sv1222SharedPost===String(id))return;
+
+            const mine=Number(msg.sender_citizen_no)===me;
+            bubble.dataset.sv1222SharedPost=String(id);
+            bubble.innerHTML=`
+              ${cardHtml1222(id,shared)}
+              <small>${mine
+                ? `${msg.read_at?'Read':'Sent'}`
+                : 'Shared with you'}</small>`;
+          }else{
+            delete bubble.dataset.sv1222SharedPost;
+          }
+        });
+      }finally{
+        state1222.rendering=false;
+      }
+    }
+
+    async function renderInboxPreviews1222(){
+      const list=document.querySelector('#view #dmConversationList');
+      const me=Number(state1222.profile?.citizen_no||0);
+
+      if(!list||!me)return;
+
+      const result=await state1222.db
+        .from('direct_messages')
+        .select('id,sender_citizen_no,recipient_citizen_no,body,created_at,shared_post_id')
+        .order('created_at',{ascending:false})
+        .limit(2000);
+
+      if(result.error)return;
+
+      const latest=new Map();
+
+      for(const msg of (result.data||[])){
+        const a=Number(msg.sender_citizen_no);
+        const b=Number(msg.recipient_citizen_no);
+        const other=a===me?b:a;
+        if(!latest.has(other))latest.set(other,msg);
+      }
+
+      list.querySelectorAll('[data-dm-citizen]').forEach(button=>{
+        const other=Number(button.dataset.dmCitizen||0);
+        const msg=latest.get(other);
+        if(!msg?.shared_post_id)return;
+
+        const preview=button.querySelector('.dm-preview');
+        if(!preview)return;
+
+        const mine=Number(msg.sender_citizen_no)===me;
+        preview.textContent=mine?'You: Shared a post':'Shared a post';
+      });
+    }
+
+    async function decorate1222(){
+      if(document.querySelector('#sectionTitle')?.textContent==='Messages'){
+        await renderThread1222();
+        await renderInboxPreviews1222();
+      }
+    }
+
+    state1222.db=await waitDb1222();
+    await refreshIdentity1222().catch(()=>{});
+    await decorate1222();
+
+    const observer=new MutationObserver(()=>{
+      clearTimeout(state1222.timer);
+      state1222.timer=setTimeout(decorate1222,60);
+    });
+
+    observer.observe(document.body,{childList:true,subtree:true});
+
+    state1222.db.auth.onAuthStateChange(async()=>{
+      await refreshIdentity1222().catch(()=>{});
+      setTimeout(decorate1222,80);
+    });
+
+    window.addEventListener('hashchange',()=>setTimeout(decorate1222,100));
+  })();
+  </script>
+  <!-- /Starvalla Shared Post DM Renderer v1.22.2 -->
+
+
+  <!-- Starvalla Home Feed Cleanup v1.22.3 -->
+  <script>
+  (() => {
+    'use strict';
+
+    function removeFoundingHero1223(){
+      document.querySelectorAll('#view .home-grid .hero-card').forEach(card=>{
+        const text=(card.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+
+        if(
+          text.includes('founding era') &&
+          text.includes('welcome') &&
+          text.includes('living digital nation')
+        ){
+          card.remove();
+        }
+      });
+    }
+
+    removeFoundingHero1223();
+
+    const view1223=document.querySelector('#view');
+    if(view1223){
+      const observer1223=new MutationObserver(()=>removeFoundingHero1223());
+      observer1223.observe(view1223,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>setTimeout(removeFoundingHero1223,0));
+  })();
+  </script>
+  <!-- /Starvalla Home Feed Cleanup v1.22.3 -->
 
 </body>
 </html>
