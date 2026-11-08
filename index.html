@@ -7076,5 +7076,170 @@ Carry dawn beyond the sky.</p>
   </script>
   <!-- /Starvalla Home Feed Cleanup v1.22.3 -->
 
+
+  <!-- Starvalla Shared Post Hard Renderer v1.22.4 -->
+  <style id="starvallaSharedPostHardRenderer1224">
+    .sv1224-card{
+      border:1px solid rgba(244,185,66,.22);
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(7,17,31,.90);
+      min-width:min(320px,72vw);
+      max-width:100%;
+    }
+    .sv1224-copy{padding:11px 12px}
+    .sv1224-copy strong{display:block;color:#fff}
+    .sv1224-copy small{display:block;color:#8395aa;margin-top:3px}
+    .sv1224-copy p{margin:9px 0 0!important;color:#d7e0ea;line-height:1.5}
+    .sv1224-media{width:100%;max-height:380px;object-fit:cover;display:block;background:#02060b}
+    .sv1224-state{padding:13px;color:#9aacbd;font-size:12px}
+    .dm-bubble:has(.sv1224-card){padding:0!important;overflow:hidden}
+  </style>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const marker1224=/^\[\[STARVALLA_SHARED_POST:(\d+)\]\]$/;
+    const cache1224=new Map();
+    const loading1224=new Map();
+
+    const esc1224=value=>String(value??'').replace(/[&<>'"]/g,c=>({
+      '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+    }[c]));
+
+    async function waitDb1224(){
+      for(let i=0;i<160;i++){
+        if(window.projectOrbitDb)return window.projectOrbitDb;
+        await new Promise(r=>setTimeout(r,50));
+      }
+      return null;
+    }
+
+    async function loadCard1224(postId){
+      const id=Number(postId);
+      if(cache1224.has(id))return cache1224.get(id);
+      if(loading1224.has(id))return loading1224.get(id);
+
+      const promise=(async()=>{
+        const db=await waitDb1224();
+        if(!db){
+          return '<div class="sv1224-card"><div class="sv1224-state">Shared post could not be loaded.</div></div>';
+        }
+
+        const postResult=await db
+          .from('posts')
+          .select('id,author_citizen_no,body,moderation_status')
+          .eq('id',id)
+          .maybeSingle();
+
+        if(postResult.error||!postResult.data||postResult.data.moderation_status!=='published'){
+          return '<div class="sv1224-card"><div class="sv1224-state">This shared post is no longer available.</div></div>';
+        }
+
+        const post=postResult.data;
+
+        const [authorResult,mediaResult]=await Promise.all([
+          db.from('profiles')
+            .select('citizen_no,display_name,is_founder')
+            .eq('citizen_no',post.author_citizen_no)
+            .maybeSingle(),
+          db.from('post_media')
+            .select('storage_path,media_type,position')
+            .eq('post_id',id)
+            .order('position',{ascending:true})
+            .limit(1)
+        ]);
+
+        const author=authorResult.data||null;
+        const media=mediaResult.data?.[0]||null;
+        const body=String(post.body||'').trim();
+
+        let mediaHtml='';
+        if(media?.storage_path){
+          const publicUrl=db.storage
+            .from('post-media')
+            .getPublicUrl(media.storage_path).data?.publicUrl||'';
+
+          if(publicUrl){
+            mediaHtml=media.media_type==='video'
+              ? `<video class="sv1224-media" src="${esc1224(publicUrl)}" controls playsinline preload="metadata"></video>`
+              : `<img class="sv1224-media" src="${esc1224(publicUrl)}" alt="Shared post image" loading="lazy">`;
+          }
+        }
+
+        return `<div class="sv1224-card" data-sv1224-post="${id}">
+          <div class="sv1224-copy">
+            <strong>${esc1224(author?.display_name||'Citizen')} ${author?.is_founder?'✓':''}</strong>
+            <small>Shared Starvalla post · #${id}</small>
+            <p>${body?esc1224(body):'Media-only post'}</p>
+          </div>
+          ${mediaHtml}
+        </div>`;
+      })();
+
+      loading1224.set(id,promise);
+      const html=await promise;
+      loading1224.delete(id);
+      cache1224.set(id,html);
+      return html;
+    }
+
+    async function replaceMarker1224(node,postId){
+      if(!node||node.dataset?.sv1224Replacing==='1')return;
+      node.dataset.sv1224Replacing='1';
+
+      // Remove the raw internal marker immediately so users never see it while loading.
+      node.textContent='Loading shared post…';
+      node.style.color='#8395aa';
+
+      const html=await loadCard1224(postId);
+
+      if(!node.isConnected)return;
+
+      const holder=document.createElement('div');
+      holder.innerHTML=html;
+      const card=holder.firstElementChild;
+
+      if(card){
+        node.replaceWith(card);
+      }else{
+        node.textContent='Shared post unavailable.';
+      }
+    }
+
+    function scan1224(){
+      document.querySelectorAll('.dm-bubble p').forEach(p=>{
+        if(p.dataset.sv1224Replacing==='1')return;
+        const text=(p.textContent||'').trim();
+        const match=text.match(marker1224);
+        if(match)replaceMarker1224(p,Number(match[1]));
+      });
+
+      document.querySelectorAll('.dm-preview').forEach(preview=>{
+        const raw=(preview.textContent||'').trim();
+        const withoutYou=raw.replace(/^You:\s*/,'');
+        if(marker1224.test(withoutYou)){
+          preview.textContent=raw.startsWith('You:')?'You: Shared a post':'Shared a post';
+        }
+      });
+    }
+
+    // Run immediately, after mutations, and on a short interval.
+    // The interval is intentionally lightweight and makes this resilient to
+    // older message code re-rendering the thread after our first pass.
+    scan1224();
+
+    const observer1224=new MutationObserver(()=>scan1224());
+    observer1224.observe(document.body,{childList:true,subtree:true});
+
+    const interval1224=setInterval(scan1224,350);
+
+    window.addEventListener('pagehide',()=>clearInterval(interval1224),{once:true});
+    window.addEventListener('hashchange',()=>setTimeout(scan1224,30));
+  })();
+  </script>
+  <!-- /Starvalla Shared Post Hard Renderer v1.22.4 -->
+
 </body>
 </html>
