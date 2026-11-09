@@ -2729,7 +2729,7 @@ aiDb1140.auth.onAuthStateChange(() => setTimeout(refreshAiState1140, 0));
     const cards=[];
 
     svBallot1180.propositions
-      .filter(p=>svOpen1180(p)||svRecentClosed1180(p))
+      .filter(p=>svOpen1180(p))
       .forEach(p=>cards.push({
         open:svOpen1180(p),
         stamp:new Date(p.created_at||p.opens_at).getTime(),
@@ -7519,6 +7519,37 @@ Carry dawn beyond the sky.</p>
       });
     }
 
+    // Expose the focused-post opener so shared cards can always invoke it,
+    // even after the older Messages module rerenders the conversation.
+    window.starvallaOpenSharedPost1225=(postId)=>render1225(Number(postId),false);
+
+    // Capture-phase delegation makes the entire shared card tappable.
+    // This is deliberately independent of per-card listeners, because the
+    // Messages UI can replace bubble DOM after those listeners were attached.
+    document.addEventListener('click',event=>{
+      const card=event.target.closest?.('[data-sv1224-post],[data-sv1222-post]');
+      if(!card)return;
+      if(event.target.closest?.('video,button,a,input,textarea'))return;
+
+      const id=Number(card.dataset.sv1224Post||card.dataset.sv1222Post||0);
+      if(!id)return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      render1225(id,false);
+    },true);
+
+    document.addEventListener('keydown',event=>{
+      if(event.key!=='Enter'&&event.key!==' ')return;
+      const card=event.target.closest?.('[data-sv1224-post],[data-sv1222-post]');
+      if(!card)return;
+      const id=Number(card.dataset.sv1224Post||card.dataset.sv1222Post||0);
+      if(!id)return;
+      event.preventDefault();
+      render1225(id,false);
+    },true);
+
     s1225.db=await waitDb1225();
     await refreshIdentity1225().catch(()=>{});
     wireSharedCards1225();
@@ -7886,7 +7917,16 @@ Carry dawn beyond the sky.</p>
   <script type="module">
   (async () => {
     'use strict';
-    const GROUP_ICON_1230=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Zm7-1.2a2.7 2.7 0 1 0 0-5.4 2.7 2.7 0 0 0 0 5.4ZM2.8 19.5v-2c0-2.9 2.5-5.2 5.7-5.2s5.7 2.3 5.7 5.2v2Zm12.2 0v-1.6c0-1.8-.6-3.3-1.7-4.5 3.5-.6 6.4 1.5 6.4 4.4v1.7Z" fill="currentColor"/></svg>`;
+    const GROUP_ICON_1230=`<svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <circle cx="7" cy="7" r="1.25" fill="currentColor"/>
+      <circle cx="17" cy="7" r="1.25" fill="currentColor"/>
+      <circle cx="7" cy="17" r="1.25" fill="currentColor"/>
+      <circle cx="17" cy="17" r="1.25" fill="currentColor"/>
+    </svg>`;
     const gs={db:null,profile:null,citizens:[],groups:[],memberships:[],mode:'discover',search:'',modal:null};
     const waitDb=async()=>{for(let i=0;i<120;i++){if(window.projectOrbitDb)return window.projectOrbitDb;await new Promise(r=>setTimeout(r,50));}throw new Error('Starvalla database client did not initialize');};
     const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -7920,6 +7960,45 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla Groups v1.23.0 -->
+
+
+  <!-- Starvalla Feed + Groups Icon + Shared Post Tap Fix v1.23.1 -->
+  <script>
+  (() => {
+    'use strict';
+
+    function removeClosedPropositions1231(){
+      const home =
+        document.querySelector('#sectionTitle')?.textContent?.trim()==='Home' ||
+        location.hash==='#home' ||
+        !location.hash;
+
+      if(!home)return;
+
+      document.querySelectorAll('#svBallotFeed1180 [data-sv-ballot-card^="proposition:"]').forEach(card=>{
+        const text=(card.textContent||'').replace(/\s+/g,' ').toLowerCase();
+        if(text.includes('voting closed')){
+          card.remove();
+        }
+      });
+    }
+
+    removeClosedPropositions1231();
+
+    const view1231=document.querySelector('#view');
+    if(view1231){
+      let timer1231=null;
+      new MutationObserver(()=>{
+        clearTimeout(timer1231);
+        timer1231=setTimeout(removeClosedPropositions1231,20);
+      }).observe(view1231,{childList:true,subtree:true});
+    }
+
+    window.addEventListener('hashchange',()=>setTimeout(removeClosedPropositions1231,20));
+    window.__starvallaFix1231=true;
+  })();
+  </script>
+  <!-- /Starvalla Feed + Groups Icon + Shared Post Tap Fix v1.23.1 -->
 
 </body>
 </html>
