@@ -8073,13 +8073,13 @@ Carry dawn beyond the sky.</p>
     function ensureConversationReport1232(){
       const toolbar=document.querySelector('#view .dm-toolbar');
       const head=document.querySelector('#view .dm-thread-head');
-      if(!toolbar||!head||!me1232)return;
+      if(!toolbar||!head)return;
 
       const small=head.querySelector('small')?.textContent||'';
       const match=small.match(/Citizen\s*#(\d+)/i);
       const other=match?Number(match[1]):0;
 
-      if(!other||other===me1232)return;
+      if(!other)return;
       if(toolbar.querySelector('[data-sv1232-conversation-report],[data-sv1220-conversation]'))return;
 
       const button=document.createElement('button');
@@ -8138,6 +8138,82 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla Persistent Reporting v1.23.2 -->
+
+
+  <!-- Starvalla Reliable DM Report v1.23.3 -->
+  <script>
+  (() => {
+    'use strict';
+
+    function ensureDmReport1233(){
+      const toolbar=document.querySelector('#view .dm-toolbar');
+      const head=document.querySelector('#view .dm-thread-head');
+      if(!toolbar||!head)return;
+
+      if(toolbar.querySelector(
+        '[data-sv1232-conversation-report],[data-sv1220-conversation],[data-sv1233-report]'
+      )) return;
+
+      const text=head.querySelector('small')?.textContent||'';
+      const match=text.match(/Citizen\s*#(\d+)/i);
+      const other=match?Number(match[1]):0;
+      if(!other)return;
+
+      const name=head.querySelector('strong')?.textContent?.replace('✓','').trim()
+        ||`Citizen #${String(other).padStart(6,'0')}`;
+
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='btn secondary sv1232-report-button';
+      button.dataset.sv1233Report=String(other);
+      button.textContent='⚑ Report';
+
+      button.addEventListener('click',()=>{
+        const open=window.starvallaReportContent1220;
+        if(typeof open==='function'){
+          open('conversation',other,`conversation with ${name}`);
+          return;
+        }
+
+        // The report system may still be finishing initialization.
+        setTimeout(()=>{
+          const retry=window.starvallaReportContent1220;
+          if(typeof retry==='function'){
+            retry('conversation',other,`conversation with ${name}`);
+          }else{
+            const toast=document.querySelector('#toast');
+            if(toast){
+              toast.textContent='Report tools are still loading. Tap Report again.';
+              toast.classList.add('show');
+              setTimeout(()=>toast.classList.remove('show'),2200);
+            }
+          }
+        },150);
+      });
+
+      // Place Report before Block when Block has already been injected.
+      const block=[...toolbar.querySelectorAll('button')].find(
+        b=>(b.textContent||'').trim().toLowerCase()==='block'
+      );
+      if(block) toolbar.insertBefore(button,block);
+      else toolbar.appendChild(button);
+    }
+
+    ensureDmReport1233();
+
+    let timer1233=null;
+    new MutationObserver(()=>{
+      clearTimeout(timer1233);
+      timer1233=setTimeout(ensureDmReport1233,20);
+    }).observe(document.body,{childList:true,subtree:true});
+
+    // Covers render paths that modify existing nodes without replacing them.
+    const interval1233=setInterval(ensureDmReport1233,500);
+    window.addEventListener('pagehide',()=>clearInterval(interval1233),{once:true});
+    window.addEventListener('hashchange',()=>setTimeout(ensureDmReport1233,20));
+  })();
+  </script>
+  <!-- /Starvalla Reliable DM Report v1.23.3 -->
 
 </body>
 </html>
