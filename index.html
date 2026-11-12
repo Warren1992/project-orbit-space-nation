@@ -6282,6 +6282,8 @@ Carry dawn beyond the sky.</p>
       w.querySelector('#sv1220Report').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget),b=e.currentTarget.querySelector('button');b.disabled=true;const r=await st.db.rpc('submit_content_report',{p_target_type:target_type,p_target_id:Number(target_id),p_reason:String(f.get('reason')||''),p_details:String(f.get('details')||'')});if(r.error){b.disabled=false;return toast(r.error.message.includes('duplicate')?'You already have an open report for this item.':r.error.message);}w.classList.remove('show');toast('Report submitted for review.');};
     }
 
+    window.starvallaReportContent1220=report;
+
     function decorateReports(){
       if(!st.profile)return;
       document.querySelectorAll('#feedList article.post-card').forEach(card=>{
@@ -6293,7 +6295,7 @@ Carry dawn beyond the sky.</p>
       const root=document.querySelector('#view .profile-page'),acts=root?.querySelector('.profile-actions'),meta=root?.querySelector('.profile-meta')?.textContent||'',m=meta.match(/Citizen\s*#(\d+)/i),no=m?Number(m[1]):0;
       if(acts&&no&&no!==Number(st.profile.citizen_no)&&!acts.querySelector('[data-sv1220-profile]')){const b=document.createElement('button');b.className='btn secondary';b.dataset.sv1220Profile=no;b.textContent='Report';b.onclick=()=>report('profile',no,person(no)?.display_name||`Citizen #${pad(no)}`);acts.appendChild(b);}
       const head=document.querySelector('#view .dm-thread-head'),bar=document.querySelector('#view .dm-toolbar'),sm=head?.querySelector('small')?.textContent||'',dm=sm.match(/Citizen\s*#(\d+)/i),other=dm?Number(dm[1]):0;
-      if(bar&&other&&other!==Number(st.profile.citizen_no)&&!bar.querySelector('[data-sv1220-conversation]')){const b=document.createElement('button');b.className='btn secondary';b.dataset.sv1220Conversation=other;b.textContent='Report conversation';b.onclick=()=>report('conversation',other,`conversation with ${person(other)?.display_name||`Citizen #${pad(other)}`}`);bar.appendChild(b);}
+      if(bar&&other&&other!==Number(st.profile.citizen_no)&&!bar.querySelector('[data-sv1220-conversation]')){const b=document.createElement('button');b.className='btn secondary sv1232-report-button';b.dataset.sv1220Conversation=other;b.textContent='⚑ Report';b.onclick=()=>report('conversation',other,`conversation with ${person(other)?.display_name||`Citizen #${pad(other)}`}`);bar.appendChild(b);}
     }
 
     function copyrightStatements(type){
@@ -7430,7 +7432,7 @@ Carry dawn beyond the sky.</p>
       const canInteract=Boolean(s1225.profile);
       const commentsClass=showComments?'sv1225-comments show':'sv1225-comments';
 
-      body.innerHTML=`<article class="sv1225-post">
+      body.innerHTML=`<article class="sv1225-post" data-sv1225-post-id="${data.post.id}" data-sv1225-author="${data.post.author_citizen_no}">
         <div class="sv1225-meta">
           ${avatar1225(data.author)}
           <div>
@@ -7999,6 +8001,143 @@ Carry dawn beyond the sky.</p>
   })();
   </script>
   <!-- /Starvalla Feed + Groups Icon + Shared Post Tap Fix v1.23.1 -->
+
+
+  <!-- Starvalla Persistent Reporting v1.23.2 -->
+  <style id="starvallaPersistentReporting1232">
+    .sv1232-report-button{
+      border-color:rgba(255,93,115,.30)!important;
+      color:#ffb0bb!important;
+      background:rgba(255,93,115,.055)!important;
+    }
+    .sv1232-report-button:hover{
+      border-color:rgba(255,93,115,.52)!important;
+      background:rgba(255,93,115,.10)!important;
+    }
+    #sv1225Report{color:#ffb0bb}
+    @media(max-width:520px){
+      #view .dm-toolbar{
+        display:grid!important;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:9px!important;
+      }
+      #view .dm-toolbar .btn{
+        width:100%;
+        min-width:0;
+        padding-left:8px;
+        padding-right:8px;
+      }
+    }
+  </style>
+
+  <script type="module">
+  (async () => {
+    'use strict';
+
+    let me1232=0;
+    let citizens1232=[];
+
+    const waitDb1232=async()=>{
+      for(let i=0;i<120;i++){
+        if(window.projectOrbitDb)return window.projectOrbitDb;
+        await new Promise(r=>setTimeout(r,50));
+      }
+      return null;
+    };
+
+    const pad1232=n=>String(n??'').padStart(6,'0');
+
+    async function refresh1232(){
+      const db=await waitDb1232();
+      if(!db)return;
+
+      const [mine,citizens]=await Promise.all([
+        db.rpc('my_profile'),
+        db.from('profiles').select('citizen_no,display_name').order('citizen_no')
+      ]);
+
+      me1232=Number(mine.data?.[0]?.citizen_no||0);
+      citizens1232=citizens.data||[];
+    }
+
+    const name1232=no=>
+      citizens1232.find(c=>Number(c.citizen_no)===Number(no))?.display_name
+      ||`Citizen #${pad1232(no)}`;
+
+    function runReport1232(type,id,label){
+      if(typeof window.starvallaReportContent1220==='function'){
+        window.starvallaReportContent1220(type,Number(id),label);
+      }
+    }
+
+    function ensureConversationReport1232(){
+      const toolbar=document.querySelector('#view .dm-toolbar');
+      const head=document.querySelector('#view .dm-thread-head');
+      if(!toolbar||!head||!me1232)return;
+
+      const small=head.querySelector('small')?.textContent||'';
+      const match=small.match(/Citizen\s*#(\d+)/i);
+      const other=match?Number(match[1]):0;
+
+      if(!other||other===me1232)return;
+      if(toolbar.querySelector('[data-sv1232-conversation-report],[data-sv1220-conversation]'))return;
+
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='btn secondary sv1232-report-button';
+      button.dataset.sv1232ConversationReport=String(other);
+      button.textContent='⚑ Report';
+      button.addEventListener('click',()=>{
+        runReport1232('conversation',other,`conversation with ${name1232(other)}`);
+      });
+      toolbar.appendChild(button);
+    }
+
+    function ensureFullPostReport1232(){
+      const article=document.querySelector('#sv1225Body .sv1225-post[data-sv1225-post-id]');
+      const actions=article?.querySelector('.sv1225-actions');
+      if(!article||!actions||!me1232)return;
+
+      const postId=Number(article.dataset.sv1225PostId||0);
+      const author=Number(article.dataset.sv1225Author||0);
+      if(!postId||!author||author===me1232)return;
+      if(actions.querySelector('#sv1225Report'))return;
+
+      const button=document.createElement('button');
+      button.type='button';
+      button.id='sv1225Report';
+      button.textContent='⚑ Report';
+      button.addEventListener('click',()=>{
+        runReport1232('post',postId,`post #${postId} by ${name1232(author)}`);
+      });
+      actions.appendChild(button);
+      actions.style.gridTemplateColumns='repeat(5,1fr)';
+    }
+
+    function decorate1232(){
+      ensureConversationReport1232();
+      ensureFullPostReport1232();
+    }
+
+    await refresh1232().catch(()=>{});
+    decorate1232();
+
+    let timer1232=null;
+    new MutationObserver(()=>{
+      clearTimeout(timer1232);
+      timer1232=setTimeout(decorate1232,30);
+    }).observe(document.body,{childList:true,subtree:true});
+
+    window.addEventListener('hashchange',()=>setTimeout(decorate1232,50));
+
+    const db=await waitDb1232();
+    db?.auth?.onAuthStateChange(async()=>{
+      await refresh1232().catch(()=>{});
+      setTimeout(decorate1232,50);
+    });
+  })();
+  </script>
+  <!-- /Starvalla Persistent Reporting v1.23.2 -->
 
 </body>
 </html>
